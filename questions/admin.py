@@ -15,17 +15,17 @@ class QuestionAdmin(admin.ModelAdmin):
         # 'stimulus',
         # 'stem',
         'difficulty',
-        'type',
+        'answer_type',
         # 'explanation',
         # 'raw',
         'source',
         'source_order',
-        'created_at',
-        'updated_at',
+        'created',
+        'modified',
         'added_by',
     )
     list_filter = (
-        'program', 
+        'program',
         # 'created_at',
         # 'updated_at',
         'added_by'
