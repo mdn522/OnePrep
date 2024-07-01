@@ -1,0 +1,23 @@
+{% load core_tags %}
+
+{#<div class="my-4">#}
+    <li class="w-full relative">
+    <a class="" style="" href="{% url 'questions:set-first-question' %}?{{ category.primary_class_args }}">
+{#        <span class="">{{ category.primary_class_count }}</span>#}
+        <span class="badge badge-lg badge-secondary">{{ category.primary_class_count }}</span>
+        <span class="">{{ terms|get_item:category.primary_class }}</span>
+    </a>
+        <ul>
+            {% for subcategory in categories  %}
+                {% if subcategory.primary_class == category.primary_class %}
+                    <li class="w-full relative">
+                        <a class="" style="" href="{% url 'questions:set-first-question' %}?{{ subcategory.skill_args }}">
+                            <span class="badge badge-lg badge-accent">{{ subcategory.skill_count }}</span>
+                            <span class="">{{ terms|get_item:subcategory.skill }}</span>
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </li>
+{#</div>#}

@@ -5,10 +5,16 @@ from django.contrib import admin
 from django.urls import include
 from django.urls import path
 from django.views import defaults as default_views
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
+    # path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
+
+    path("", include("exams.urls", namespace="exams")),
+    path("", include("questions.urls", namespace="questions")),
+
+    path("api/", include("api.urls")),
+
     path(
         "about/",
         TemplateView.as_view(template_name="pages/about.html"),
@@ -23,6 +29,8 @@ urlpatterns = [
     # ...
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
+
+    path("", TemplateView.as_view(template_name="basic/pages/home.html"), name="home"),
 ]
 
 

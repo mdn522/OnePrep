@@ -4,6 +4,11 @@ argon2-cffi==23.1.0  # https://github.com/hynek/argon2_cffi
 whitenoise==6.6.0  # https://github.com/evansd/whitenoise
 # redis==5.0.1  # https://github.com/redis/redis-py
 # hiredis==2.3.2  # https://github.com/redis/hiredis-py
+more_itertools  # https://pypi.org/project/more-itertools/
+rich
+django-taggit  # https://pypi.org/project/django-taggit/
+pydantic  # https://github.com/pydantic/pydantic
+sortedcontainers  # https://pypi.org/project/sortedcontainers/
 
 # Django
 # ------------------------------------------------------------------------------
@@ -14,4 +19,12 @@ django-model-utils==4.4.0  # https://github.com/jazzband/django-model-utils
 django-allauth==0.61.1  # https://github.com/pennersr/django-allauth
 django-crispy-forms==2.1  # https://github.com/django-crispy-forms/django-crispy-forms
 crispy-bootstrap5==2023.10  # https://github.com/django-crispy-forms/crispy-bootstrap5
+django-ninja
 # django-redis==5.4.0  # https://github.com/jazzband/django-redis
+django-import-export  # https://github.com/django-import-export/django-import-export/
+# Django Admin
+django-admin-env-notice  # https://github.com/dizballanze/django-admin-env-notice
+django-related-admin  # https://github.com/PetrDlouhy/django-related-admin
+django-admin-easy  # https://github.com/ebertti/django-admin-easy
+djangoql  # https://github.com/ivelum/djangoql
+django-filter  # https://github.com/carltongibson/django-filter

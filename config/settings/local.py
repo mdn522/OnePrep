@@ -36,7 +36,10 @@ EMAIL_BACKEND = env(
 # WhiteNoise
 # ------------------------------------------------------------------------------
 # http://whitenoise.evans.io/en/latest/django.html#using-whitenoise-in-development
-INSTALLED_APPS = ["whitenoise.runserver_nostatic", *INSTALLED_APPS]
+INSTALLED_APPS = [
+    "whitenoise.runserver_nostatic",
+    *INSTALLED_APPS,
+]
 
 
 # django-debug-toolbar

@@ -67,18 +67,34 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # "django.contrib.humanize", # Handy template tags
+
+    "django_admin_env_notice",
+    "related_admin",
+
     "django.contrib.admin",
     "django.forms",
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
+
+    "django_filters",
+
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+
+    # Admin
+    "import_export",
+    "djangoql",
+
+    # Model
+    "taggit",
 ]
 
 LOCAL_APPS = [
+    "core",
+
     "users",
 
     "app",
@@ -191,6 +207,7 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
                 "users.context_processors.allauth_settings",
+                "django_admin_env_notice.context_processors.from_settings",
             ],
         },
     },
@@ -288,3 +305,6 @@ SOCIALACCOUNT_FORMS = {"signup": "users.forms.UserSocialSignupForm"}
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+# TODO Fix
+ENVIRONMENT_NAME = env.str("ENVIRONMENT_NAME", default="development")
+ENVIRONMENT_COLOR = env.str("ENVIRONMENT_COLOR", default="black")

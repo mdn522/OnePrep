@@ -1,0 +1,503 @@
+{% extends "basic/base.html" %}
+{% load core_tags %}
+
+{% block javascript %}
+	{{ block.super }}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+
+{% block css %}
+	{{ block.super }}
+
+    <style>
+    .stats-xs {}
+
+    .stats-xs .stat {
+        padding: 0.5rem 1rem;
+    }
+
+    .stats-xs .stat-title {
+        font-size: 1rem;
+        line-height: 1rem;
+    }
+
+    .stats-xs .stat-value {
+        font-size: 1.25rem;
+        line-height: 1.5rem;
+    }
+
+    /* TODO question table, list items, check original question bank for reference */
+    </style>
+
+    <style>
+    #question {
+        font-family: Roboto, sans-serif;
+    }
+
+    #question img {
+        display: inline-block;
+        margin: 0 3px;
+    }
+
+    #question table {
+        border: 1px solid;
+    }
+
+    #question table tr th {
+        border: 1px solid;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    #question table tr td {
+        border: 1px solid;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    #question ul, #question ol {
+        padding-left: 40px;
+        margin-top: 16px;
+        margin-bottom: 16px;
+    }
+
+    #question ul {
+        list-style: disc;
+    }
+
+    #question ol {
+        list-style: decimal;
+    }
+
+    #answer-choices .answer-choice:not(.deleted) .answer-choice-deleted-line  {
+        display: none;
+    }
+
+    #answer-choices .answer-choice.deleted .answer-choice-content {
+        opacity: 50%;
+    }
+
+    .question-mark-for-review.question-marked .question-mark-for-review-icon-unmarked {
+        display: none;
+    }
+
+    .question-mark-for-review:not(.question-marked) .question-mark-for-review-icon-marked {
+        display: none;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-cols-1 md:grid-cols-2 px-2 gap-4 md:gap-16">
+        {% if is_question_set %}
+            <div id="question-set-meta" class="">
+                <div class="">
+                    <div class="text-sm">Question Set</div>
+                    <div class="text-2xl font-semibold flex items-center">
+                        {{ question_set_name }}
+                        <a href="{% url 'questions:question-set' question_set_key %}?{{ question_set_categories_args }}"
+                           class="btn btn-secondary btn-xs ml-4">Back to Question Set</a>
+                    </div>
+        {#            <div class="text-sm">{{ question_set_description }}</div>#}
+                </div>
+                <div class="stats bg-base-200 w-full mt-2 mb-4 stats-xs">
+                    {% for set_stat in set_stats %}
+                    	<div class="stat">
+                            <div class="stat-title">{{ set_stat.text }}</div>
+                            <div class="stat-value">{{ set_stat.value }}</div>
+                        </div>
+                    {% endfor %}
+{#                    {% for filter_key, filter in question_set_filters.items %}#}
+{#                        <div class="stat">#}
+{#                            <div class="stat-title">{{ filter.text }}</div>#}
+{#                            <div class="stat-value">#}
+{#                                {% firstof question_set_filter_text|get_item:filter_key 'All' %}#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    {% endfor %}#}
+{#                    <div class="stat">#}
+{#                        <div class="stat-title">Questions</div>#}
+{#                        <div class="stat-value">{{ question_set_questions.count }}</div>#}
+{#                    </div>#}
+                </div>
+            </div>
+        {% endif %}
+        <div id="question-meta" class="">
+            <div class="">
+                <div class="text-sm">Question</div>
+                <div class="text-2xl font-semibold flex items-center font-mono">
+                     <i>###</i>
+{#                    {{ pk }}#}
+                </div>
+            </div>
+            <div class="stats bg-base-200 w-full mt-2 mb-4 stats-xs">
+                {% if stats %}
+                    {% for stat in stats %}
+                        <div class="stat">
+                            <div class="stat-title">{{ stat.text }}</div>
+                            <div class="stat-value">{{ stat.value }}</div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 px-2 gap-4 md:gap-16 question" id="question" x-data>
+        <div>
+            {% if question.module == Question.Module.ENGLISH %}
+            	<div style="font-family: Roboto, sans-serif" id="question-stimulus">
+                    <div class="">{{ question.stimulus | safe }}</div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div>
+            <div class="flex bg-base-300 py-1 px-1">
+                <span class="flex items-center question-mark-for-review">
+                    <span class="mr-1">
+                        <span class="question-mark-for-review-icon-unmarked">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
+                        </span>
+                        <span class="question-mark-for-review-icon-marked">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6"><path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd" /></svg>
+                        </span>
+                    </span>
+                    <span class="question-mark-for-review-toggle cursor-pointer select-none">Mark for Review</span>
+                </span>
+                <span class="grow"></span>
+                {% if question.answer_type == Question.AnswerType.MCQ %}
+                	<span class="">
+                        <button class="btn btn-xs answer-choice-delete-toggle"
+                                :class="{'btn-disabled': $store.data.has_answered_correct}"
+                                @click="$store.data.delete_mode = !$store.data.delete_mode;">
+                            <del>ABC</del>
+                        </button>
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if question.module == Question.Module.MATH %}
+            	<div class="my-3" style="font-family: Roboto, sans-serif" id="question-stimulus">
+                    <div class="">{{ question.stimulus | safe }}</div>
+                </div>
+            {% endif %}
+
+            <div class="my-3" id="question-stem">{{ question.stem | safe }}</div>
+
+            {% if question.answer_type == Question.AnswerType.MCQ %}
+                <div class="flex flex-col" id="answer-choices" x-data>
+                    {% for answer in question.answer_choice_set.all %}
+                        <div class="flex items-center answer-choice"
+                             :class="{deleted: $store.data.answer_choices_status[letter].is_deleted}"
+                             x-data="{letter: '{{ answer.letter }}'}">
+                            <div class="flex flex-row border-2 border-neutral rounded-xl p-3 mt-2 grow relative transition-colors duration-200 answer-choice-content"
+                                 :class="{
+                                    'border-neutral': !$store.data.answer_choices_status[letter].is_submitted,
+                                    'border-primary': !$store.data.answer_choices_status[letter].is_submitted && $store.data.answer_choices_status[letter].is_selected,
+                                    'border-success': $store.data.answer_choices_status[letter].is_submitted && $store.data.answer_choices_status[letter].is_correct,
+                                    'border-error': $store.data.answer_choices_status[letter].is_submitted && !$store.data.answer_choices_status[letter].is_correct
+                                 }"
+                                 @click="$store.data.select_answer_choice(letter)">
+                                <div class="flex flex-row"> <!-- opacity-65 -->
+                                    <div class="mr-3">
+                                        <div class="w-7 h-7 text-base leading-base border-2 border-neutral rounded-full transition-colors duration-200 flex items-center justify-center select-none"
+                                             :class="{
+                                                'border-neutral': !$store.data.answer_choices_status[letter].is_submitted,
+                                                'border-primary bg-primary text-primary-content': !$store.data.answer_choices_status[letter].is_submitted && $store.data.answer_choices_status[letter].is_selected,
+                                                'border-success bg-success text-success-content': $store.data.answer_choices_status[letter].is_submitted && $store.data.answer_choices_status[letter].is_correct,
+                                                'border-error bg-error text-error-content': $store.data.answer_choices_status[letter].is_submitted && !$store.data.answer_choices_status[letter].is_correct
+                                             }">
+                                            {{ answer.letter }}
+                                        </div>
+                                    </div>
+                                    <div class="self-center">{{ answer.text | safe }}</div>
+                                </div>
+
+                                <div class="absolute border-t-2 inset-y-2/4 -left-2 -right-2 border-neutral answer-choice-deleted-line"></div>
+                            </div>
+                            <div class="w-16 flex justify-center shrink-0 answer-choice-delete"
+                                 x-show="$store.data.delete_mode" x-cloak>
+                                <div class="w-7 h-7 border border-neutral rounded-full leading-none flex items-center justify-center relative cursor-pointer select-none answer-choice-delete-button"
+                                     @click="$store.data.answer_choices_status[letter].is_deleted = !$store.data.answer_choices_status[letter].is_deleted">
+                                    {{ answer.letter }}
+                                    <div class="absolute border-t-2 inset-y-2/4 -left-1 -right-1 border-neutral"></div>
+                                </div>
+{#                                <div class="underline font-semibold cursor-pointer answer-choice-delete-undo-button">Undo</div>#}
+                            </div>
+                        </div>
+
+                    {% endfor %}
+                </div>
+{#                    <li class="p-2 border">#}
+{#                        <span class="badge badge-lg badge-primary">{{ answer.letter }}</span>#}
+{#                        <span>{{ answer.text | safe }}</span>#}
+{#                    </li>#}
+{#                {% endfor %}#}
+            {% endif %}
+            {% if question.answer_type == Question.AnswerType.SPR %}
+                <div x-data="{input: ''}">
+                    <input type="text" placeholder="Answer" maxlength="6"
+                       class="input input-bordered input-primary mt-2"
+                       x-model="input" @input="$store.data.input_user_answer(input)"/>
+                </div>
+            {% endif %}
+
+            <div class="my-5">
+                <span class="flex items-center">
+                    <span class="text-success underline">Solved 57 seconds ago</span>
+                </span>
+                <span class="flex items-center">
+                    <span class="text-error underline">Attempted 20 minutes ago</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {% if is_question_set %}
+        <div class="mt-20"></div>
+        <template x-for="(question, index) in $store.question_set.questions" x-data>
+            <a :href="question_url(question.id) + '?' + $store.question_set.args"
+               class="btn btn-sm btn-outline relative my-1 mx-0.5"
+               :class="{
+                    'btn-active': question.id === $store.data.question_id,
+                    'border-b-4 border-green-600': question.difficulty === 'E',
+                    'border-b-4 border-orange-500': question.difficulty === 'M',
+                    'border-b-4 border-red-600': question.difficulty === 'H'
+               }">
+                <span x-text="index + 1"></span>
+                <span class="absolute w-2 h-2 bg-warning top-0.5 left-0.5 rounded-full"></span>
+                <span class="absolute w-2 h-2 bg-error top-0.5 right-0.5 rounded-full"></span>
+            </a>
+        </template>
+{#    	{% for qs_question in question_set_questions %}#}
+{#            <a class="btn btn-sm btn-outline relative my-1 {% if qs_question.id == question.id %}btn-active{% endif %} {% if qs_question.difficulty == Question.Difficulty.EASY %}border-b-4 border-green-600{% endif %}{% if qs_question.difficulty == Question.Difficulty.MEDIUM %}border-b-4 border-orange-500{% endif %}{% if qs_question.difficulty == Question.Difficulty.HARD %}border-b-4 border-red-600{% endif %}"#}
+{#               href="{% url 'questions:detail' qs_question.id %}?{{ question_set_args }}">#}
+{#                {{ forloop.counter }}#}
+{#                <span class="absolute w-2 h-2 bg-warning top-0.5 left-0.5 rounded-full"></span>#}
+{#                <span class="absolute w-2 h-2 bg-error top-0.5 right-0.5 rounded-full"></span>#}
+{#            </a>#}
+{#    	{% endfor %}#}
+    {% endif %}
+
+    <div class="my-24"></div>
+
+    <div class="fixed bg-base-100 z-50 bottom-0 right-0 left-0 border-t p-2 flex flex-row items-center align-center">
+        <div class="grow flex flex-row items-center justify-start">
+            {% if question.explanation %}
+                <button class="btn btn-sm btn-secondary">Explanation</button>
+            {% endif %}
+        </div>
+        <div class="grow-0 flex flex-row items-center justify-center">
+            {% if is_question_set %}
+                {{ question_set_current_number }} / {{ question_set_questions | length }}
+            {% endif %}
+        </div>
+        <div class="grow flex flex-row items-center justify-end">
+            {% if is_question_set and question_set_next_question_id %}
+            	<a class="btn btn-sm btn-neutral mx-2"
+
+                   href="{% url "questions:detail" question_set_next_question_id %}?{{ question_set_args }}">Next</a>
+            {% endif %}
+            <button class="btn btn-sm btn-primary px-6 btn-disabled" x-data
+                    :class="{'btn-disabled': !$store.data.has_answered,
+                     'btn-success btn-disabled': $store.data.has_answered_correct,
+                     'btn-error': $store.data.has_answered_wrong}"
+                    x-text="$store.data.has_answered_correct ? 'Correct' : (!$store.data.has_answered_wrong ? 'Check' : 'Check Again')"
+                    @click="!$store.data.has_answered_correct ? $store.data.check() : ''">
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block inline_javascript %}
+	{{ block.super }}
+
+    <script>
+    function question_url(question_id) {
+        let question_url = "{% url 'questions:detail' 9999 %}".replace('9999', question_id);
+        return question_url;
+    }
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('data', {
+            // ID, SavedAnswer, MarkedForReviewStatus, TimeSpent
+            notes: '',
+            status: {
+                is_marked_for_review: false,
+            },
+
+            delete_mode: false,
+
+            question_id: {{ question.id }},
+            answer_type: {{ question.answer_type | jsonify }},
+            server_side_answer_check: false,
+            is_spr() {
+                return this.answer_type === 'spr';
+            },
+            is_mcq() {
+                return this.answer_type === 'mcq';
+            },
+            /*has_answered() {
+                return (this.is_mcq() && this.answer_choices_status.some(answer_choice => answer_choice.is_selected)) || (this.is_spr() && this.user_answer);
+            },*/
+            has_answered: false,
+            has_answered_wrong: false,
+            has_answered_correct: false,
+
+            answer_choices_status: {
+                {% for answer_choice in answer_choices %}
+                    '{{ answer_choice.letter }}': {
+                        is_deleted: false,
+                        is_selected: false,
+                        is_submitted: false,
+                        is_correct: {{ answer_choice.is_correct | jsonify }},
+                    },
+                {% endfor %}
+                /*'A': {
+                    is_deleted: false,
+                    selected: false,
+                },*/
+            },
+            select_answer_choice(letter) {
+                if (this.has_answered_correct) {
+                    return;
+                }
+
+                if (this.answer_choices_status[letter].is_deleted) {
+                    return;
+                }
+
+                this.has_answered = true;
+                for (const [key, value] of Object.entries(this.answer_choices_status)) {
+                    if (key === letter) {
+                        this.selected_answer_choice_letter = letter;
+                        this.answer_choices_status[key].is_selected = true;
+                    } else {
+                        this.answer_choices_status[key].is_selected = false;
+                    }
+                }
+            },
+            selected_answer_choice_letter: null,
+            answer_choices: {{answer_choices | jsonify}},
+            answers: {{answers | jsonify}},
+            user_answer: '',
+            input_user_answer(input) {
+                this.user_answer = input;
+                if (this.user_answer) {
+                    this.has_answered = true;
+                } else {
+                    this.has_answered = false;
+                }
+                {#console.log(this.has_answered, this.user_answer)#}
+            },
+            get_correct_answer_choice() {
+                return this.answer_choices.filter(answer_choice => answer_choice.correct)[0];
+            },
+            check() {
+                let API_URL = "{% url 'api_v1:answers_submit' %}";
+                console.log('Checking answer');
+                let data = {
+                    question_id: this.question_id,
+                    exam_id: null,
+
+                };
+                if (this.is_mcq()) {
+                    {#let selected_answer_choice = ;#}
+                    // TODO null check
+                    let answer_choice = this.answer_choices.filter(answer_choice => answer_choice.letter === this.selected_answer_choice_letter)[0];
+                    if (answer_choice.is_correct) {
+                        this.has_answered_wrong = false;
+                        this.has_answered_correct = true;
+                    } else {
+                        this.has_answered_wrong = true;
+                        this.has_answered_correct = false;
+                    }
+                    data.answer_choice_id = answer_choice.id;
+                    this.answer_choices_status[answer_choice.letter].is_submitted = true;
+                } else if (this.is_spr()) {
+                    let is_correct = this.answers.some(answer => answer.value.trim() === this.user_answer);
+                    if (is_correct) {
+                        this.has_answered_wrong = false;
+                        this.has_answered_correct = true;
+                    } else {
+                        this.has_answered_wrong = true;
+                        this.has_answered_correct = false;
+                    }
+                    data.answer = this.user_answer;
+                }
+
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf }}',
+                    },
+                    body: JSON.stringify(data),
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok.');
+                }).then(data => {
+                    console.log(data);
+                }).catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                });
+            },
+            mark_for_review() {
+                // TODO Mark for review
+                this.status.is_marked_for_review = !this.status.is_marked_for_review;
+            },
+        });
+
+        Alpine.store('question_set', {
+            is_question_set: {{ is_question_set | jsonify }},
+        {% if is_question_set %}
+        	questions: {{ question_set_questions | jsonify }},
+            args: {{ question_set_args | jsonify }},
+        {% endif %}
+        });
+    })
+
+    // Skip Button
+    // Check Button
+    // Choice Button
+    // Mark for Review
+    $('.question-mark-for-review-toggle').on('click', function() {
+        let isMarked = $(this).closest('.question-mark-for-review').hasClass('question-marked');
+        if (isMarked) {
+            $(this).text('Mark for Review')
+        } else {
+            $(this).text('Marked for Review')
+        }
+        $(this).closest('.question-mark-for-review').toggleClass('question-marked');
+    });
+    // Delete Button
+    /*$('.answer-choice-delete-toggle').on('click', function() {
+        let status = $(this).hasClass('btn-secondary');
+        if (status) {
+            $(this).closest('.question').find('.answer-choice-delete').addClass('hidden');
+        } else {
+            $(this).closest('.question').find('.answer-choice-delete').removeClass('hidden');
+        }
+        $(this).toggleClass('btn-secondary');
+    });*/
+    </script>
+
+    <script type="text/javascript" id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <script>
+        window.MathJax = {
+            startup: {
+                ready: () => {
+                    console.log('MathJax is loaded, but not yet initialized');
+                    MathJax.startup.defaultReady();
+                    MathJax.typeset();
+                    document.getElementById('mathjax-wait').classList.remove('hidden');
+                    console.log('MathJax is initialized, and the initial typeset is queued');
+                }
+            }
+        };
+    </script>
+{% endblock %}

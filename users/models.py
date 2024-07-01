@@ -22,7 +22,16 @@ class User(AbstractUser):
     first_name = None  # type: ignore[assignment]
     last_name = None  # type: ignore[assignment]
     email = EmailField(_("email address"), unique=True)
+
+    # TODO enable username back
     username = None  # type: ignore[assignment]
+
+    # TODO Organization system. multiple users
+    # TODO User type: student, admin, parent, teacher, organization?, staff
+    # TODO coin system
+    # TODO referral system
+    # TODO Transactions
+    # TODO buy coin
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

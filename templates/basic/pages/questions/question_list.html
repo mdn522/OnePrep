@@ -1,0 +1,27 @@
+{% extends "basic/base.html" %}
+
+
+{% block content %}
+
+    <div>
+    {{ questions }}
+    </div>
+
+    <div class="join">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a class="join-item btn btn-md" href="?page=1">&laquo; first</a>
+            <a class="join-item btn btn-md" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        <span class="join-item btn btn-md btn-active">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a class="join-item btn btn-md" href="?page={{ page_obj.next_page_number }}">Next</a>
+            <a class="join-item btn btn-md" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+        {% endif %}
+    </span>
+    </div>
+{% endblock %}

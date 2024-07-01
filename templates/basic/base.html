@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="winter">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+    <title>
+        {% block title %}
+            Digital SAT
+        {% endblock title %}
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Digital SAT"/>
+    <meta name="author" content="Abdullah Mallik"/>
+    <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}"/>
+
+    {% block css %}
+        <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css" rel="stylesheet" type="text/css"/>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Your stuff: Third-party CSS libraries go here -->
+        <!-- This file stores project-specific CSS -->
+        <link href="{% static 'css/project.css' %}" rel="stylesheet"/>
+
+        <style>
+        .hidden {
+            display: none;
+        }
+        
+        [x-cloak] {
+            display: none !important;
+        }
+        </style>
+    {% endblock css %}
+
+    {% block javascript %}
+        <!-- Your stuff: Third-party javascript libraries go here -->
+        <!-- place project specific Javascript in this file -->
+        <script defer src="{% static 'js/project.js' %}"></script>
+    {% endblock javascript %}
+</head>
+<body class="">
+{% block nav %}
+    {% include 'basic/components/nav.html' %}
+{% endblock nav %}
+
+<div class="container mx-auto mt-4">
+    {% block content %}{% endblock content %}
+</div>
+
+
+{% block modal %}
+{% endblock modal %}
+{% block inline_javascript %}
+    {% comment %}
+        Script tags with only code, no src (defer by default). To run
+        with a "defer" so that you run inline code:
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+
+            });
+        </script>
+    {% endcomment %}
+{% endblock inline_javascript %}
+</body>
+</html>
