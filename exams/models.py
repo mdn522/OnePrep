@@ -12,6 +12,8 @@ class Exam(TimeStampedModel, models.Model):
     description = models.TextField(default='', blank=True)
     time = models.DurationField()
 
+    is_active = models.BooleanField(default=True)
+
     tags = TaggableManager()
     skill_tags = TaggableManager(through=SkillTagged)
 
@@ -24,8 +26,11 @@ class Exam(TimeStampedModel, models.Model):
     source_order = models.PositiveIntegerField(null=True)  # TODO UniqueConstraint
 
     prevent_copy = models.BooleanField(default=False)
-    retake = models.BooleanField(default=True)
+
+    can_retake = models.BooleanField(default=True)
     retake_after = models.DateTimeField(null=True, blank=True)
+
+    can_see_explanation = models.BooleanField(default=False)
 
     # TODO Program
     # TODO price/coins
@@ -47,10 +52,12 @@ class ExamQuestion(models.Model):
     question = models.ForeignKey('questions.Question', on_delete=models.CASCADE, related_name='exam_question_set')
     order = models.PositiveIntegerField()
 
-    can_see_explanation = models.BooleanField(default=False)
+    # can_see_explanation = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Exam Question'
+
+        ordering = ['order']
 
         constraints = [
             # Constraints
@@ -67,16 +74,20 @@ class ExamQuestion(models.Model):
 # TODO Exam Group
 
 class UserExam(models.Model):
-    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='user_exam_set')
-    exam = models.ForeignKey('exams.Exam', on_delete=models.CASCADE, related_name='user_exam_set')
-    started_at = models.DateTimeField(auto_now_add=True)
-    finished_at = models.DateTimeField(null=True, blank=True)
-    time_taken = models.DurationField(null=True, blank=True)
-
     class Status(models.IntegerChoices):
         NOT_STARTED = 0, 'Not Started'
         IN_PROGRESS = 1, 'In Progress'
         FINISHED = 2, 'Finished'
+
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='user_exam_set')
+    exam = models.ForeignKey('exams.Exam', on_delete=models.CASCADE, related_name='user_exam_set')
+
+    started_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    time_given = models.DurationField(null=True, blank=True)
+
+    # suggest me more columns
+    status = models.IntegerField(choices=Status.choices, default=Status.NOT_STARTED)
 
     class Meta:
         constraints = [
@@ -86,3 +97,4 @@ class UserExam(models.Model):
             # models.UniqueConstraint(fields=['user', 'exam'], name='unique_user_exam'),
         ]
         verbose_name = 'User Exam'
+

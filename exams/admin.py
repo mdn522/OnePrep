@@ -30,7 +30,7 @@ class ExamAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        queryset = queryset.annotate(question_count=Count("exam_questions"))
+        queryset = queryset.annotate(question_count=Count("exam_question_set"))
         return queryset
 
 

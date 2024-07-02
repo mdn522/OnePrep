@@ -4,6 +4,7 @@
 {% block javascript %}
 	{{ block.super }}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@marcreichel/alpine-timeago@latest/dist/alpine-timeago.min.js" defer></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 {% endblock %}
 
@@ -96,8 +97,10 @@
                     <div class="text-sm">Question Set</div>
                     <div class="text-2xl font-semibold flex items-center">
                         {{ question_set_name }}
-                        <a href="{% url 'questions:question-set' question_set_key %}?{{ question_set_categories_args }}"
-                           class="btn btn-secondary btn-xs ml-4">Back to Question Set</a>
+                        {% if question_set_back %}
+                        	<a href="{% url 'questions:question-set' question_set_key %}?{{ question_set_categories_args }}" 
+                               class="btn btn-secondary btn-xs ml-4">Back to Question Set</a>
+                        {% endif %}
                     </div>
         {#            <div class="text-sm">{{ question_set_description }}</div>#}
                 </div>
@@ -245,12 +248,26 @@
             {% endif %}
 
             <div class="my-5">
-                <span class="flex items-center">
-                    <span class="text-success underline">Solved 57 seconds ago</span>
-                </span>
-                <span class="flex items-center">
-                    <span class="text-error underline">Attempted 20 minutes ago</span>
-                </span>
+                {% for user_answers_group in user_answers_groups %}
+                	{% if user_answers_group.corrected %}
+                		<span class="flex items-center underline">
+                            <span title="{{ user_answers_group.items.0.answered_at.isoformat }}">
+                                <span class="text-success">Solved <span x-data="{ date: new Date('{{ user_answers_group.items.0.answered_at.isoformat }}') }" x-timeago.seconds="date"></span></span>
+                                {% if user_answers_group.attempts > 0 %}
+                                    &nbsp;(<span class="text-error">{{ user_answers_group.attempts }} {{ user_answers_group.attempts|pluralize:"Attempt,Attempts" }}</span>)
+                                {% endif %}
+                            </span>
+                        </span>
+                    {% else %}
+                        <span class="flex items-center underline">
+                            <span>
+                                {% if user_answers_group.attempts > 0 %}
+                                    <span class="text-error">Attempted {{ user_answers_group.attempts }} {{ user_answers_group.attempts|pluralize:"time,times" }}</span>
+                                {% endif %}
+                            </span>
+                        </span>
+                	{% endif %}
+                {% endfor %}
             </div>
         </div>
     </div>

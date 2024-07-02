@@ -114,7 +114,7 @@ class UserQuestionAnswer(models.Model):
     answer_group_id = models.CharField(max_length=64, null=True, blank=True)
 
     is_correct = models.BooleanField()
-    time_taken = models.DurationField(null=True, blank=True)
+    time_given = models.DurationField(null=True, blank=True)
     started_at = models.DateTimeField(null=True, blank=True)
     answered_at = models.DateTimeField(auto_now_add=True)
 

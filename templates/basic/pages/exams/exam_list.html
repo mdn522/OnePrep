@@ -1,0 +1,33 @@
+{% extends "basic/base.html" %}
+{% load core_tags %}
+
+{% block title %}Exams{% endblock %}
+
+{% block content %}
+    <h1>Exams</h1>
+    <div class="overflow-x-auto w-2/3 mx-auto">
+    <table class="table table-zebra table-pin-rows">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Questions</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for exam in exams %}
+                <tr>
+                    <td></td>
+                    <td>{{ exam.title }}</td>
+                    <td>{{ exam.question_count }}</td>
+                    <td>
+                        <a class="btn btn-neutral btn-sm"
+                           href="{% url 'questions:detail' exam.first_question_id %}?question_set=exam&exam_id={{ exam.id }}">View</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+{% endblock %}

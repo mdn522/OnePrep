@@ -22,7 +22,7 @@
                             {% update_variable current_filter|merge_dict:filter_dict as qf %}
 {#                            <li>#}
                                 <a class="btn btn-sm btn-neutral btn-outline {% if item_key == current_filter|get_item:filter_key %}btn-active{% endif %}{% if current_filter|get_item:filter_key == None and item_key == 'all' %}btn-active{% endif %}"
-                                   href="{% url "questions:cbqb" %}?{{ qf | dj_urlencode | safe }}">
+                                   href="{% url "questions:question-set-cbqb" %}?{{ qf | dj_urlencode | safe }}">
                                     {% firstof item.text item %}
                                 </a>
 {#                            </li>#}

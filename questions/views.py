@@ -11,7 +11,8 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.views.generic import TemplateView, ListView
 
-from .models import Question
+from exams.models import Exam
+from .models import Question, UserQuestionAnswer
 
 
 class QuestionListView(ListView):
@@ -26,6 +27,62 @@ class QuestionSetView(TemplateView):
         Question.Module.ENGLISH: 'English',
         Question.Module.MATH: 'Math',
     }
+
+    def question_number(self, context, question):
+        context['question_set_current_number'] = 'N/A'
+        context['question_set_next_question_id'] = None
+        context['question_set_previous_question_id'] = None
+        for q_i, q in enumerate(context['question_set_questions']):
+            if q['id'] == int(question.id):
+                context['question_set_current_number'] = q_i + 1
+            elif context['question_set_current_number'] == 'N/A':
+                context['question_set_previous_question_id'] = q['id']
+            elif context['question_set_current_number'] != 'N/A':
+                context['question_set_next_question_id'] = q['id']
+                break
+
+
+class ExamQuestionSet(QuestionSetView):
+    name = 'Exam'
+    key = 'exam'
+    filters = {}
+
+    def filtered_queryset(self, exam_id):
+        # exam = Exam.objects.get(id=exam_id)
+        return Question.objects.filter(exam_question_set__exam=exam_id).order_by('exam_question_set__order').distinct()
+
+    def get_question_context_data(self, question, request, context):
+        question_set_filter = OrderedDict()
+
+        exam_id = request.GET.get('exam_id')
+
+        assert exam_id, 'Exam ID is required'
+
+        exam = Exam.objects.annotate(question_count=Count("exam_question_set")).get(id=exam_id)
+
+        question_set = request.GET.get('question_set')
+        question_set_filter['question_set'] = question_set
+        question_set_filter['exam_id'] = exam.id
+
+        context['question_set_filter'] = question_set_filter
+        context['question_set_name'] = exam.title
+        context['question_set_key'] = f'exam'
+        context['question_set_filter'] = {}
+        context['question_set_args'] = urlencode(question_set_filter)
+        context['question_set_back'] = False
+
+        question_set_filtered_queryset = self.filtered_queryset(exam_id=exam.id).order_by('source_order').only('id', 'source_order', 'difficulty', 'module')
+
+        context['set_stats'] = [
+            {
+                'text': 'Total Questions',
+                'value': exam.question_count,
+            },
+        ]
+
+        context['question_set_questions'] = list(question_set_filtered_queryset.order_by('source_order').values('id', 'source_order', 'difficulty'))
+
+        self.question_number(context, question)
 
 
 class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
@@ -289,6 +346,7 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
         # url encode using urllib
         context['question_set_args'] = urlencode(question_set_filter)
         context['question_set_categories_args'] = urlencode({k: v for k, v in question_set_filter.items() if k not in ['module', 'question_set', 'primary_class', 'skill']})
+        context['question_set_back'] = True
 
         # print('question_set_args', context['question_set_args'])
         # print('question_set_categories_args', context['question_set_categories_args'])
@@ -329,22 +387,11 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
 
         context['question_set_questions'] = list(question_set_filtered_queryset.order_by('source_order').values('id', 'source_order', 'difficulty'))  # TODO user status
 
-        context['question_set_current_number'] = 'N/A'
-        context['question_set_next_question_id'] = None
-        context['question_set_previous_question_id'] = None
-        for q_i, q in enumerate(context['question_set_questions']):
-            if q['id'] == int(question.pk):
-                context['question_set_current_number'] = q_i + 1
-            elif context['question_set_current_number'] == 'N/A':
-                context['question_set_previous_question_id'] = q['id']
-            elif context['question_set_current_number'] != 'N/A':
-                context['question_set_next_question_id'] = q['id']
-                break
+        self.question_number(context, question)
 
         print('question_set_current_number', context['question_set_current_number'])
         print('question_set_next_question_id', context['question_set_next_question_id'])
         print('question_set_previous_question_id', context['question_set_previous_question_id'])
-
 
         # Question Stat
         question_tags_names = question.tags.names()
@@ -397,7 +444,8 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
 
 
 question_sets = {
-    CollegeBoardQuestionBankCategoryListView.key: CollegeBoardQuestionBankCategoryListView
+    CollegeBoardQuestionBankCategoryListView.key: CollegeBoardQuestionBankCategoryListView,
+    ExamQuestionSet.key: ExamQuestionSet,
 }
 
 
@@ -442,6 +490,27 @@ class QuestionDetailView(TemplateView):
         context['answer_choices'] = list(question.answer_choice_set.only(*['id', 'text', 'letter', 'order', 'correct', 'explanation']).order_by('order').values())
         context['answers'] = list(question.answer_set.only(*['id', 'value', 'order', 'explanation']).order_by('order').values())
 
+        # TODO choice letter
+        context['user_answers'] = UserQuestionAnswer.objects.filter(user=self.request.user, question=question).values('answer_choice', 'answer', 'is_correct', 'answered_at')
+        # Bucket them by incorrect correct then again bucket
+        f = lambda: {'items': [], 'corrected': False, 'attempts': 0}
+        context['user_answers_groups']: List = [f()]
+        for user_answer in context['user_answers']:
+            if context['user_answers_groups'][-1]['corrected']:
+                context['user_answers_groups'].append(f())
+
+            if user_answer['is_correct']:
+                context['user_answers_groups'][-1]['items'].append(user_answer)
+                context['user_answers_groups'][-1]['corrected'] = True
+            else:
+                context['user_answers_groups'][-1]['items'].append(user_answer)
+                context['user_answers_groups'][-1]['attempts'] += 1
+
+        context['user_answers_groups'].reverse()
+
+        print('user_answers', context['user_answers'])
+        print('user_answers_groups', context['user_answers_groups'])
+
         print('question', question.__dict__)
 
         context['stats'] = [
@@ -467,7 +536,11 @@ class QuestionDetailView(TemplateView):
             QuestionSetView: CollegeBoardQuestionBankCategoryListView = question_sets[question_set]()
             context['question_set_name'] = QuestionSetView.name
 
-            QuestionSetView.get_question_context_data(question, self.request, context)
+            try:
+                QuestionSetView.get_question_context_data(question, self.request, context)
+            except Exception as e:
+                print(e)
+                context['is_question_set'] = False
 
             # question_set_filtered_queryset = question_set_filtered_queryset.only('id', 'source_order', 'difficulty')
 
