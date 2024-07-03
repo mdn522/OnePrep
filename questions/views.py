@@ -65,7 +65,7 @@ class ExamQuestionSet(QuestionSetView):
         question_set_filter['exam_id'] = exam.id
 
         context['question_set_filter'] = question_set_filter
-        context['question_set_name'] = exam.title
+        context['question_set_name'] = exam.name
         context['question_set_key'] = f'exam'
         context['question_set_filter'] = {}
         context['question_set_args'] = urlencode(question_set_filter)

@@ -67,7 +67,8 @@ class CollegeBoardBlueBookLoader(Loader):
                     source=self.source,
                     source_id='_'.join(list(filter(None, ['practice', str(exams_data['index']), module, diff]))),
                     defaults=dict(
-                        title=' - '.join(list(filter(None, [exams_data['name'], module.title(), diff.title()]))),
+                        is_public=True,
+                        name=' - '.join(list(filter(None, [exams_data['name'], module.title(), diff.title()]))),
                         source_order=exams_data['index'],
                         added_by=None,
                         time=durations[module],
@@ -104,7 +105,7 @@ class CollegeBoardBlueBookLoader(Loader):
                                 letter=choice_letter,
                                 defaults=dict(
                                     text=choice_data['body'],
-                                    correct=question_data['answer']['correctChoice'] == choice_letter,
+                                    is_correct=question_data['answer']['correctChoice'] == choice_letter,
                                     order=ord(choice_letter) - ord('A') + 1,
                                 )
                             )

@@ -13,14 +13,16 @@ class Loader:
         return program
 
     @staticmethod
-    def get_file_list(path, glob) -> List[Path]:
-        data_path = Path('') / 'data' / 'sat' / path
+    def get_file_list(path, glob, base_path: Path = None) -> List[Path]:
+        data_path = (base_path / path) if base_path else Path('') / 'data' / 'sat' / path
+
         files = list(data_path.glob(glob))
         return files
 
     @staticmethod
-    def get_file(path, file) -> Path:
-        return Path('') / 'data' / 'sat' / path / file
+    def get_file(path, file, base_path=None) -> Path:
+        data_path = base_path if base_path else Path('') / 'data' / 'sat' / path
+        return data_path / path / file
 
     def load(self):
         raise NotImplementedError

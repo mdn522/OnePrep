@@ -8,7 +8,7 @@ from .models import Exam, ExamQuestion
 @admin.register(Exam)
 class ExamAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = [
-        'title',
+        'name',
         'description',
         'time',
         'official',
@@ -17,7 +17,7 @@ class ExamAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     ]
     list_filter = ['official', 'time']
     search_fields = [
-        'title',
+        'name',
         'description',
         # 'added_by__username',
         'added_by__email'
@@ -38,6 +38,6 @@ class ExamAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
 class ExamQuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ['exam', 'question', 'order']
     list_filter = ['exam']
-    search_fields = ['exam__title', 'question__stem']
+    search_fields = ['exam__name', 'question__stem']
 
     # TODO Question Details

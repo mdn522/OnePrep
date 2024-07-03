@@ -197,7 +197,7 @@ class CollegeBoardQuestionBankLoader(Loader):
                         letter=ans['letter'],
                         defaults=dict(
                             text=ans['text'],
-                            correct=ans['correct'],
+                            is_correct=ans['correct'],
                             order=ans['order'],
                         )
                     )

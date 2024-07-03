@@ -43,7 +43,7 @@ class Question(TimeStampedModel, models.Model):
     source_id = models.CharField(max_length=64, null=True)
     source_id_2 = models.CharField(max_length=64, null=True)
     source_id_3 = models.CharField(max_length=64, null=True)
-    source_raw_data = models.JSONField(default=None)
+    source_raw_data = models.JSONField(default=None, null=True)
 
     module = models.CharField(choices=Module.choices, max_length=4)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)

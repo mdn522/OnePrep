@@ -12,17 +12,17 @@ class ExamListView(ListView):
 
     context_object_name = 'exams'
 
-    paginate_by = 40
+    paginate_by = 500
 
     def get_queryset(self):
         questions = Question.objects.filter(exam_question_set__exam=OuterRef('pk')).order_by('exam_question_set__order').values('id')
 
         return (
             Exam.objects
-                .filter(is_active=True)
+                .filter(is_active=True)  # is_public=True
                 .annotate(question_count=Count("exam_question_set"))
                 .annotate(first_question_id=Subquery(questions[:1]))
-                .order_by('source', 'source_order', 'title')
+                .order_by('source', 'source_order', 'name')
         )
 
 

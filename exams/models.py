@@ -8,11 +8,12 @@ from core.models import SkillTagged
 
 
 class Exam(TimeStampedModel, models.Model):
-    title = models.CharField(max_length=64)
+    name = models.CharField(max_length=64)
     description = models.TextField(default='', blank=True)
-    time = models.DurationField()
+    time = models.DurationField(blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
+    is_public = models.BooleanField(default=False)
 
     tags = TaggableManager()
     skill_tags = TaggableManager(through=SkillTagged)
@@ -44,7 +45,7 @@ class Exam(TimeStampedModel, models.Model):
         ]
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class ExamQuestion(models.Model):
@@ -68,7 +69,7 @@ class ExamQuestion(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.exam.title} - Question #{self.order}'
+        return f'{self.exam.name} - Question #{self.order}'
 
 
 # TODO Exam Group
