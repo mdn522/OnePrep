@@ -26,11 +26,15 @@ class SubmitAnswer(Schema):
 @router.post('/mark-for-review')
 def question_mark_for_review(request, data: MarkForReview):
     user = request.user
-    user.question_status_set.update_or_create(
+
+    UserQuestionStatus.objects.update_or_create(
+        user=user,
         question_id=data.question_id,
         exam_id=data.exam_id,
-        default=dict(is_marked_for_review=data.is_marked_for_review)
+        defaults=dict(is_marked_for_review=data.is_marked_for_review)
     )
+
+    return 200
 
 
 class AnswerStatus(Schema):

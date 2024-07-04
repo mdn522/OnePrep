@@ -98,7 +98,7 @@
                     <div class="text-2xl font-semibold flex items-center">
                         {{ question_set_name }}
                         {% if question_set_back %}
-                        	<a href="{% url 'questions:question-set' question_set_key %}?{{ question_set_categories_args }}" 
+                        	<a href="{% url 'questions:question-set' question_set_key %}?{{ question_set_categories_args }}"
                                class="btn btn-secondary btn-xs ml-4">Back to Question Set</a>
                         {% endif %}
                     </div>
@@ -158,7 +158,9 @@
 
         <div>
             <div class="flex bg-base-300 py-1 px-1">
-                <span class="flex items-center question-mark-for-review">
+                <span class="flex items-center question-mark-for-review"
+                      x-data :class="{'question-marked': $store.data.status.is_marked_for_review}"
+                      @click="$store.data.mark_for_review()" x-cloak>
                     <span class="mr-1">
                         <span class="question-mark-for-review-icon-unmarked">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
@@ -167,7 +169,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6"><path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd" /></svg>
                         </span>
                     </span>
-                    <span class="question-mark-for-review-toggle cursor-pointer select-none">Mark for Review</span>
+                    <span class="question-mark-for-review-toggle cursor-pointer select-none" x-text="!$store.data.status.is_marked_for_review ? 'Mark for Review' : 'Marked for Review' ">Mark for Review</span>
                 </span>
                 <span class="grow"></span>
                 {% if question.answer_type == Question.AnswerType.MCQ %}
@@ -284,8 +286,11 @@
                     'border-b-4 border-red-600': question.difficulty === 'H'
                }">
                 <span x-text="index + 1"></span>
-                <span class="absolute w-2 h-2 bg-warning top-0.5 left-0.5 rounded-full"></span>
-                <span class="absolute w-2 h-2 bg-error top-0.5 right-0.5 rounded-full"></span>
+                
+                <span class="absolute w-2 h-2 bg-warning top-0.5 left-0.5 rounded-full" x-cloak x-show="question.is_marked_for_review"></span>
+                <span class="absolute w-2 h-2 top-0.5 right-0.5 rounded-full" 
+                      :class="{'bg-success': question.last_answer_correct, 'bg-error': !question.last_answer_correct}"
+                      x-cloak x-show="question.last_answer_correct != null"></span>
             </a>
         </template>
 {#    	{% for qs_question in question_set_questions %}#}
@@ -342,7 +347,7 @@
             // ID, SavedAnswer, MarkedForReviewStatus, TimeSpent
             notes: '',
             status: {
-                is_marked_for_review: false,
+                is_marked_for_review: {{ question_status.is_marked_for_review | jsonify }} | false,
             },
 
             delete_mode: false,
@@ -463,9 +468,32 @@
                     console.error('There has been a problem with your fetch operation:', error);
                 });
             },
+
             mark_for_review() {
                 // TODO Mark for review
                 this.status.is_marked_for_review = !this.status.is_marked_for_review;
+                let API_URL = "{% url 'api_v1:question_mark_for_review' %}";
+                let data = {
+                    question_id: this.question_id,
+                    is_marked_for_review: this.status.is_marked_for_review,
+                };
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf }}',
+                    },
+                    body: JSON.stringify(data),
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok.');
+                }).then(data => {
+                    console.log(data);
+                }).catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                });
             },
         });
 
@@ -482,7 +510,7 @@
     // Check Button
     // Choice Button
     // Mark for Review
-    $('.question-mark-for-review-toggle').on('click', function() {
+    /*$('.question-mark-for-review-toggle').on('click', function() {
         let isMarked = $(this).closest('.question-mark-for-review').hasClass('question-marked');
         if (isMarked) {
             $(this).text('Mark for Review')
@@ -490,7 +518,7 @@
             $(this).text('Marked for Review')
         }
         $(this).closest('.question-mark-for-review').toggleClass('question-marked');
-    });
+    });*?
     // Delete Button
     /*$('.answer-choice-delete-toggle').on('click', function() {
         let status = $(this).hasClass('btn-secondary');

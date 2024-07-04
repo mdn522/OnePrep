@@ -137,7 +137,9 @@ class UserQuestionStatus(models.Model):
 
     is_marked_for_review = models.BooleanField(default=False, blank=True)  # TODO retain
     marked_for_review_at = models.DateTimeField(null=True, blank=True)  # TODO retain
+
     is_skipped = models.BooleanField(default=False, blank=True)
+
     saw_explanation_before = models.BooleanField(default=False, blank=True)
     saw_explanation_at = models.DateTimeField(null=True, blank=True)
 
