@@ -38,11 +38,11 @@ class Question(TimeStampedModel, models.Model):
             models.Index(fields=['source', 'source_id'], name='index_question_source_id', condition=models.Q(source__isnull=False) & models.Q(source_id__isnull=False)),
         ]
 
-    source = models.CharField(max_length=64, null=True, blank=True)
+    source = models.CharField(max_length=128, null=True, blank=True)
+    source_id = models.CharField(max_length=255, null=True)
+    source_id_2 = models.CharField(max_length=255, null=True)
+    source_id_3 = models.CharField(max_length=255, null=True)
     source_order = models.PositiveIntegerField(null=True)  # TODO UniqueConstraint
-    source_id = models.CharField(max_length=64, null=True)
-    source_id_2 = models.CharField(max_length=64, null=True)
-    source_id_3 = models.CharField(max_length=64, null=True)
     source_raw_data = models.JSONField(default=None, null=True)
 
     module = models.CharField(choices=Module.choices, max_length=4)

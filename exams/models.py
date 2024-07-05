@@ -8,7 +8,7 @@ from core.models import SkillTagged
 
 
 class Exam(TimeStampedModel, models.Model):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=128)
     description = models.TextField(default='', blank=True)
     time = models.DurationField(blank=True, null=True)
 
@@ -22,8 +22,8 @@ class Exam(TimeStampedModel, models.Model):
 
     added_by = models.ForeignKey('users.User', on_delete=models.CASCADE, null=True, blank=True)
 
-    source = models.CharField(max_length=24, null=True, blank=True)
-    source_id = models.CharField(max_length=64, null=True)
+    source = models.CharField(max_length=128, null=True, blank=True)
+    source_id = models.CharField(max_length=255, null=True)
     source_order = models.PositiveIntegerField(null=True)  # TODO UniqueConstraint
 
     prevent_copy = models.BooleanField(default=False)
