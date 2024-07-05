@@ -193,7 +193,7 @@
 
             {% if question.answer_type == Question.AnswerType.MCQ %}
                 <div class="flex flex-col" id="answer-choices" x-data>
-                    {% for answer in question.answer_choice_set.all %}
+                    {% for answer in answer_choices %}
                         <div class="flex items-center answer-choice"
                              :class="{deleted: $store.data.answer_choices_status[letter].is_deleted}"
                              x-data="{letter: '{{ answer.letter }}'}">
