@@ -27,7 +27,7 @@ class Question(TimeStampedModel, models.Model):
         constraints = [
             # Constraints
             # A question can only have one source and source_id if source is not null and source_id is not null
-            models.UniqueConstraint(fields=['source', 'source_id'], name='unique_question_source_id', condition=models.Q(source__isnull=False) & models.Q(source_id__isnull=False)),
+            models.UniqueConstraint(fields=['source', 'source_id'],   name='unique_question_source_id',   condition=models.Q(source__isnull=False) & models.Q(source_id__isnull=False)),
             models.UniqueConstraint(fields=['source', 'source_id_2'], name='unique_question_source_id_2', condition=models.Q(source__isnull=False) & models.Q(source_id_2__isnull=False)),
             models.UniqueConstraint(fields=['source', 'source_id_3'], name='unique_question_source_id_3', condition=models.Q(source__isnull=False) & models.Q(source_id_3__isnull=False)),
 

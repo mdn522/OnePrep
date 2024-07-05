@@ -207,7 +207,7 @@
                                  @click="$store.data.select_answer_choice(letter)">
                                 <div class="flex flex-row"> <!-- opacity-65 -->
                                     <div class="mr-3">
-                                        <div class="w-7 h-7 text-base leading-base border-2 border-neutral rounded-full transition-colors duration-200 flex items-center justify-center select-none"
+                                        <div class="w-7 h-7 text-base leading-base border-2 border-neutral rounded-full transition-colors duration-200 flex items-center justify-center select-none font-sans font-semibold"
                                              :class="{
                                                 'border-neutral': !$store.data.answer_choices_status[letter].is_submitted,
                                                 'border-primary bg-primary text-primary-content': !$store.data.answer_choices_status[letter].is_submitted && $store.data.answer_choices_status[letter].is_selected,
@@ -286,9 +286,9 @@
                     'border-b-4 border-red-600': question.difficulty === 'H'
                }">
                 <span x-text="index + 1"></span>
-                
+
                 <span class="absolute w-2 h-2 bg-warning top-0.5 left-0.5 rounded-full" x-cloak x-show="question.is_marked_for_review"></span>
-                <span class="absolute w-2 h-2 top-0.5 right-0.5 rounded-full" 
+                <span class="absolute w-2 h-2 top-0.5 right-0.5 rounded-full"
                       :class="{'bg-success': question.last_answer_correct, 'bg-error': !question.last_answer_correct}"
                       x-cloak x-show="question.last_answer_correct != null"></span>
             </a>
@@ -308,7 +308,22 @@
     <div class="fixed bg-base-100 z-50 bottom-0 right-0 left-0 border-t p-2 flex flex-row items-center align-center">
         <div class="grow flex flex-row items-center justify-start">
             {% if question.explanation %}
-                <button class="btn btn-sm btn-secondary">Explanation</button>
+                <button class="btn btn-sm btn-secondary" onclick="explanation.showModal()">Explanation</button>
+
+                <dialog id="explanation" class="modal">
+                    <div class="modal-box w-10/12 max-w-3xl">
+                        <form method="dialog">
+                            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                        </form>
+                        <h2 class="text-2xl font-bold mb-3">Explanation</h2>
+                        <div>
+                            {{ question.explanation | safe }}
+                        </div>
+                    </div>
+                    <form method="dialog" class="modal-backdrop">
+                        <button>close</button>
+                    </form>
+                </dialog>
             {% endif %}
         </div>
         <div class="grow-0 flex flex-row items-center justify-center">
@@ -531,7 +546,25 @@
     });*/
     </script>
 
-    <script type="text/javascript" id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <script>
+    MathJax = {
+        {#loader: {load: ['input/asciimath', '[mml]/mml3', 'output/chtml', 'ui/menu']},#}
+        /*asciimath: {
+            delimiters: [['$','$'], ['`','`']]
+        },*/
+        jax: ["input/TeX", "output/HTML-CSS"],
+        tex2jax: {
+            inlineMath: [["$", "$"], ["\\(", "\\)"]],
+            displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+            skipTags: ["script", "noscript", "style", "textarea", "pre"]
+        },
+        "HTML-CSS": {
+            availableFonts: ["STIX", "TeX"],
+            showMathMenu: !1
+        }
+    };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
     <script>
         window.MathJax = {
             startup: {

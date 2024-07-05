@@ -1,5 +1,6 @@
 from django.contrib import admin
 from djangoql.admin import DjangoQLSearchMixin
+from import_export import resources
 
 from .models import Question, AnswerChoice, Answer
 from .models import UserQuestionAnswer
