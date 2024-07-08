@@ -2,6 +2,8 @@ import json
 from collections import namedtuple, OrderedDict
 from typing import Any, Dict, List
 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Q, Count, Field, Value, F, Min, Subquery, OuterRef
@@ -451,6 +453,7 @@ question_sets = {
 }
 
 
+@login_required
 def question_set_first_question_view(request):
     question_set = request.GET.get('question_set')
     if question_set not in question_sets:
@@ -474,7 +477,7 @@ def question_set_first_question_view(request):
     # return HttpResponse(json.dumps(first_question, indent=4), content_type='application/json')
 
 
-class QuestionDetailView(TemplateView):
+class QuestionDetailView(LoginRequiredMixin, TemplateView):
     template_name = 'basic/pages/questions/question_detail.html'
 
     def get_context_data(self, **kwargs):

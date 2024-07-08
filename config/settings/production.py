@@ -158,11 +158,13 @@ sentry_logging = LoggingIntegration(
     level=SENTRY_LOG_LEVEL,  # Capture info and above as breadcrumbs
     event_level=logging.ERROR,  # Send errors as events
 )
+
 integrations = [
     sentry_logging,
     DjangoIntegration(),
     # RedisIntegration()  # TODO redis
 ]
+
 sentry_sdk.init(
     dsn=SENTRY_DSN,
     integrations=integrations,
@@ -171,6 +173,3 @@ sentry_sdk.init(
     profiles_sample_rate=env.float("SENTRY_PROFILES_SAMPLE_RATE", default=0.0),
 )
 
-
-# Your stuff...
-# ------------------------------------------------------------------------------

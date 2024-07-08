@@ -31,12 +31,14 @@ def reset_sequences():
 
         output.close()
 
-    print('Done')
+    print('Done Resetting sequences...')
 
 
 def delete_all():
     Exam.objects.all().delete()
     Question.objects.all().delete()
+
+    print('Done deleting all...')
 
 
 def run(*args):
