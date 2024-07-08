@@ -36,6 +36,10 @@ CACHES = {
     #         "IGNORE_EXCEPTIONS": True,
     #     },
     # },
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "db_cache_table",
+    }
 }
 
 # SECURITY
