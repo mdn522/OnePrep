@@ -1,6 +1,8 @@
 {% extends "basic/base.html" %}
 {% load core_tags %}
 
+{% block title %}Question #{{ question.id }} - {{ block.super }}{% endblock %}
+
 {% block javascript %}
 	{{ block.super }}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

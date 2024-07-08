@@ -1,11 +1,25 @@
 {% extends "basic/base.html" %}
 {% load core_tags %}
 
-{% block title %}Exams{% endblock %}
+{% block title %}Exams - {{ block.super }}{% endblock %}
 
 {% block content %}
     <div class="overflow-x-auto w-2/3 mx-auto">
         <h1 class="text-3xl font-bold">Exams ({{ exams | length }})</h1>
+
+        <div class="alert">
+            <span>
+                Practice Environment Matters! <br>
+This website includes practice tests from the official Bluebook exam. However, it's important to understand that the actual exam experience might differ slightly. <br>
+
+For the most accurate simulation of the exam environment, we strongly recommend using the official Bluebook software. This will ensure you're familiar with the interface, tools, and functionalities you'll encounter on test day. <br>
+
+Use this website for practice only if you're already comfortable with the official Bluebook software. This way, you can focus on the content of the practice tests without additional distractions. <br>
+
+Remember: Your goal is to be fully prepared for the real exam. By practicing in the official environment, you can minimize surprises and maximize your performance on test day. <br>
+            </span>
+        </div>
+
         <table class="table table-zebra table-pin-rows">
             <thead>
                 <tr>

@@ -1,6 +1,10 @@
 {% extends "basic/base.html" %}
 {% load core_tags %}
 
+{% block title %}
+	CollegeBoard Question Bank - {{ block.super }}
+{% endblock title %}
+
 {% block content %}
     <div class="bg-base-300 rounded-badge mb-4 flex mb-4 items-center text-sm border border-orange-100 p-2 font-bold flex-wrap pb-0 px-4">
 {#        {{ filters }}#}
