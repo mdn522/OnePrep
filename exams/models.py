@@ -8,6 +8,15 @@ from core.models import SkillTagged
 
 
 class Exam(TimeStampedModel, models.Model):
+    # class Type(models.TextChoices):
+    #     MOCK = 'mock', 'Mock'
+    #     PRACTICE = 'practice', 'Practice'
+    #     TEST = 'test', 'Test'
+    #     QUIZ = 'quiz', 'Quiz'
+    #     DRILL = 'drill', 'Drill'
+    #     EXAM = 'exam', 'Exam'
+
+    # TODO module/ or use tags
     name = models.CharField(max_length=128)
     description = models.TextField(default='', blank=True)
     time = models.DurationField(blank=True, null=True)
@@ -15,8 +24,8 @@ class Exam(TimeStampedModel, models.Model):
     is_active = models.BooleanField(default=True)
     is_public = models.BooleanField(default=False)
 
-    tags = TaggableManager()
-    skill_tags = TaggableManager(through=SkillTagged)
+    tags = TaggableManager(blank=True)
+    skill_tags = TaggableManager(through=SkillTagged, blank=True)
 
     official = models.BooleanField(default=False)
 

@@ -65,6 +65,8 @@ class SATMocksLoader(Loader):
                 "Kaplan Digital SAT Test",
                 # "MADS Digital SAT",
                 # "Princeton Review Digital SAT",
+                # SATMocks Full Practice Test 1 English Module 2 (Linear)
+                re.compile(r'SATMocks Full Practice Test \d+ (English|Math) Module \d+ \(Linear\)'),
                 re.compile(r'The SAT® Practice Test #\d+ (English|Math) Module \d+ \(Linear\)'),
             ]):
                 practices_raw_filtered.append(practice)
@@ -96,7 +98,8 @@ class SATMocksLoader(Loader):
             for exam_question_data in exam_raw['exam_questions']:
                 question_data = exam_question_data['question']
 
-                answer_type = {0: Question.AnswerType.MCQ, 1: Question.AnswerType.SPR}[question_data['sat_options'][0]['title'] is None]
+                # answer_type = {o: Question.AnswerType.MCQ, 1: Question.AnswerType.SPR}[question_data['sat_options'][0]['title'] is None]
+                answer_type = {1: Question.AnswerType.MCQ, 0: Question.AnswerType.SPR}[any(letter in question_data['sat_answers'][0]['answers'] for letter in ["A", "B", "C", "D"])]
 
                 question, question_created = Question.objects.update_or_create(
                     source=self.source,

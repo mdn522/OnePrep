@@ -21,7 +21,7 @@ class Loader:
 
     @staticmethod
     def get_file(path, file, base_path=None) -> Path:
-        data_path = base_path if base_path else Path('') / 'data' / 'sat' / path
+        data_path = base_path if base_path else Path('') / 'data' / 'sat'
         return data_path / path / file
 
     def load(self):
