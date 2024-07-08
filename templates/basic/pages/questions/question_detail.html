@@ -348,7 +348,7 @@
             {% endif %}
             <button class="btn btn-sm btn-primary px-6 btn-disabled" x-data
                     :class="{'btn-disabled': !$store.data.has_answered,
-                     'btn-success btn-disabled': $store.data.has_answered_correct,
+                     'btn-success': $store.data.has_answered_correct,
                      'btn-error': $store.data.has_answered_wrong}"
                     x-text="$store.data.has_answered_correct ? 'Correct' : (!$store.data.has_answered_wrong ? 'Check' : 'Check Again')"
                     @click="!$store.data.has_answered_correct ? $store.data.check() : ''">
