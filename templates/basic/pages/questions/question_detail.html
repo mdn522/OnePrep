@@ -260,12 +260,15 @@
                 </div>
             {% endif %}
 
-            <div class="my-5">
+            <div class="my-5" x-cloak>
                 {% for user_answers_group in user_answers_groups %}
                 	{% if user_answers_group.corrected %}
                 		<span class="flex items-center underline">
                             <span title="{{ user_answers_group.items.0.answered_at.isoformat }}">
-                                <span class="text-success">Solved <span x-data="{ date: new Date('{{ user_answers_group.items.0.answered_at.isoformat }}') }" x-timeago.seconds="date"></span></span>
+                                <span class="text-success">
+                                    Solved <span x-data="{ date: new Date('{{ user_answers_group.items.0.answered_at.isoformat }}') }" x-timeago.seconds="date"></span>
+                                    in {{ user_answers_group.items.0.time_given | duration }}
+                                </span>
                                 {% if user_answers_group.attempts > 0 %}
                                     &nbsp;(<span class="text-error">{{ user_answers_group.attempts }} {{ user_answers_group.attempts|pluralize:"Attempt,Attempts" }}</span>)
                                 {% endif %}

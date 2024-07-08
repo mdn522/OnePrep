@@ -501,7 +501,9 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
             context['question_status'] = None
 
         # TODO choice letter
-        context['user_answers'] = UserQuestionAnswer.objects.filter(user=self.request.user, question=question).values('answer_choice', 'answer', 'is_correct', 'answered_at')
+        context['user_answers'] = UserQuestionAnswer.objects.filter(user=self.request.user, question=question).values(
+            'answer_choice', 'answer', 'is_correct', 'answered_at', 'time_given'
+        ).order_by('answered_at')
         # Bucket them by incorrect correct then again bucket
         f = lambda: {'items': [], 'corrected': False, 'attempts': 0}
         context['user_answers_groups']: List = [f()]
