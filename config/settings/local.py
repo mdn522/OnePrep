@@ -64,7 +64,9 @@ INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
 # django-extensions
 # ------------------------------------------------------------------------------
 # https://django-extensions.readthedocs.io/en/latest/installation_instructions.html#configuration
-INSTALLED_APPS += ["django_extensions"]
+INSTALLED_APPS += [
+    # "django_extensions"
+]
 
 # Your stuff...
 # ------------------------------------------------------------------------------
