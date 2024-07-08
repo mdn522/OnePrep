@@ -1,4 +1,5 @@
 import json
+import re
 from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
@@ -27,9 +28,6 @@ class SATMocksLoader(Loader):
         Question.Module.ENGLISH: 'English',
         Question.Module.MATH: 'Math',
     }
-
-
-    # TODO AI answer choice explanation from big explanation
 
     def load(self):
         program = self.get_program()
@@ -62,10 +60,12 @@ class SATMocksLoader(Loader):
                 print(practice_id)
                 raise
 
-            if any(s in practice['exam']['title'] for s in [
+            if any((s in practice['exam']['title'] if isinstance(s, str) else s.match(practice['exam']['title'])) for s in [
                 "Barron's Digital SAT",
+                "Kaplan Digital SAT Test",
                 # "MADS Digital SAT",
-                "Princeton Review Digital SAT",
+                # "Princeton Review Digital SAT",
+                re.compile(r'The SAT® Practice Test #\d+ (English|Math) Module \d+ \(Linear\)'),
             ]):
                 practices_raw_filtered.append(practice)
                 print(practice_id, practice['exam']['title'])

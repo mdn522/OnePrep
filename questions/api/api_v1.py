@@ -1,7 +1,12 @@
+from datetime import timedelta, datetime
 from typing import Optional
 
+from django.utils.timezone import make_aware
 from ninja import Router, Schema
 from ninja.throttling import UserRateThrottle
+from ninja.security import django_auth
+
+import zoneinfo
 
 from ..models import Question, AnswerChoice, Answer
 from ..models import UserQuestionAnswer, UserQuestionAnswerStatus, UserQuestionStatus
@@ -21,9 +26,12 @@ class SubmitAnswer(Schema):
     answer_choice_id: Optional[int] = None
     answer: Optional[str] = None
 
+    started_at: Optional[int] = None
+    time_given: Optional[int] = None
+
 
 # TODO auth
-@router.post('/mark-for-review')
+@router.post('/mark-for-review', auth=django_auth)
 def question_mark_for_review(request, data: MarkForReview):
     user = request.user
 
@@ -48,7 +56,7 @@ class AnswerStatus(Schema):
     is_deleted: bool
 
 
-@router.post('/answers/status')
+@router.post('/answers/status', auth=django_auth)
 def answers_status_delete(request, data: AnswerStatus):
     user = request.user
 
@@ -71,7 +79,7 @@ def answers_status_delete(request, data: AnswerStatus):
     )
 
 
-@router.post('/answers/submit', throttle=[UserRateThrottle('4/s')])
+@router.post('/answers/submit', throttle=[UserRateThrottle('4/s')], auth=django_auth)
 def answers_submit(request, data: SubmitAnswer):
     user = request.user
 
@@ -84,8 +92,12 @@ def answers_submit(request, data: SubmitAnswer):
     user_answer = UserQuestionAnswer(
         user=user,
         question_id=data.question_id,
-        exam_id=data.exam_id
+        exam_id=data.exam_id,
     )
+    if data.started_at:  # UNIX timestamp to date
+        user_answer.started_at = datetime.fromtimestamp(data.started_at, tz=zoneinfo.ZoneInfo("UTC"))
+    if data.time_given:
+        user_answer.time_given = timedelta(seconds=data.time_given)
     # check data.answer_choice_id
     if data.answer_choice_id:
         try:

@@ -48,8 +48,9 @@ class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'explanation',
         # 'added_by__username',
         'added_by__email',
-
     ]
+
+    raw_id_field = ['added_by']
     # date_hierarchy = 'created_at'
 
 
@@ -86,6 +87,8 @@ class AnswerChoiceAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'explanation',
     ]
 
+    raw_id_field = ['question']
+
 
 @admin.register(Answer)
 class AnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
@@ -97,6 +100,7 @@ class AnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'order'
     ]
     list_filter = []
+    raw_id_fields = ['question']
 
 
 @admin.register(UserQuestionAnswer)
@@ -109,6 +113,8 @@ class UserQuestionAnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'answer_choice',
         'answer',
         'is_correct',
+        'time_given',
+        'started_at',
         'answered_at',
     ]
     list_filter = [
@@ -132,3 +138,4 @@ class UserQuestionAnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'answer_choice__text',
         'answer',
     ]
+    raw_id_fields = ['user', 'question', 'exam', 'answer_choice']

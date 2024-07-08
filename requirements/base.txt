@@ -28,3 +28,4 @@ django-related-admin  # https://github.com/PetrDlouhy/django-related-admin
 django-admin-easy  # https://github.com/ebertti/django-admin-easy
 djangoql  # https://github.com/ivelum/djangoql
 django-filter  # https://github.com/carltongibson/django-filter
+django-object-actions  # https://github.com/crccheck/django-object-actions

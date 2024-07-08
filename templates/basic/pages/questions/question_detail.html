@@ -5,6 +5,11 @@
 	{{ block.super }}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@marcreichel/alpine-timeago@latest/dist/alpine-timeago.min.js" defer></script>
+
+    <!-- Alpine Plugins -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Alpine Core -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 {% endblock %}
 
@@ -157,7 +162,7 @@
         </div>
 
         <div>
-            <div class="flex bg-base-300 py-1 px-1">
+            <div class="flex bg-base-300 py-1 px-1 items-center">
                 <span class="flex items-center question-mark-for-review"
                       x-data :class="{'question-marked': $store.data.status.is_marked_for_review}"
                       @click="$store.data.mark_for_review()" x-cloak>
@@ -172,6 +177,10 @@
                     <span class="question-mark-for-review-toggle cursor-pointer select-none" x-text="!$store.data.status.is_marked_for_review ? 'Mark for Review' : 'Marked for Review' ">Mark for Review</span>
                 </span>
                 <span class="grow"></span>
+                <div class="timer font-bold mr-4 underline flex items-center space-x-1" x-data="timer_data(new Date())" x-init="init()" @click="">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                    <span class="timer-time" x-text="time_s()" x-cloak></span>
+                </div>
                 {% if question.answer_type == Question.AnswerType.MCQ %}
                 	<span class="">
                         <button class="btn btn-xs answer-choice-delete-toggle"
@@ -366,6 +375,8 @@
             },
 
             delete_mode: false,
+            timer: null,
+            started_at: null,
 
             question_id: {{ question.id }},
             answer_type: {{ question.answer_type | jsonify }},
@@ -438,7 +449,9 @@
                 let data = {
                     question_id: this.question_id,
                     exam_id: null,
-
+                    
+                    started_at: parseInt(this.started_at.getTime() / 1000),
+                    time_given: this.timer,
                 };
                 if (this.is_mcq()) {
                     {#let selected_answer_choice = ;#}
@@ -469,7 +482,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf }}',
+                        'X-CSRFToken': '{{ csrf_token }}',
                     },
                     body: JSON.stringify(data),
                 }).then(response => {
@@ -496,7 +509,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf }}',
+                        'X-CSRFToken': '{{ csrf_token }}',
                     },
                     body: JSON.stringify(data),
                 }).then(response => {
@@ -520,6 +533,77 @@
         {% endif %}
         });
     })
+
+    function timer_data(start) {
+        Alpine.store('data').started_at = start;
+        return {
+            start: start,
+            {#remaining: null, #}
+            {#current: null,#}
+            diff: null,
+            init() {
+                this.setCurrent();
+                setInterval(() => {
+                    this.setCurrent();
+                }, 1000);
+            },
+            setCurrent() {
+                const diff = new Date().getTime() - this.start;
+                this.diff = parseInt(diff / 1000);
+                Alpine.store('data').timer = this.diff;
+            },
+            days() {
+                return {
+                    value: this.diff / 86400,
+                    diff: this.diff % 86400
+                };
+            },
+            hours() {
+                return {
+                    value: this.days().diff / 3600,
+                    diff: this.days().diff % 3600
+                };
+            },
+            minutes() {
+                return {
+                    value: this.hours().diff / 60,
+                    diff: this.hours().diff % 60
+                };
+            },
+            seconds() {
+                return {
+                    value: this.minutes().diff
+                };
+            },
+            format(value) {
+                return ("0" + parseInt(value)).slice(-2);
+            },
+            time() {
+                return {
+                    days: this.format(this.days().value),
+                    hours: this.format(this.hours().value),
+                    minutes: this.format(this.minutes().value),
+                    seconds: this.format(this.seconds().value)
+                };
+            },
+            time_s() {
+                let r = [];
+                const {days, hours, minutes, seconds} = this.time();
+
+                if (this.days().value >= 1) {
+                    r.push(days);
+                }
+                if (this.hours().value >= 1) {
+                    r.push(hours);
+                }
+                {#console.log(this.days(), this.hours())#}
+                r.push(minutes);
+                r.push(seconds);
+
+                return r.join(':');
+            }
+        }
+    }
 
     // Skip Button
     // Check Button

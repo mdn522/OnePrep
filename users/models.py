@@ -24,7 +24,7 @@ class User(AbstractUser):
     email = EmailField(_("email address"), unique=True)
 
     # TODO enable username back
-    username = None  # type: ignore[assignment]
+    # username = None  # type: ignore[assignment]
 
     # TODO Organization system. multiple users
     # TODO User type: student, admin, parent, teacher, organization?, staff
@@ -33,7 +33,7 @@ class User(AbstractUser):
     # TODO Transactions
     # TODO buy coin
 
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
 
     objects: ClassVar[UserManager] = UserManager()
