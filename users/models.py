@@ -34,7 +34,7 @@ class User(AbstractUser):
     # TODO buy coin
 
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['email']
 
     objects: ClassVar[UserManager] = UserManager()
 
