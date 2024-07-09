@@ -30,3 +30,7 @@ djangoql  # https://github.com/ivelum/djangoql
 django-filter  # https://github.com/carltongibson/django-filter
 django-object-actions  # https://github.com/crccheck/django-object-actions
 django-extensions==3.2.3  # https://github.com/django-extensions/django-extensions
+
+django-allauth-ui
+slippers
+django-widget-tweaks

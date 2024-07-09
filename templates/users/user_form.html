@@ -1,31 +1,28 @@
-{% extends "base.html" %}
+{% extends "basic/base.html" %}
 
-{% load crispy_forms_tags %}
+{% load i18n %}
+{% load allauth_ui %}
+{% load widget_tweaks %}
 
 {% block title %}
-
-
-  {{ user.name }}
-
-
+    {{ user.name }}
 {% endblock title %}
 {% block content %}
-  <h1>
-  
-  
-    {{ user.name }}
-  
-  
-</h1>
-<form class="form-horizontal"
-      method="post"
-      action="{% url 'users:update' %}">
-  {% csrf_token %}
-  {{ form|crispy }}
-  <div class="control-group">
-    <div class="controls">
-      <button type="submit" class="btn btn-primary">Update</button>
-    </div>
-  </div>
-</form>
+    <h1 class="text-3xl mb-2">
+        {{ user.name }}
+    </h1>
+    <form class="form-horizontal" method="post" action="{% url 'users:update' %}">
+        {% csrf_token %}
+
+        <label class="input input-bordered flex items-center gap-2 max-w-[400px]">
+            Full Name
+            {% render_field form.name class="" %}
+        </label>
+
+        <div class="control-group mt-2">
+            <div class="controls">
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+        </div>
+    </form>
 {% endblock content %}
