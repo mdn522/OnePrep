@@ -79,7 +79,7 @@ THIRD_PARTY_APPS = [
 
     "crispy_forms",
     "crispy_bootstrap5",
-    "crispy_tailwind",
+    # "crispy_tailwind",
 
     "django_filters",
 
