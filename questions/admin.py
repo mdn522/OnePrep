@@ -26,7 +26,6 @@ class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'source_order',
         'created',
         'modified',
-        'added_by',
     ]
     list_filter = [
         'program',
@@ -139,3 +138,32 @@ class UserQuestionAnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'answer',
     ]
     raw_id_fields = ['user', 'question', 'exam', 'answer_choice']
+
+
+@admin.register(UserQuestionStatus)
+class UserQuestionStatusAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    list_display = [
+        'id',
+        'user',
+        'exam',
+        'question',
+        'is_marked_for_review',
+        'marked_for_review_at',
+        'is_skipped',
+    ]
+    list_filter = []
+    search_fields = [
+        'user__username',
+        'user__email',
+        'question__source_id',
+        'question__source_id_2',
+        'question__source_id_3',
+        'question__source',
+        'question__module',
+        'question__stimulus',
+        'question__stem',
+        'question__difficulty',
+    ]
+    raw_id_fields = ['user', 'exam', 'question']
+
+
