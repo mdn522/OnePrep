@@ -135,10 +135,10 @@
         {% endif %}
         <div id="question-meta" class="">
             <div class="">
-                <div class="text-sm">Question</div>
+                <div class="text-sm">Question ID</div>
                 <div class="text-2xl font-semibold flex items-center font-mono">
-                     <i>###</i>
-{#                    {{ pk }}#}
+                     <!--<i>###</i>-->
+                    <i>#{{ question.id|stringformat:"05d" }}</i>
                 </div>
             </div>
             <div class="stats bg-base-200 w-full mt-2 mb-4 stats-xs">
