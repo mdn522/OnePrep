@@ -1,6 +1,8 @@
 from django.contrib import admin
 from djangoql.admin import DjangoQLSearchMixin
 from import_export import resources
+import easy
+
 
 from .models import Question, AnswerChoice, Answer
 from .models import UserQuestionAnswer
@@ -9,6 +11,7 @@ from .models import UserQuestionStatus, UserQuestionAnswerStatus
 
 @admin.register(Question)
 class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    list_select_related = ['program']
     list_display = [
         'id',
         'source_id',
@@ -55,9 +58,10 @@ class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
 
 @admin.register(AnswerChoice)
 class AnswerChoiceAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    list_select_related = ['question']
     list_display = [
         'id',
-        'question',
+        'question_fk',
         # 'text',
         # 'explanation',
         'is_correct',
@@ -88,12 +92,16 @@ class AnswerChoiceAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
 
     raw_id_field = ['question']
 
+    question_fk = easy.ForeignKeyAdminField('question')
+
 
 @admin.register(Answer)
 class AnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    list_select_related = ['question']
     list_display = [
         'id',
-        'question',
+        # 'question',
+        'question_fk',
         'value',
         # 'explanation',
         'order'
@@ -101,16 +109,26 @@ class AnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_filter = []
     raw_id_fields = ['question']
 
+    question_fk = easy.ForeignKeyAdminField('question')
+
 
 @admin.register(UserQuestionAnswer)
 class UserQuestionAnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    list_select_related = ['user', 'question', 'exam', 'answer_choice']
     list_display = [
         'id',
-        'user',
-        'question',
-        'exam',
-        'answer_choice',
+        # 'user',
+        # 'question',
+        # 'exam',
+        # 'answer_choice',
+        # 'answer',
+
+        'user_fk',
+        'exam_fk',
+        'question_fk',
+        'answer_choice_fk',
         'answer',
+
         'is_correct',
         'time_given',
         'started_at',
@@ -139,14 +157,25 @@ class UserQuestionAnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     ]
     raw_id_fields = ['user', 'question', 'exam', 'answer_choice']
 
+    user_fk = easy.ForeignKeyAdminField('user')
+    question_fk = easy.ForeignKeyAdminField('question')
+    exam_fk = easy.ForeignKeyAdminField('exam')
+    answer_choice_fk = easy.ForeignKeyAdminField('answer_choice')
+
 
 @admin.register(UserQuestionStatus)
 class UserQuestionStatusAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    list_select_related = ['user', 'question', 'exam']
     list_display = [
         'id',
-        'user',
-        'exam',
-        'question',
+        # 'user',
+        # 'exam',
+        # 'question',
+
+        'user_fk',
+        'exam_fk',
+        'question_fk',
+
         'is_marked_for_review',
         'marked_for_review_at',
         'is_skipped',
@@ -165,5 +194,9 @@ class UserQuestionStatusAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'question__difficulty',
     ]
     raw_id_fields = ['user', 'exam', 'question']
+
+    user_fk = easy.ForeignKeyAdminField('user')
+    question_fk = easy.ForeignKeyAdminField('question')
+    exam_fk = easy.ForeignKeyAdminField('exam')
 
 

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import admin as auth_admin
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.utils.translation import gettext_lazy as _
 
 from users.forms import UserAdminChangeForm
@@ -35,7 +36,14 @@ class UserAdmin(auth_admin.UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
-    list_display = ["id", "email", "username", "name", "is_superuser"]
+    list_display = [
+        "id",
+        "email",
+        "username",
+        "name",
+        "num_user_question_answers",
+        "is_superuser"
+    ]
     search_fields = ["name"]
     ordering = ["id"]
     add_fieldsets = (
@@ -47,3 +55,15 @@ class UserAdmin(auth_admin.UserAdmin):
             },
         ),
     )
+
+    def num_user_question_answers(self, obj):
+        return obj.num_user_question_answers
+
+    num_user_question_answers.label = "User Question Answers"
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        # count of user question answers
+        return queryset.annotate(
+            num_user_question_answers=Count("question_answer_set__id", distinct=True)
+        )
