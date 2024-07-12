@@ -1,7 +1,7 @@
 {% extends "basic/base.html" %}
 
 {% block content %}
-    <div class="flex space-x-2 justify-center mt-10">
+    <div class="flex flex-wrap space-x-2 space-y-2 justify-center mt-10">
         <a href="{% url 'exams:list' %}" class="btn btn-lg btn-primary">Practice Tests</a>
         <a href="{% url 'questions:question-set-cbqb' %}" class="btn btn-lg btn-primary">CollegeBoard Question Bank</a>
     </div>
