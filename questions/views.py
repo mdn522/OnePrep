@@ -180,8 +180,8 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
             'text': 'Marked For Review',
             'items': OrderedDict([
                 ('all', {'text': 'All'}),
-                ('true', {'text': 'True', 'filter': {'is_marked_for_review': True}}),
-                ('false', {'text': 'False', 'filter': {'is_marked_for_review': False}})
+                ('true', {'text': 'Yes', 'filter': {'is_marked_for_review': True}}),
+                ('false', {'text': 'No', 'filter': {'is_marked_for_review': False}})
             ]),
             # 'orm_field': 'is_marked_for_review',
             'orm_annotate': lambda request: {'is_marked_for_review': Coalesce(
