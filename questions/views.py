@@ -175,6 +175,21 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
             'choices': Question.Difficulty,
             'orm_field': 'difficulty',
         },
+        'marked_for_review': {
+            'show': True,
+            'text': 'Marked For Review',
+            'items': OrderedDict([
+                ('all', {'text': 'All'}),
+                ('true', {'text': 'True', 'filter': {'is_marked_for_review': True}}),
+                ('false', {'text': 'False', 'filter': {'is_marked_for_review': False}})
+            ]),
+            # 'orm_field': 'is_marked_for_review',
+            'orm_annotate': lambda request: {'is_marked_for_review': Coalesce(
+                Subquery(UserQuestionStatus.objects.filter(user=request.user, exam=None, question_id=OuterRef('id')).values('is_marked_for_review')[:1]),
+                Value(False)
+            ),}
+        },
+
         'primary_class': {
             'show': False,
             'text': 'Domain',
@@ -381,6 +396,10 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
                 'text': 'Set Skill',
                 'value': question_set_filter_text.get('skill', 'All')
             },
+            {
+                'text': 'Set Marked For Review',
+                'value': question_set_filter_text.get('marked_for_review', 'All')
+            }
         ] + set_stats
 
         for stat in set_stats:
@@ -419,6 +438,9 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
 
     def get_filter_from_args(self, request, question_set_filter, question_set_filter_text, question_set_filtered_queryset=None):
         for filter_key, filter_data in self.filters.items():
+            if 'orm_annotate' in filter_data:
+                question_set_filtered_queryset = question_set_filtered_queryset.annotate(**filter_data['orm_annotate'](request))
+
             if 'items' in filter_data:
                 item_value: Dict[str, Any] = request.GET.get(filter_key, filter_data.get('default'))
                 if item_value is not None:
@@ -465,7 +487,10 @@ def question_set_first_question_view(request):
     question_set_filtered_queryset = QuestionSetView.filtered_queryset()
     question_set_filtered_queryset = QuestionSetView.get_filter_from_args(request, question_set_filter, {}, question_set_filtered_queryset)
 
-    first_question = question_set_filtered_queryset.first()
+    try:
+        first_question = question_set_filtered_queryset.first()
+    except Question.DoesNotExist:
+        return JsonResponse({'error': 'No questions found'}, status=400)
 
     # print('first_question', first_question)
 

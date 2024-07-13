@@ -34,19 +34,19 @@
     {# Placed at the top of the document so pages load faster with defer #}
     {% block javascript %}
         
-        <!-- Bootstrap JS -->
-        <script defer
-                src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"
-                integrity="sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g=="
-                crossorigin="anonymous"
-                referrerpolicy="no-referrer"></script>
-        <!-- Your stuff: Third-party javascript libraries go here -->
+    <!-- Bootstrap JS -->
+    <script defer
+            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"
+            integrity="sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
+    <!-- Your stuff: Third-party javascript libraries go here -->
 
 
-        <!-- place project specific Javascript in this file -->
+    <!-- place project specific Javascript in this file -->
 
 
-        <script defer src="{% static 'js/project.js' %}"></script>
+    <script defer src="{% static 'js/project.js' %}"></script>
 
 
     {% endblock javascript %}
@@ -118,8 +118,7 @@
     {% endblock content %}
 </div>
 <!-- /container -->
-{% block modal %}
-{% endblock modal %}
+{% block modal %}{% endblock modal %}
 {% block inline_javascript %}
     {% comment %}
         Script tags with only code, no src (defer by default). To run

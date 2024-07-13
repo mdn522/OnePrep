@@ -68,7 +68,7 @@
                 {#                </a>#}
                 <ul class="menu menu-lg menu-horizontal bg-base-300 w-full rounded-box">
                     <li class="w-full relative">
-                        <a class="" href="{% url 'questions:set-first-question' %}?{{ modules_args|get_item:module }}">
+                        <a class="" {% if counts|get_item:module > 0 %}href="{% url 'questions:set-first-question' %}?{{ modules_args|get_item:module }}"{% endif %}>
                             <span class="badge badge-lg badge-primary">{{ counts|get_item:module }}</span>
                             <span>{{ terms|get_item:module }}</span>
                         </a>
