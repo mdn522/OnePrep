@@ -184,7 +184,7 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
                 ('false', {'text': 'No', 'filter': {'is_marked_for_review': False}})
             ]),
             # 'orm_field': 'is_marked_for_review',
-            'orm_annotate': lambda request: {'is_marked_for_review': Coalesce(
+            'orm_annotate': lambda request: {'is_marked_for_review': Value(False) if not request.user.is_authenticated else Coalesce(
                 Subquery(UserQuestionStatus.objects.filter(user=request.user, exam=None, question_id=OuterRef('id')).values('is_marked_for_review')[:1]),
                 Value(False)
             ),}
