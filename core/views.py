@@ -89,7 +89,7 @@ def import_question_answer_and_status_view(request):
                 vals.update(defaults)
 
                 obj, created = UserQuestionAnswer.objects.update_or_create(**vals)
-                logs += f'Question #{user_question_answer['question_id']} -> {questions_id_2_id[user_question_answer['question_id']]}: Created: {created}\n'
+                logs += f'Question #{user_question_answer['question_id']} -> {questions_id_2_id[user_question_answer["question_id"]]}: Created: {created}\n'
                 print(vals)
                 print(UserQuestionAnswer.objects.filter(**{k: v for k, v in vals.items() if k not in ['answer']}))
                 # print(vals)
@@ -110,7 +110,7 @@ def import_question_answer_and_status_view(request):
                         defaults[k] = datetime.fromisoformat(v)
 
                 obj, created = UserQuestionStatus.objects.update_or_create(**vals, defaults=defaults)
-                logs += f'Question #{user_question_status['question_id']} -> {questions_id_2_id[user_question_status['question_id']]}: Created: {created}\n'
+                logs += f'Question #{user_question_status['question_id']} -> {questions_id_2_id[user_question_status["question_id"]]}: Created: {created}\n'
 
             # print('user', user)
             # print('questions', questions)
