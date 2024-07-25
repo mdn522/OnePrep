@@ -12,7 +12,6 @@ class Question(TimeStampedModel, models.Model):
         ENGLISH = 'en', 'English'
         MATH = 'math', 'Math'
 
-    # TODO change to TextChoices
     class Difficulty(models.TextChoices):
         # UNSPECIFIED = None, 'Unspecified'
         EASY = 'E', 'Easy'
@@ -27,9 +26,21 @@ class Question(TimeStampedModel, models.Model):
         constraints = [
             # Constraints
             # A question can only have one source and source_id if source is not null and source_id is not null
-            models.UniqueConstraint(fields=['source', 'source_id'],   name='unique_question_source_id',   condition=models.Q(source__isnull=False) & models.Q(source_id__isnull=False)),
-            models.UniqueConstraint(fields=['source', 'source_id_2'], name='unique_question_source_id_2', condition=models.Q(source__isnull=False) & models.Q(source_id_2__isnull=False)),
-            models.UniqueConstraint(fields=['source', 'source_id_3'], name='unique_question_source_id_3', condition=models.Q(source__isnull=False) & models.Q(source_id_3__isnull=False)),
+            models.UniqueConstraint(
+                fields=['source', 'source_id'],
+                name='unique_question_source_id',
+                condition=models.Q(source__isnull=False) & models.Q(source_id__isnull=False)
+            ),
+            models.UniqueConstraint(
+                fields=['source', 'source_id_2'],
+                name='unique_question_source_id_2',
+                condition=models.Q(source__isnull=False) & models.Q(source_id_2__isnull=False)
+            ),
+            models.UniqueConstraint(
+                fields=['source', 'source_id_3'],
+                name='unique_question_source_id_3',
+                condition=models.Q(source__isnull=False) & models.Q(source_id_3__isnull=False)
+            ),
 
             # Indexes
             # Index for source
@@ -125,7 +136,11 @@ class UserQuestionAnswer(models.Model):
         constraints = [
             # Constraints
             # A user can only have one answer for a question in an exam if exam is not null
-            models.UniqueConstraint(fields=['user', 'question', 'exam'], name='unique_user_question_answer_exam', condition=models.Q(exam__isnull=False)),
+            models.UniqueConstraint(
+                fields=['user', 'question', 'exam'],
+                name='unique_user_question_answer_exam',
+                condition=models.Q(exam__isnull=False)
+            ),
         ]
         verbose_name = 'User Answer'
 
@@ -153,6 +168,7 @@ class UserQuestionStatus(models.Model):
         ]
 
         verbose_name = 'User Question Status'
+        verbose_name_plural = 'User Question Statuses'
 
 
 class UserQuestionAnswerStatus(models.Model):
@@ -171,8 +187,17 @@ class UserQuestionAnswerStatus(models.Model):
         constraints = [
             # Constraints
             # A user can only have one status per question's answer per exam
-            models.UniqueConstraint(fields=['user', 'question', 'exam', 'answer_choice'], name='unique_user_question_answer_status_exam', condition=models.Q(answer_choice__isnull=False)),
-            models.UniqueConstraint(fields=['user', 'question', 'exam'], name='unique_user_question_answer_status_exam_spr', condition=models.Q(answer_choice__isnull=True)),
+            models.UniqueConstraint(
+                fields=['user', 'question', 'exam', 'answer_choice'],
+                name='unique_user_question_answer_status_exam',
+                condition=models.Q(answer_choice__isnull=False)
+            ),
+            models.UniqueConstraint(
+                fields=['user', 'question', 'exam'],
+                name='unique_user_question_answer_status_exam_spr',
+                condition=models.Q(answer_choice__isnull=True)
+            ),
         ]
 
         verbose_name = 'User Question Answer Status'
+        verbose_name_plural = 'User Question Answer Statuses'

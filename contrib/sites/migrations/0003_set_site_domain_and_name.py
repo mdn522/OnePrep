@@ -41,6 +41,18 @@ def _update_or_create_site_with_sequence(site_model, connection, domain, name):
                         "ALTER TABLE django_site AUTO_INCREMENT=%s",
                         [max_id + 1],
                     )
+            # https://blog.tafkas.net/2024/04/17/using-cookiecutter-django-with-sqlite/
+            elif connection.vendor == "sqlite":
+                cursor.execute("SELECT MAX(id) FROM django_site")
+                current_id = cursor.fetchone()[0] or 0
+                if current_id <= max_id:
+                    try:
+                        cursor.execute("INSERT INTO django_site (id, domain, name) VALUES (?, 'temp', 'temp')",
+                                       (max_id + 1,))
+                    except Exception:
+                        pass
+                    finally:
+                        cursor.execute("DELETE FROM django_site WHERE domain='temp' AND name='temp'")
 
 
 def update_site_forward(apps, schema_editor):

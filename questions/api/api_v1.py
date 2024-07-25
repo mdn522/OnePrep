@@ -1,6 +1,7 @@
 from datetime import timedelta, datetime
 from typing import Optional
 
+from django.utils import timezone
 from django.utils.timezone import make_aware
 from ninja import Router, Schema
 from ninja.throttling import UserRateThrottle
@@ -35,11 +36,17 @@ class SubmitAnswer(Schema):
 def question_mark_for_review(request, data: MarkForReview):
     user = request.user
 
+    defaults = dict(is_marked_for_review=data.is_marked_for_review)
+    if data.is_marked_for_review:
+        defaults['marked_for_review_at'] = timezone.now()
+    else:
+        defaults['marked_for_review_at'] = None
+
     UserQuestionStatus.objects.update_or_create(
         user=user,
         question_id=data.question_id,
         exam_id=data.exam_id,
-        defaults=dict(is_marked_for_review=data.is_marked_for_review)
+        defaults=defaults
     )
 
     return 200

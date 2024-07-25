@@ -16,6 +16,12 @@ class ExamListView(ListView):
 
     paginate_by = 500
 
+    # TODO user answers count
+    # TODO user correct answers count
+    # TODO user correct percentage
+    # TODO user time spent
+    # TODO user marked for review count
+
     def get_queryset(self):
         questions = Question.objects.filter(exam_question_set__exam=OuterRef('pk')).order_by('exam_question_set__order').values('id')
 
