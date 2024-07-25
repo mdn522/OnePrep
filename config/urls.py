@@ -10,6 +10,7 @@ from django.views.generic import TemplateView, RedirectView
 urlpatterns = [
     # path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
 
+    path("", include("core.urls")),
     path("", include("exams.urls", namespace="exams")),
     path("", include("questions.urls", namespace="questions")),
 

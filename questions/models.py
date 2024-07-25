@@ -127,7 +127,7 @@ class UserQuestionAnswer(models.Model):
     is_correct = models.BooleanField()
     time_given = models.DurationField(null=True, blank=True)
     started_at = models.DateTimeField(null=True, blank=True)
-    answered_at = models.DateTimeField(auto_now_add=True)
+    answered_at = models.DateTimeField()  # auto_now_add=True
 
     saw_explanation_before = models.BooleanField(default=False, blank=True, null=True)
     saw_explanation_at = models.DateTimeField(null=True, blank=True)

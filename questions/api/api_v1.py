@@ -9,6 +9,7 @@ from ninja.security import django_auth
 
 import zoneinfo
 
+from utils.datetime import tz_now_w_ms
 from ..models import Question, AnswerChoice, Answer
 from ..models import UserQuestionAnswer, UserQuestionAnswerStatus, UserQuestionStatus
 
@@ -38,7 +39,7 @@ def question_mark_for_review(request, data: MarkForReview):
 
     defaults = dict(is_marked_for_review=data.is_marked_for_review)
     if data.is_marked_for_review:
-        defaults['marked_for_review_at'] = timezone.now()
+        defaults['marked_for_review_at'] = tz_now_w_ms()
     else:
         defaults['marked_for_review_at'] = None
 
@@ -100,6 +101,7 @@ def answers_submit(request, data: SubmitAnswer):
         user=user,
         question_id=data.question_id,
         exam_id=data.exam_id,
+        answered_at=tz_now_w_ms()
     )
     if data.started_at:  # UNIX timestamp to date
         user_answer.started_at = datetime.fromtimestamp(data.started_at, tz=zoneinfo.ZoneInfo("UTC"))
