@@ -16,8 +16,14 @@
     <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}"/>
 
     {% block css %}
-        <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css" rel="stylesheet" type="text/css"/>
-        <script src="https://cdn.tailwindcss.com"></script>
+        {% if not IS_BLACKOUT %}
+            <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css" rel="stylesheet" type="text/css"/>
+            <script src="https://cdn.tailwindcss.com"></script>
+        {% else %}
+            <link rel="stylesheet" href="{% static 'cdn/daisyui.full.min.css' %}">
+            <script src="{% static 'cdn/tailwind_3.4.5.min.js' %}"></script>
+        {% endif %} 
+
         <!-- Your stuff: Third-party CSS libraries go here -->
         <!-- This file stores project-specific CSS -->
         <link href="{% static 'css/project.css' %}" rel="stylesheet"/>

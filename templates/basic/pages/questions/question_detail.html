@@ -1,18 +1,32 @@
 {% extends "basic/base.html" %}
-{% load core_tags %}
+{% load core_tags static %}
 
 {% block title %}Question #{{ question.id }} - {{ block.super }}{% endblock %}
 
 {% block javascript %}
 	{{ block.super }}
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@marcreichel/alpine-timeago@latest/dist/alpine-timeago.min.js" defer></script>
-
+    
+    {% if not IS_BLACKOUT %}
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    {% else %}
+        <script src="{% static 'cdn/jquery-3.7.1.min.js' %}"></script>
+    {% endif %}
+    
     <!-- Alpine Plugins -->
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
-
+    {% if not IS_BLACKOUT %}
+        <script src="https://cdn.jsdelivr.net/npm/@marcreichel/alpine-timeago@latest/dist/alpine-timeago.min.js" defer></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+    {% else %}
+        <script src="{% static 'cdn/alpine-timeago.min.js' %}" defer></script>
+        <script src="{% static 'cdn/alpine-persist.min.js' %}" defer></script>
+    {% endif %} 
+    
     <!-- Alpine Core -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {% if not IS_BLACKOUT %}
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {% else %}
+        <script src="{% static 'cdn/alpine.3.x.x.min.js' %}" defer></script>
+    {% endif %}
 {% endblock %}
 
 {% block css %}
@@ -454,7 +468,7 @@
                 let data = {
                     question_id: this.question_id,
                     exam_id: null,
-                    
+
                     started_at: parseInt(this.started_at.getTime() / 1000),
                     time_given: this.timer,
                 };
@@ -638,9 +652,9 @@
     <script>
     MathJax = {
         {#loader: {load: ['input/asciimath', '[mml]/mml3', 'output/chtml', 'ui/menu']},#}
-        /*asciimath: {
-            delimiters: [['$','$'], ['`','`']]
-        },*/
+        //asciimath: {
+        //    delimiters: [['$','$'], ['`','`']]
+        //},
         jax: ["input/TeX", "output/HTML-CSS"],
         tex2jax: {
             inlineMath: [["$", "$"], ["\\(", "\\)"]],
@@ -653,7 +667,11 @@
         }
     };
     </script>
-    <script type="text/javascript" id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    {% if not IS_BLACKOUT %}
+        <script type="text/javascript" id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    {% else %}
+        <script src="{% static 'cdn/MathJax.2.7.7.js' %}" async id="MathJax-script"></script>
+    {% endif %} 
     <script>
         window.MathJax = {
             startup: {
@@ -667,4 +685,5 @@
             }
         };
     </script>
+    
 {% endblock %}

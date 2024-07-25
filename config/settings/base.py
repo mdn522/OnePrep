@@ -217,6 +217,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "users.context_processors.allauth_settings",
                 "django_admin_env_notice.context_processors.from_settings",
+
+                "utils.context_processors.internet_blackout_context",
             ],
         },
     },
@@ -322,3 +324,5 @@ SOCIALACCOUNT_FORMS = {"signup": "users.forms.UserSocialSignupForm"}
 # ------------------------------------------------------------------------------
 ENVIRONMENT_NAME = env.str("ENVIRONMENT_NAME", default="development")
 ENVIRONMENT_COLOR = env.str("ENVIRONMENT_COLOR", default="black")
+
+IS_BLACKOUT = env.bool('IS_BLACKOUT', default=False)

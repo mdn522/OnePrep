@@ -16,14 +16,17 @@
     <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}"/>
     {% block css %}
         <!-- Latest compiled and minified Bootstrap CSS -->
-        <link rel="stylesheet"
-              href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css"
-              integrity="sha512-SbiR/eusphKoMVVXysTKG/7VseWii+Y3FdHrt0EpKgpToZeemhqHeZeLWLhJutz/2ut2Vw1uQEj2MbRF+TVBUA=="
-              crossorigin="anonymous"
-              referrerpolicy="no-referrer"/>
+        {% if not IS_BLACKOUT %}
+        	<link rel="stylesheet" 
+                  href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css" 
+                  integrity="sha512-SbiR/eusphKoMVVXysTKG/7VseWii+Y3FdHrt0EpKgpToZeemhqHeZeLWLhJutz/2ut2Vw1uQEj2MbRF+TVBUA==" 
+                  crossorigin="anonymous" referrerpolicy="no-referrer"/>
+        {% else %}
+            <link rel="stylesheet" href="{% static 'cdn/bootstrap.5.2.3.min.css' %}">
+        {% endif %} 
+        
         <!-- Your stuff: Third-party CSS libraries go here -->
         <!-- This file stores project-specific CSS -->
-
 
         <link href="{% static 'css/project.css' %}" rel="stylesheet"/>
 
@@ -34,20 +37,18 @@
     {# Placed at the top of the document so pages load faster with defer #}
     {% block javascript %}
         
-    <!-- Bootstrap JS -->
-    <script defer
-            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"
-            integrity="sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g=="
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer"></script>
-    <!-- Your stuff: Third-party javascript libraries go here -->
-
-
-    <!-- place project specific Javascript in this file -->
-
-
-    <script defer src="{% static 'js/project.js' %}"></script>
-
+        <!-- Bootstrap JS -->
+        {% if not IS_BLACKOUT %}
+            <script defer crossorigin="anonymous" referrerpolicy="no-referrer"
+                    src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"
+                    integrity="sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g=="></script>
+        {% else %}
+            <script src="{% static 'cdn/bootstrap.5.2.3.min.js' %}" defer></script>
+        {% endif %} 
+        
+        <!-- Your stuff: Third-party javascript libraries go here -->
+        <!-- place project specific Javascript in this file -->
+        <script defer src="{% static 'js/project.js' %}"></script>
 
     {% endblock javascript %}
 </head>
