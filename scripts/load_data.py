@@ -6,7 +6,7 @@ from utils.scraper.loaders.satmocks import SATMocksLoader
 
 def run(*args):
     # loader = CollegeBoardQuestionBankLoader()
-    # loader = CollegeBoardBlueBookLoader()
+    loader = CollegeBoardBlueBookLoader()
     # loader = PrincetonReviewLoader()
-    loader = SATMocksLoader()
+    # loader = SATMocksLoader()
     loader.load()
