@@ -5,13 +5,13 @@
 
 {% block javascript %}
 	{{ block.super }}
-    
+
     {% if not IS_BLACKOUT %}
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     {% else %}
         <script src="{% static 'cdn/jquery-3.7.1.min.js' %}"></script>
     {% endif %}
-    
+
     <!-- Alpine Plugins -->
     {% if not IS_BLACKOUT %}
         <script src="https://cdn.jsdelivr.net/npm/@marcreichel/alpine-timeago@latest/dist/alpine-timeago.min.js" defer></script>
@@ -19,8 +19,8 @@
     {% else %}
         <script src="{% static 'cdn/alpine-timeago.min.js' %}" defer></script>
         <script src="{% static 'cdn/alpine-persist.min.js' %}" defer></script>
-    {% endif %} 
-    
+    {% endif %}
+
     <!-- Alpine Core -->
     {% if not IS_BLACKOUT %}
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -652,38 +652,41 @@
     <script>
     MathJax = {
         {#loader: {load: ['input/asciimath', '[mml]/mml3', 'output/chtml', 'ui/menu']},#}
-        //asciimath: {
-        //    delimiters: [['$','$'], ['`','`']]
-        //},
+        /*asciimath: {
+            delimiters: [['$','$'], ['`','`']]
+        },*/
         jax: ["input/TeX", "output/HTML-CSS"],
         tex2jax: {
             inlineMath: [["$", "$"], ["\\(", "\\)"]],
             displayMath: [["$$", "$$"], ["\\[", "\\]"]],
             skipTags: ["script", "noscript", "style", "textarea", "pre"]
         },
+        /*tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },*/
         "HTML-CSS": {
             availableFonts: ["STIX", "TeX"],
             showMathMenu: !1
         }
     };
     </script>
+    <script>
+        window.MathJax.startup = {
+            ready: () => {
+                console.log('MathJax is loaded, but not yet initialized');
+                MathJax.startup.defaultReady();
+                MathJax.typeset();
+                document.getElementById('mathjax-wait').classList.remove('hidden');
+                console.log('MathJax is initialized, and the initial typeset is queued');
+            }
+        }
+    </script>
     {% if not IS_BLACKOUT %}
         <script type="text/javascript" id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
     {% else %}
-        <script src="{% static 'cdn/MathJax.2.7.7.js' %}" async id="MathJax-script"></script>
-    {% endif %} 
-    <script>
-        window.MathJax = {
-            startup: {
-                ready: () => {
-                    console.log('MathJax is loaded, but not yet initialized');
-                    MathJax.startup.defaultReady();
-                    MathJax.typeset();
-                    document.getElementById('mathjax-wait').classList.remove('hidden');
-                    console.log('MathJax is initialized, and the initial typeset is queued');
-                }
-            }
-        };
-    </script>
+        <script type="text/javascript" id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+{#        <script src="{% static 'cdn/MathJax.2.7.7.js' %}" async id="MathJax-script"></script>#}
+    {% endif %}
     
+
 {% endblock %}
