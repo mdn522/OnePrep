@@ -184,11 +184,11 @@ class CollegeBoardQuestionBankLoader(Loader):
                 q_meta['skill_cd'], q_meta['skill_desc'],
                 self.difficulty_long_map[q_meta['difficulty']],
             )
-            question.skill_tags.add(
-                q_meta['primary_class_cd'], q_meta['primary_class_cd_desc'],
-                q_meta['skill_cd'], q_meta['skill_desc'],
-                self.difficulty_long_map[q_meta['difficulty']],
-            )
+            # question.skill_tags.add(
+            #     q_meta['primary_class_cd'], q_meta['primary_class_cd_desc'],
+            #     q_meta['skill_cd'], q_meta['skill_desc'],
+            #     self.difficulty_long_map[q_meta['difficulty']],
+            # )
 
             if answer_type == Question.AnswerType.MCQ:
                 for ans in answers_choices:

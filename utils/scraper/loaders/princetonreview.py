@@ -20,7 +20,7 @@ class PrincetonReviewLoader(Loader):
     def load(self):
         program = self.get_program()
         # TODO path
-        exams_file = self.get_file('princeton review', 'exams.json', base_path=Path(r'D:\Workspace\Python\Notebooks\SAT-Lab'))
+        exams_file = self.get_file('princeton_review', 'exams.json')  # base_path=Path(r'D:\Workspace\Python\Notebooks\SAT-Lab')
 
         durations = {
             'math': timedelta(minutes=35),
@@ -78,6 +78,11 @@ class PrincetonReviewLoader(Loader):
                             source_order=question_i + 1,
                             source_raw_data=None,  # TODO strip keys
                         )
+                    )
+
+                    question.tags.add(
+                        'The Princeton Review', 'SAT', module.title(),
+                        *question_data['concepts']
                     )
 
                     if answer_type == Question.AnswerType.MCQ:

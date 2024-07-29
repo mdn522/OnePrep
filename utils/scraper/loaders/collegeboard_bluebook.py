@@ -98,6 +98,10 @@ class CollegeBoardBlueBookLoader(Loader):
                         )
                     )
 
+                    question.tags.add(
+                        'College Board', 'Bluebook', 'SAT', module.title(),
+                    )
+
                     if question_data['answer']['style'] == 'Multiple Choice':
                         for choice_letter, choice_data in question_data['answer']['choices'].items():
                             answer_choice, answer_choice_created = AnswerChoice.objects.update_or_create(
