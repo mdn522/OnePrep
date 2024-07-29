@@ -97,11 +97,13 @@ class UserAdmin(auth_admin.UserAdmin):
             'question_status_set__question', 'question_answer_set__question',
             'question_answer_set__answer_choice',
         )
+        data_all = {}
 
-        questions: Dict[int, Question] = {}
-        answer_choices: Dict[int, AnswerChoice] = {}
         for user in queryset:
             user: User
+
+            questions: Dict[int, Question] = {}
+            answer_choices: Dict[int, AnswerChoice] = {}
 
             dkeys = ['id', 'user_id', 'exam_id']
             data = {
@@ -138,9 +140,11 @@ class UserAdmin(auth_admin.UserAdmin):
             # print('questions', questions)
             # print('answer_choice', answer_choices)
             # print(data)
-            response = JsonResponse(data, json_dumps_params=dict(indent=4))
 
-            return response
-        pass
+            data_all[user.username] = data
+
+        data_all['type'] = 'users'
+        response = JsonResponse(data_all, json_dumps_params=dict(indent=4))
+        return response
 
     export_user_data.short_description = "Export Data"
