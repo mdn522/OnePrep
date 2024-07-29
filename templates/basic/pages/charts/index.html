@@ -11,8 +11,14 @@
 {% endblock %}
 
 {% block content %}
+    <h2 class="text-2xl text-center">
+        Attempts
+    </h2>
+
     <div id="en-answers-chart-container"></div>
     <div id="math-answers-chart-container"></div>
+
+    <hr>
 
     <div id="container"></div>
 {% endblock content %}
@@ -52,12 +58,12 @@
                     series: [
                         {
                             name: 'Correct',
-                            color: 'green',
+                            color: '#27ae60',
                             data: data[module][1],
                         },
                         {
                             name: 'Incorrect',
-                            color: 'red',
+                            color: '#e74c3c',
                             data: data[module][0],
                         }
                     ],
