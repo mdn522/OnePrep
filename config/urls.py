@@ -13,6 +13,7 @@ urlpatterns = [
     path("", include("core.urls")),
     path("", include("exams.urls", namespace="exams")),
     path("", include("questions.urls", namespace="questions")),
+    path("", include("charts.urls", namespace="charts")),
 
     path("api/", include("api.urls")),
 

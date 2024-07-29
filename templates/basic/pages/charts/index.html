@@ -1,0 +1,72 @@
+{% extends "basic/base.html" %}
+
+{% block title %}
+    Chart
+{% endblock %}
+
+{% block javascript %}
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div id="en-answers-chart-container"></div>
+    <div id="math-answers-chart-container"></div>
+
+    <div id="container"></div>
+{% endblock content %}
+
+{% block inline_javascript %}
+    {{ block.super }}
+
+    <script>
+        function answer_chart(data) {
+            let titles = {
+                'en': 'English',
+                'math': 'Math'
+            }
+            for (let module of ['en', 'math']) {
+                let id = module + '-answers-chart-container';
+                let chart_data = {
+                    title: {
+                        text: titles[module],
+                        align: 'left'
+                    },
+                    yAxis: {
+                        title: {
+                            text: "Count",
+                        }
+                    },
+                    xAxis: {
+                        categories: data.x_axis,
+                    },
+                    plotOptions: {
+                        line: {
+                            dataLabels: {
+                                enabled: true
+                            },
+                            enableMouseTracking: true
+                        }
+                    },
+                    series: [
+                        {
+                            name: 'Correct',
+                            color: 'green',
+                            data: data[module][1],
+                        },
+                        {
+                            name: 'Incorrect',
+                            color: 'red',
+                            data: data[module][0],
+                        }
+                    ],
+                }
+                console.log(chart_data)
+                Highcharts.chart(id, chart_data);
+            }
+        }
+
+        answer_chart({{ answer_data | safe }})
+    </script>
+{% endblock %}
