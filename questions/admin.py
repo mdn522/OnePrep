@@ -164,7 +164,7 @@ class UserQuestionAnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     exam_fk = easy.ForeignKeyAdminField('exam')
     answer_choice_fk = easy.ForeignKeyAdminField('answer_choice')
 
-    question_module = easy.SimpleAdminField(lambda obj: obj.question.module, short_description='Question Module')
+    question_module = easy.SimpleAdminField('question.module', short_description='Question Module')
 
 
 @admin.register(UserQuestionStatus)
@@ -184,10 +184,13 @@ class UserQuestionStatusAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'is_marked_for_review',
         'marked_for_review_at',
         'unmarked_for_review_at',
-        
+
         'is_skipped',
     ]
-    list_filter = []
+    list_filter = [
+        'is_marked_for_review',
+        'question_module',
+    ]
     search_fields = [
         'user__username',
         'user__email',
@@ -206,6 +209,6 @@ class UserQuestionStatusAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     question_fk = easy.ForeignKeyAdminField('question')
     exam_fk = easy.ForeignKeyAdminField('exam')
 
-    question_module = easy.SimpleAdminField(lambda obj: obj.question.module, short_description='Question Module')
+    question_module = easy.SimpleAdminField('question.module', short_description='Question Module')
 
 
