@@ -40,8 +40,10 @@ def question_mark_for_review(request, data: MarkForReview):
     defaults = dict(is_marked_for_review=data.is_marked_for_review)
     if data.is_marked_for_review:
         defaults['marked_for_review_at'] = tz_now_w_ms()
+        # defaults['unmarked_for_review_at'] = None
     else:
-        defaults['marked_for_review_at'] = None
+        defaults['unmarked_for_review_at'] = tz_now_w_ms()
+        # defaults['marked_for_review_at'] = None
 
     UserQuestionStatus.objects.update_or_create(
         user=user,
