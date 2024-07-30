@@ -6,8 +6,13 @@
 {% block head %}
 	{{ block.super }}
     
-    {% if is_question_set and question_set_next_question_id %}
-        <link rel="prefetch" href="{% url "questions:detail" question_set_next_question_id %}?{{ question_set_args }}">
+    {% if is_question_set %}
+    	{% if question_set_next_question_id %}
+    		<link rel="prefetch" href="{% url "questions:detail" question_set_next_question_id %}?{{ question_set_args }}">
+    	{% endif %} 
+        {% if question_set_previous_question_id %}
+        	<link rel="prefetch" href="{% url "questions:detail" question_set_previous_question_id %}?{{ question_set_args }}">
+        {% endif %} 
     {% endif %}
 {% endblock %}
 
