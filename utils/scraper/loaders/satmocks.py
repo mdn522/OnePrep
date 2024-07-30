@@ -3,6 +3,7 @@ import re
 from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
+from typing import List
 
 from questions.models import Question, AnswerChoice, Answer
 from exams.models import Exam, ExamQuestion
@@ -32,7 +33,7 @@ class SATMocksLoader(Loader):
     def load(self):
         program = self.get_program()
 
-        practices_file = self.get_file('satmocks', 'satmocks_raw_data_practices.json', base_path=Path(r'D:\Workspace\Python\Notebooks\SAT-Lab'))
+        practices_file = self.get_file('satmocks', 'satmocks_raw_data_practices.json')  # , base_path=Path(r'D:\Workspace\Python\Notebooks\SAT-Lab')
 
         durations = {
             'math': timedelta(minutes=35),
@@ -118,8 +119,18 @@ class SATMocksLoader(Loader):
                     )
                 )
 
+                question.tags.add(
+                    'SATMocks', 'SAT', module.title(),
+                )
+
                 if answer_type == Question.AnswerType.MCQ:
                     for sat_option in question_data['sat_options']:
+                        # pop till we get a valid answer
+                        while question_data['sat_answers'][0]['answers'][0] not in ['A', 'B', 'C', 'D']:
+                            question_data['sat_answers'][0]['answers'].pop(0)
+
+                        assert question_data['sat_answers'][0]['answers'][0] in ['A', 'B', 'C', 'D'], question_data['sat_answers'][0]['answers']
+
                         answer_choice, answer_choice_created = AnswerChoice.objects.update_or_create(
                             question=question,
                             letter=sat_option['letter'],
