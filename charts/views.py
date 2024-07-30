@@ -1,5 +1,8 @@
+from typing import Optional
+
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.http import Http404
+from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
 from questions.models import Question
@@ -18,8 +21,19 @@ def get_date_range(start_date, end_date):
 
 
 @login_required
-def chart_view(request):
-    user: User = request.user
+def chart_view(request, user_id=None, username=None):
+    user: Optional[User] = None
+    if not user_id and not username:
+        user = request.user
+    else:
+        if user_id:
+            user = get_object_or_404(User, id=user_id)
+        elif username:
+            user = get_object_or_404(User, username=username)
+
+    if not user:
+        # raise 404
+        raise Http404
 
     # dynamic past 15 days
     DAYS = 30
