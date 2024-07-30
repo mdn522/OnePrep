@@ -1,4 +1,5 @@
 {% extends "basic/base.html" %}
+{% load core_tags static %}
 
 {% block title %}
     {{ current_user.username }}'s Charts - {{ block.super }}
@@ -11,18 +12,18 @@
 {% endblock %}
 
 {% block content %}
-    <h1 class="text-3xl text-left">
+    <h1 class="text-3xl text-left font-bold mb-2">
         {{ current_user.name }} - {{ current_user.username }}'s Chart
     </h1>
 
-    <h2 class="text-2xl text-center">
-        Attempts
-    </h2>
+    <div class="border-2 bg-base-200 rounded p-3 mb-4">
+        <h2 class="text-2xl text-center mb-3 font-semibold">
+            Attempts & Marks
+        </h2>
 
-    <div id="en-answers-chart-container"></div>
-    <div id="math-answers-chart-container"></div>
-
-    <hr>
+        <div id="en-answers-chart-container"></div>
+        <div id="math-answers-chart-container"></div>
+    </div>
 
     <div id="container"></div>
 {% endblock content %}
@@ -31,7 +32,7 @@
     {{ block.super }}
 
     <script>
-        function answer_chart(data) {
+        function answer_chart(answer_data, mark_data) {
             let titles = {
                 'en': 'English',
                 'math': 'Math'
@@ -49,7 +50,12 @@
                         }
                     },
                     xAxis: {
-                        categories: data.x_axis,
+                        categories: answer_data.x_axis,
+                    },
+                    tooltip: {
+                        shared: true,
+                        split: false,
+                        enabled: true
                     },
                     plotOptions: {
                         line: {
@@ -61,15 +67,25 @@
                     },
                     series: [
                         {
-                            name: 'Correct',
-                            color: '#27ae60',
-                            data: data[module][1],
+                            name: 'Unmarked for Review',
+                            color: '#334155',
+                            data: mark_data[module][0],
+                        },
+                        {
+                            name: 'Marked for Review',
+                            color: '#facc15',
+                            data: mark_data[module][1],
                         },
                         {
                             name: 'Incorrect',
                             color: '#e74c3c',
-                            data: data[module][0],
-                        }
+                            data: answer_data[module][0],
+                        },
+                        {
+                            name: 'Correct',
+                            color: '#27ae60',
+                            data: answer_data[module][1],
+                        },
                     ],
                 }
                 console.log(chart_data)
@@ -77,6 +93,6 @@
             }
         }
 
-        answer_chart({{ answer_data | safe }})
+        answer_chart({{ answer_data | jsonify }}, {{ mark_data | jsonify}})
     </script>
 {% endblock %}
