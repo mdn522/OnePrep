@@ -40,86 +40,98 @@ def import_question_answer_and_status_view(request):
             data = None
 
         if data:
-            user = User.objects.get(username=data['username'])
-            questions = {}
-            questions_id_2_id = {}
-            questions_qs = Question.objects.filter(reduce(lambda x, y: x | y, [Q(source=q['source'], source_id=q['source_id']) for q in data['questions'].values()]))
-            for q in questions_qs:
-                # find question in data
-                for data_question_id, data_question in data['questions'].items():
-                    if q.source == data_question['source'] and q.source_id == data_question['source_id']:
-                        questions[q.id] = q
-                        questions_id_2_id[data_question_id] = q.id
-                        break
+            data_list = data
+            if data.get('type') == 'users':
+                del data['type']
+                data_list = data.values()
+            else:
+                data_list = [data]
 
-            questions_id_2_id = {int(k): v for k, v in questions_id_2_id.items()}
+            for data in data_list:
+                user = User.objects.get(username=data['username'])
+                logs += "User: " + data['username'] + "\n"
 
-            answer_choices = {}
-            answer_choices_id_2_id = {}
-            answer_choices_qs = AnswerChoice.objects.filter(reduce(lambda x, y: x | y, [Q(question_id=questions_id_2_id[ac['question_id']], letter=ac['letter']) for ac in data['answer_choices'].values()]))
+                questions = {}
+                questions_id_2_id = {}
+                questions_qs = Question.objects.filter(reduce(lambda x, y: x | y, [Q(source=q['source'], source_id=q['source_id']) for q in data['questions'].values()]))
+                for q in questions_qs:
+                    # find question in data
+                    for data_question_id, data_question in data['questions'].items():
+                        if q.source == data_question['source'] and q.source_id == data_question['source_id']:
+                            questions[q.id] = q
+                            questions_id_2_id[data_question_id] = q.id
+                            break
 
-            for ac in answer_choices_qs:
-                # find answer choice in data
-                for data_answer_choice_id, data_answer_choice in data['answer_choices'].items():
-                    if ac.question_id == questions_id_2_id[data_answer_choice['question_id']] and ac.letter == data_answer_choice['letter']:
-                        answer_choices[ac.id] = ac
-                        answer_choices_id_2_id[data_answer_choice_id] = ac.id
-                        break
+                questions_id_2_id = {int(k): v for k, v in questions_id_2_id.items()}
 
-            answer_choices_id_2_id = {int(k): v for k, v in answer_choices_id_2_id.items()}
+                answer_choices = {}
+                answer_choices_id_2_id = {}
+                answer_choices_qs = AnswerChoice.objects.filter(reduce(lambda x, y: x | y, [Q(question_id=questions_id_2_id[ac['question_id']], letter=ac['letter']) for ac in data['answer_choices'].values()]))
 
-            logs += 'User Question Answer'
-            for user_question_answer in data['question_answer_set']:
-                vals = dict(
-                    user=user,
-                    question=questions[questions_id_2_id[user_question_answer['question_id']]],
-                    exam=None,
-                )
+                for ac in answer_choices_qs:
+                    # find answer choice in data
+                    for data_answer_choice_id, data_answer_choice in data['answer_choices'].items():
+                        if ac.question_id == questions_id_2_id[data_answer_choice['question_id']] and ac.letter == data_answer_choice['letter']:
+                            answer_choices[ac.id] = ac
+                            answer_choices_id_2_id[data_answer_choice_id] = ac.id
+                            break
 
-                if user_question_answer['answer_choice_id']:
-                    vals['answer_choice'] = answer_choices[answer_choices_id_2_id[user_question_answer['answer_choice_id']]]
+                answer_choices_id_2_id = {int(k): v for k, v in answer_choices_id_2_id.items()}
 
-                defaults = {k: v for k, v in user_question_answer.items() if k not in ['question_id', 'answer_choice_id', 'exam_id']}
-                for k, v in defaults.items():
-                    if k.endswith('_at') and v is not None:
-                        defaults[k] = datetime.fromisoformat(v)
-                    if k == 'time_given':
-                        defaults[k] = parse_time(v)
+                logs += 'User Question Answer\n'
+                for user_question_answer in data['question_answer_set']:
+                    vals = dict(
+                        user=user,
+                        question=questions[questions_id_2_id[user_question_answer['question_id']]],
+                        exam=None,
+                    )
 
-                vals.update(defaults)
+                    if user_question_answer['answer_choice_id']:
+                        vals['answer_choice'] = answer_choices[answer_choices_id_2_id[user_question_answer['answer_choice_id']]]
 
-                obj, created = UserQuestionAnswer.objects.update_or_create(**vals)
-                # logs += f'Question #{user_question_answer['question_id']} -> {questions_id_2_id[user_question_answer["question_id"]]}: Created: {created}\n'
-                logs += 'Question #' + str(user_question_answer['question_id']) + ' -> ' + str(questions_id_2_id[user_question_answer["question_id"]]) + ': Created: ' + str(created) + '\n'
-                # print(vals)
-                # print(UserQuestionAnswer.objects.filter(**{k: v for k, v in vals.items() if k not in ['answer']}))
-                # print(vals)
+                    defaults = {k: v for k, v in user_question_answer.items() if k not in ['question_id', 'answer_choice_id', 'exam_id']}
+                    for k, v in defaults.items():
+                        if k.endswith('_at') and v is not None:
+                            defaults[k] = datetime.fromisoformat(v)
+                        if k == 'time_given':
+                            defaults[k] = parse_time(v)
 
-            logs += '\n'
+                    vals.update(defaults)
 
-            logs += 'User Question Status'
-            for user_question_status in data['question_status_set']:
-                vals = {
-                    'user': user,
-                    'question': questions[questions_id_2_id[user_question_status['question_id']]],
-                    'exam': None,
-                }
+                    obj, created = UserQuestionAnswer.objects.update_or_create(**vals)
+                    # logs += f'Question #{user_question_answer['question_id']} -> {questions_id_2_id[user_question_answer["question_id"]]}: Created: {created}\n'
+                    logs += 'Question #' + str(user_question_answer['question_id']) + ' -> ' + str(questions_id_2_id[user_question_answer["question_id"]]) + ': Created: ' + str(created) + '\n'
+                    # print(vals)
+                    # print(UserQuestionAnswer.objects.filter(**{k: v for k, v in vals.items() if k not in ['answer']}))
+                    # print(vals)
 
-                defaults = {k: v for k, v in user_question_status.items() if k not in ['user_id', 'question_id', 'exam_id']}
-                for k, v in defaults.items():
-                    if k.endswith('_at') and v is not None:
-                        defaults[k] = datetime.fromisoformat(v)
+                logs += '\n'
 
-                obj, created = UserQuestionStatus.objects.update_or_create(**vals, defaults=defaults)
-                # logs += f'Question #{user_question_status['question_id']} -> {questions_id_2_id[user_question_status["question_id"]]}: Created: {created}\n'
-                logs += 'Question #' + str(user_question_status['question_id']) + ' -> ' + str(questions_id_2_id[user_question_status["question_id"]]) + ': Created: ' + str(created) + '\n'
+                logs += 'User Question Status\n'
+                for user_question_status in data['question_status_set']:
+                    vals = {
+                        'user': user,
+                        'question': questions[questions_id_2_id[user_question_status['question_id']]],
+                        'exam': None,
+                    }
 
-            # print('user', user)
-            # print('questions', questions)
-            # print('questions_id_2_id', questions_id_2_id)
-            #
-            # print('answer_choices', answer_choices)
-            # print('answer_choices_id_2_id', answer_choices_id_2_id)
+                    defaults = {k: v for k, v in user_question_status.items() if k not in ['user_id', 'question_id', 'exam_id']}
+                    for k, v in defaults.items():
+                        if k.endswith('_at') and v is not None:
+                            defaults[k] = datetime.fromisoformat(v)
+
+                    obj, created = UserQuestionStatus.objects.update_or_create(**vals, defaults=defaults)
+                    # logs += f'Question #{user_question_status['question_id']} -> {questions_id_2_id[user_question_status["question_id"]]}: Created: {created}\n'
+                    logs += 'Question #' + str(user_question_status['question_id']) + ' -> ' + str(questions_id_2_id[user_question_status["question_id"]]) + ': Created: ' + str(created) + '\n'
+
+                # print('user', user)
+                # print('questions', questions)
+                # print('questions_id_2_id', questions_id_2_id)
+                #
+                # print('answer_choices', answer_choices)
+                # print('answer_choices_id_2_id', answer_choices_id_2_id)
+
+                logs += '\n\n'
 
         # print('data:', data)
     return render(request, 'basic/pages/tools/import_question_answer_and_status.html', context={'logs': logs})
