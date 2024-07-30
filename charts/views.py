@@ -63,5 +63,6 @@ def chart_view(request, user_id=None, username=None):
     print('answer_data', answer_data)
 
     return render(request, 'basic/pages/charts/index.html', context={
-        'answer_data': answer_data
+        'answer_data': answer_data,
+        'current_user': user
     })
