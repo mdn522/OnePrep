@@ -183,6 +183,8 @@ class UserQuestionStatusAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
 
         'is_marked_for_review',
         'marked_for_review_at',
+        'unmarked_for_review_at',
+        
         'is_skipped',
     ]
     list_filter = []
