@@ -189,7 +189,7 @@ class UserQuestionStatusAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     ]
     list_filter = [
         'is_marked_for_review',
-        'question_module',
+        'question__module',
     ]
     search_fields = [
         'user__username',
