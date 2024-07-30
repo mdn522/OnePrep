@@ -65,7 +65,7 @@
     #question table {
         border: 1px solid;
     }
-    
+
     #question table :where(thead, tfoot) {
         white-space: normal !important;
     }
@@ -662,10 +662,10 @@
         jax: ["input/TeX", "output/HTML-CSS"],
         tex2jax: {
             inlineMath: [
-                {% if 'College Board' not in question.tags %}
-                    ["$", "$"], 
-                {% endif %} 
-                
+                {% if 'College Board' not in questions_tags %}
+                    ["$", "$"],
+                {% endif %}
+
                 ["\\(", "\\)"],
             ],
             displayMath: [["$$", "$$"], ["\\[", "\\]"]],
@@ -697,6 +697,6 @@
         <script type="text/javascript" id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 {#        <script src="{% static 'cdn/MathJax.2.7.7.js' %}" async id="MathJax-script"></script>#}
     {% endif %}
-    
+
 
 {% endblock %}

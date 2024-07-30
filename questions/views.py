@@ -517,6 +517,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
         ]).get(pk=kwargs['pk'])
         context['question'] = question
         context['Question'] = Question
+        context['questions_tags'] = [tag.name for tag in question.tags.all()]
         context['answer_choices'] = list(question.answer_choice_set.only(*['id', 'text', 'letter', 'order', 'correct', 'explanation']).order_by('order').values())
         context['answers'] = list(question.answer_set.only(*['id', 'value', 'order', 'explanation']).order_by('order').values())
 
