@@ -60,7 +60,7 @@ def chart_view(request, user_id=None, username=None):
         answer_data[answer.question.module][answer.is_correct][x_axis.index(answer.answered_at.strftime('%Y-%m-%d'))] += 1
         pass
 
-    print('answer_data', answer_data)
+    # print('answer_data', answer_data)
 
     return render(request, 'basic/pages/charts/index.html', context={
         'answer_data': answer_data,

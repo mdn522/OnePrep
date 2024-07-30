@@ -1,7 +1,7 @@
 {% extends "basic/base.html" %}
 
 {% block title %}
-    Chart
+    {{ current_user.username }}'s Charts - {{ block.super }}
 {% endblock %}
 
 {% block javascript %}
