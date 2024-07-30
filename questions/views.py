@@ -207,7 +207,13 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
     }
 
     def filtered_queryset(self):
-        return Question.objects.filter(tags__name__in=self.tag_filter).distinct()
+        qs = Question.objects
+        for tag in self.tag_filter:
+            qs = qs.filter(tags__name=tag)
+
+        qs = qs.distinct()
+        return qs
+        # return Question.objects.filter(tags__name=self.tag_filter[0]).filter(tags__name=self.tag_filter[1]).distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -254,6 +260,8 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
         question_set_filtered_queryset = self.get_filter_from_args(self.request, question_set_filter, {}, question_set_filtered_queryset)
         # print('filter_from_args', question_set_filter)
 
+        # print(len(question_set_filtered_queryset))
+
         counts = (Question.tags.through.objects.filter(
             # tag__name__in=self.tag_filter,
             object_id__in=question_set_filtered_queryset.values('id'),  # tags__name__in=['Bluebook']
@@ -293,6 +301,8 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
             #     for category in self.category_map if category.primary_class is None and category.skill is None
             # }
         ))
+
+        # print(counts)
 
         categories = []
         modules_args = {}
