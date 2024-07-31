@@ -4,15 +4,9 @@ from django.db.models import Count, Min, F, OuterRef, Subquery, Q, PositiveInteg
 from django.shortcuts import render
 from django.views.generic import ListView
 
+from core.models import SubqueryCount
 from questions.models import Question, UserQuestionAnswer, UserQuestionStatus
 from .models import Exam
-
-
-class SubqueryCount(Subquery):
-    # Custom Count function to just perform simple count on any queryset without grouping.
-    # https://stackoverflow.com/a/47371514/1164966
-    template = "(SELECT count(*) FROM (%(subquery)s) _count)"
-    output_field = PositiveIntegerField()
 
 
 class ExamListView(ListView):
