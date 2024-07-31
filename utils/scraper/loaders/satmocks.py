@@ -145,7 +145,7 @@ class SATMocksLoader(Loader):
                     for i, sat_answer in enumerate(question_data['sat_answers']):
                         answer, answer_created = Answer.objects.update_or_create(
                             question=question,
-                            value=sat_answer['answers'][0],
+                            value=sat_answer['answers'][0].strip('`').strip("'").strip('"'),
 
                             defaults=dict(
                                 order=i,
