@@ -14,6 +14,7 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.views.generic import TemplateView, ListView
 
+from core.models import SubqueryCount
 from exams.models import Exam
 from .models import Question, UserQuestionAnswer, UserQuestionStatus
 
@@ -262,6 +263,15 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
 
         # print(len(question_set_filtered_queryset))
 
+        # question_status = (
+        #     UserQuestionStatus.objects
+        #     .filter(question_id=OuterRef('object_id'), user=self.request.user if self.request.user.is_authenticated else None, exam=None,
+        #             is_marked_for_review=True)
+        #     .annotate(count=Count('id'))
+        #     # .order_by('question__exam_question_set__exam')
+        #     .values('count')
+        # )
+
         counts = (Question.tags.through.objects.filter(
             # tag__name__in=self.tag_filter,
             object_id__in=question_set_filtered_queryset.values('id'),  # tags__name__in=['Bluebook']
@@ -270,24 +280,20 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
             # tag_id_=F('tag_id'),
         ).aggregate(   # .distinct('object_id')
             count=Count('object_id', distinct=True),
+            # count_marked=,
             # module count
             **{
-                f'{category.module}': Count('object_id', distinct=True,
-                                            filter=Q(tag_id=tags_map[self.module_tag_map[category.module]].id))
+                f'{category.module}': Count('object_id', distinct=True, filter=Q(tag_id=tags_map[self.module_tag_map[category.module]].id))
                 for category in self.category_map if category.primary_class is None and category.skill is None
             },
-            # # primary class count
+            # primary class count
             **{
-                f'{category.module}_{category.primary_class}': Count('object_id', distinct=True,
-                                                                     filter=Q(tag_id=tags_map[category.primary_class].id))
+                f'{category.module}_{category.primary_class}': Count('object_id', distinct=True, filter=Q(tag_id=tags_map[category.primary_class].id))
                 for category in self.category_map if category.primary_class and category.skill is None
             },
-            # # skill count
+            # skill count
             **{
-                f'{category.module}_{category.primary_class}_{category.skill}':
-                    Count('object_id',
-                          distinct=True,
-                          filter=Q(tag_id=tags_map[category.skill].id))
+                f'{category.module}_{category.primary_class}_{category.skill}': Count('object_id', distinct=True, filter=Q(tag_id=tags_map[category.skill].id))
                 for category in self.category_map if category.skill
             }
             # module first question source_order ordered by question.source_order; source order is in question model. not in tags model
@@ -301,6 +307,39 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
             #     for category in self.category_map if category.primary_class is None and category.skill is None
             # }
         ))
+
+        counts_marked_for_review = (
+            UserQuestionStatus.objects.filter(
+                user=self.request.user if self.request.user.is_authenticated else None, exam=None,
+                question_id__in=question_set_filtered_queryset.values('id'),
+                is_marked_for_review=True
+            ).aggregate(
+                count=Count('question_id', distinct=True),
+                # # module count
+                # **{
+                #     f'{category.module}': Count('question_id', distinct=True, filter=Q(question__tags__id=tags_map[self.module_tag_map[category.module]].id))
+                #     for category in self.category_map if category.primary_class is None and category.skill is None
+                # },
+
+                # module count
+                **{
+                    f'{category.module}': Count('question_id', distinct=True, filter=Q(question__tags__id=tags_map[self.module_tag_map[category.module]].id))
+                    for category in self.category_map if category.primary_class is None and category.skill is None
+                },
+                # primary class count
+                **{
+                    f'{category.module}_{category.primary_class}': Count('question_id', distinct=True, filter=Q(question__tags__id=tags_map[category.primary_class].id))
+                    for category in self.category_map if category.primary_class and category.skill is None
+                },
+                # skill count
+                **{
+                    f'{category.module}_{category.primary_class}_{category.skill}': Count('question_id', distinct=True, filter=Q(question__tags__id=tags_map[category.skill].id))
+                    for category in self.category_map if category.skill
+                }
+            )
+        )
+
+        # print(counts_marked_for_review)
 
         # print(counts)
 
@@ -320,12 +359,15 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
             categories.append({
                 'module': m,
                 'module_count': counts[m],
+                'module_marked_count': counts_marked_for_review[m],
                 'module_args': urlencode({'question_set': self.key} | question_set_filter_wo_modules| {'module': m}),
                 'primary_class': pc,
                 'primary_class_count': counts[m + '_' + pc],
+                'primary_class_marked_count': counts_marked_for_review[m + '_' + pc],
                 'primary_class_args': urlencode({'question_set': self.key} | question_set_filter_wo_modules | {'module': m, 'primary_class': pc}),
                 'skill': s,
                 'skill_count': counts[m + '_' + pc + '_' + s],
+                'skill_marked_count': counts_marked_for_review[m + '_' + pc + '_' + s],
                 'skill_args': urlencode({'question_set': self.key} | question_set_filter_wo_modules| {'module': m, 'primary_class': pc, 'skill': s}),
                 # 'primary_class': [],
             })
@@ -347,6 +389,7 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
         context['question_set_key'] = self.key
         context['terms'] = self.terms
         context['counts'] = counts
+        context['counts_marked_for_review'] = counts_marked_for_review
         context['categories'] = categories
         context['modules'] = ['en', 'math']
         context['modules_args'] = modules_args

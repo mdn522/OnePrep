@@ -6,6 +6,12 @@
 {#        <span class="">{{ category.primary_class_count }}</span>#}
         <span class="badge badge-lg badge-secondary">{{ category.primary_class_count }}</span>
         <span class="">{{ terms|get_item:category.primary_class }}</span>
+        {% if user.is_authenticated and category.primary_class_marked_count > 0 %}
+            <span class="badge badge-lg badge-ghost badge-outline">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="inline-block h-4 w-4 mr-1 text-warning"><path fillRule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clipRule="evenodd" /></svg>
+                {{ category.primary_class_marked_count }}
+            </span>
+        {% endif %}
     </a>
         <ul>
             {% for subcategory in categories  %}
@@ -14,6 +20,12 @@
                         <a class="" style="" {% if subcategory.skill_count > 0 %}href="{% url 'questions:set-first-question' %}?{{ subcategory.skill_args }}"{% endif %}>
                             <span class="badge badge-lg badge-accent">{{ subcategory.skill_count }}</span>
                             <span class="">{{ terms|get_item:subcategory.skill }}</span>
+                            {% if user.is_authenticated and subcategory.skill_marked_count > 0 %}
+                                <span class="badge badge-lg badge-ghost badge-outline">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="inline-block h-4 w-4 mr-1 text-warning"><path fillRule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clipRule="evenodd" /></svg>
+                                    {{ subcategory.skill_marked_count }}
+                                </span>
+                            {% endif %}
                         </a>
                     </li>
                 {% endif %}
