@@ -4,7 +4,7 @@
 {% block title %}Exams - {{ block.super }}{% endblock %}
 
 {% block content %}
-    <div class="overflow-x-auto w-2/3 mx-auto">
+    <div class="overflow-x-auto max-w-screen-xl mx-auto">
         <h1 class="text-3xl font-bold">Exams ({{ exams | length }})</h1>
 
         <div class="alert">
@@ -22,25 +22,42 @@ Remember: Your goal is to be fully prepared for the real exam. By practicing in 
 
         <table class="table table-zebra table-pin-rows">
             <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Questions</th>
-                    <th></th>
-                </tr>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                {% if user.is_authenticated %}
+                    <th>
+                        <span class="flex align-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline text-warning"><path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clip-rule="evenodd" /></svg>
+                            <span>Marked Count</span>
+                        </span>
+                    </th>
+                {% endif %}
+                <th>Questions</th>
+                <th></th>
+            </tr>
             </thead>
             <tbody>
-                {% for exam in exams %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td><span class="text-lg font-semibold">{{ exam.name }}</span></td>
-                        <td>{{ exam.question_count }}</td>
-                        <td>
-                            <a class="btn btn-neutral btn-sm"
-                               href="{% url 'questions:detail' exam.first_question_id %}?question_set=exam&exam_id={{ exam.id }}">View</a>
+            {% for exam in exams %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><span class="text-lg font-semibold">{{ exam.name }}</span></td>
+                    {% if user.is_authenticated %}
+                        <td class="">
+                            {% if exam.marked_for_review_count > 0 %}
+                                <span class="badge badge-warning text-warning-content">
+                                    {{ exam.marked_for_review_count }}
+                                </span>
+                            {% endif %}
                         </td>
-                    </tr>
-                {% endfor %}
+                    {% endif %}
+                    <td class="font-bold">{{ exam.question_count }}</td>
+                    <td>
+                        <a class="btn btn-neutral btn-sm"
+                           href="{% url 'questions:detail' exam.first_question_id %}?question_set=exam&exam_id={{ exam.id }}">View</a>
+                    </td>
+                </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>
