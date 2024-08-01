@@ -5,14 +5,14 @@
 
 {% block head %}
 	{{ block.super }}
-    
+
     {% if is_question_set %}
     	{% if question_set_next_question_id %}
     		<link rel="prefetch" href="{% url "questions:detail" question_set_next_question_id %}?{{ question_set_args }}">
-    	{% endif %} 
+    	{% endif %}
         {% if question_set_previous_question_id %}
         	<link rel="prefetch" href="{% url "questions:detail" question_set_previous_question_id %}?{{ question_set_args }}">
-        {% endif %} 
+        {% endif %}
     {% endif %}
 {% endblock %}
 
@@ -353,7 +353,9 @@
     <div class="fixed bg-base-100 z-50 bottom-0 right-0 left-0 border-t p-2 flex flex-row items-center align-center">
         <div class="grow flex flex-row items-center justify-start">
             {% if question.explanation %}
-                <button class="btn btn-sm btn-secondary" onclick="explanation.showModal()">Explanation</button>
+                <button class="btn btn-sm btn-secondary" onclick="explanation.showModal()">
+                    Explanation
+                </button>
 
                 <dialog id="explanation" class="modal">
                     <div class="modal-box w-10/12 max-w-3xl">
@@ -377,10 +379,23 @@
             {% endif %}
         </div>
         <div class="grow flex flex-row items-center justify-end">
-            {% if is_question_set and question_set_next_question_id %}
-            	<a class="btn btn-sm btn-neutral mx-2"
-                   href="{% url "questions:detail" question_set_next_question_id %}?{{ question_set_args }}">Next</a>
+            {% if is_question_set %}
+                {% if question_set_previous_question_id %}
+                	<a class="btn btn-sm btn-neutral mr-1"
+                       href="{% url "questions:detail" question_set_previous_question_id %}?{{ question_set_args }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
+                        <span class="hidden md:inline-block">Previous</span>
+                    </a>
+                {% endif %}
+            	{% if question_set_next_question_id %}
+                    <a class="btn btn-sm btn-neutral mr-2"
+                       href="{% url "questions:detail" question_set_next_question_id %}?{{ question_set_args }}">
+                        <span class="hidden md:inline-block">Next</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
+                    </a>
+                {% endif %}
             {% endif %}
+
             <button class="btn btn-sm btn-primary px-6 btn-disabled" x-data
                     :class="{'btn-disabled': !$store.data.has_answered,
                      'btn-success': $store.data.has_answered_correct,
