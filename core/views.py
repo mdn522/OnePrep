@@ -36,6 +36,13 @@ def parse_time(time_str):
 def import_question_answer_and_status_view(request):
     logs = ''
 
+    def parse_dts(dts):
+        try:
+            return datetime.fromisoformat(dts)
+        except ValueError:
+            from dateutil import parser
+            return parser.parse(dts)
+
     if request.method == 'POST':
         raw = request.POST.get('data')
         try:
@@ -97,7 +104,7 @@ def import_question_answer_and_status_view(request):
                         defaults = {k: v for k, v in user_question_answer.items() if k not in ['question_id', 'answer_choice_id', 'exam_id']}
                         for k, v in defaults.items():
                             if k.endswith('_at') and v is not None:
-                                defaults[k] = datetime.fromisoformat(v)
+                                defaults[k] = parse_dts(v)
                             if k == 'time_given':
                                 defaults[k] = parse_time(v)
 
@@ -123,7 +130,7 @@ def import_question_answer_and_status_view(request):
                         defaults = {k: v for k, v in user_question_status.items() if k not in ['user_id', 'question_id', 'exam_id']}
                         for k, v in defaults.items():
                             if k.endswith('_at') and v is not None:
-                                defaults[k] = datetime.fromisoformat(v)
+                                defaults[k] = parse_dts(v)
 
                         obj, created = UserQuestionStatus.objects.update_or_create(**vals, defaults=defaults)
                         # logs += f'Question #{user_question_status['question_id']} -> {questions_id_2_id[user_question_status["question_id"]]}: Created: {created}\n'

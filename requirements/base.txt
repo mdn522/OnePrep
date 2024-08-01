@@ -9,6 +9,7 @@ rich
 django-taggit  # https://pypi.org/project/django-taggit/
 pydantic  # https://github.com/pydantic/pydantic
 sortedcontainers  # https://pypi.org/project/sortedcontainers/
+python-dateutil  # https://pypi.org/project/python-dateutil/
 
 # Django
 # ------------------------------------------------------------------------------
