@@ -210,7 +210,7 @@
                     <span class="question-mark-for-review-toggle cursor-pointer select-none" x-text="!$store.data.status.is_marked_for_review ? 'Mark for Review' : 'Marked for Review' ">Mark for Review</span>
                 </span>
                 <span class="grow"></span>
-                <div class="timer font-bold mr-4 underline flex items-center space-x-1" x-data="timer_data(new Date())" x-init="init()" @click="">
+                <div class="timer font-bold mr-4 underline flex items-center space-x-1" x-data="timer_data(new Date())" x-init="init()" @click="" @click.alt="start = new Date(); Alpine.store('data').started_at = start;">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                     <span class="timer-time" x-text="time_s()" x-cloak></span>
                 </div>
@@ -595,7 +595,7 @@
                 this.setCurrent();
                 setInterval(() => {
                     this.setCurrent();
-                }, 1000);
+                }, 100);
             },
             setCurrent() {
                 const diff = new Date().getTime() - this.start;
