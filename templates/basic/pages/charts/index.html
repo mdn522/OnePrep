@@ -6,7 +6,11 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="https://code.highcharts.com/highcharts.js"></script>
+    {% if not IS_BLACKOUT %}
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+    {% else %}
+        <script src="{% static 'cdn/highcharts.11.4.6.min.js' %}"></script>
+    {% endif %}
 
     {{ block.super }}
 {% endblock %}
