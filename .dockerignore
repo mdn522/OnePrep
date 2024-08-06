@@ -1,0 +1,8 @@
+fly.toml
+.git/
+*.sqlite3
+data/
+venv/
+static/cdn/
+.env
+data.*
