@@ -1,9 +1,12 @@
 import json
+import json_stream
 import re
 from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
 from typing import List
+
+from json_stream.base import StreamingJSONList, StreamingJSONObject
 
 from questions.models import Question, AnswerChoice, Answer
 from exams.models import Exam, ExamQuestion
@@ -11,6 +14,15 @@ from ..loaders import Loader
 
 import more_itertools
 from rich import print
+
+
+def unstream(value):
+    if isinstance(value, StreamingJSONList):
+        return [unstream(el) for el in value]
+    elif isinstance(value, StreamingJSONObject):
+        return {k: unstream(v) for (k,v) in value.items()}
+    else:
+        return value
 
 
 class SATMocksLoader(Loader):
@@ -39,14 +51,21 @@ class SATMocksLoader(Loader):
             'math': timedelta(minutes=35),
             'english': timedelta(minutes=32),
         }
+        explanations_cache = {}
 
         # print(files)
         practices_raw_filtered = []
 
-        with practices_file.open(encoding='utf-8') as fp:
-            practices_raw = json.load(fp)
+        # with practices_file.open(encoding='utf-8') as fp:
+        #     practices_raw = json.load(fp)
 
-        for practice_id, practice_root in practices_raw.items():
+        fp = practices_file.open(encoding='utf-8')
+        practices_raw = json_stream.load(fp)
+
+        # for practice_id in practices_raw.items():
+        for practice_id, practice_root in practices_raw._iter_items():
+            practice_root = unstream(practice_root)
+
             practice = practice_root['practice']
             practice_id = practice['id']
             # exam_raw = practice['exam']
@@ -71,7 +90,7 @@ class SATMocksLoader(Loader):
                 re.compile(r'The SAT® Practice Test #\d+ (English|Math) Module \d+ \(Linear\)'),
             ]):
                 practices_raw_filtered.append(practice)
-                print(practice_id, practice['exam']['title'])
+                print(practice_id, practice['exam']['title'], "Public: ", practice['exam'].get('is_public'))
 
         for practice in practices_raw_filtered:
             practice_id = practice['id']
@@ -86,13 +105,13 @@ class SATMocksLoader(Loader):
                 defaults=dict(
                     is_public=True,
                     name=exam_raw['title'],
-                    description=exam_raw['description'] or '',
+                    description=exam_raw.get('description') or '',
                     added_by=None,
                     official=False,
                 )
             )
 
-            exam.tags.add('SAT', 'SAT Mocks', 'Exam', self.module_to_text[module])
+            exam.tags.add('SAT', 'SATMocks', 'Exam', self.module_to_text[module])
 
             print('Exam Created', exam, exam_created)
 
@@ -102,13 +121,19 @@ class SATMocksLoader(Loader):
                 # answer_type = {o: Question.AnswerType.MCQ, 1: Question.AnswerType.SPR}[question_data['sat_options'][0]['title'] is None]
                 answer_type = {1: Question.AnswerType.MCQ, 0: Question.AnswerType.SPR}[any(letter in question_data['sat_answers'][0]['answers'] for letter in ["A", "B", "C", "D"])]
 
+                explanation = question_data['explanation'] or ''
+                if explanation:
+                    explanations_cache[question_data['id']] = explanation
+                elif question_data['id'] in explanations_cache:
+                    explanation = explanations_cache[question_data['id']]
+
                 question, question_created = Question.objects.update_or_create(
                     source=self.source,
                     source_id=question_data['id'],
                     defaults=dict(
                         stem=question_data['content'],
                         stimulus=(question_data['sat_passage'] or {}).get('content', ''),
-                        explanation=question_data['explanation'] or '',
+                        explanation=explanation,
                         answer_type=answer_type,
 
                         module=module,
@@ -120,10 +145,12 @@ class SATMocksLoader(Loader):
                 )
 
                 question.tags.add(
-                    'SATMocks', 'SAT', module.title(),
+                    'SATMocks', 'SAT', self.module_to_text[module],
                 )
 
                 if answer_type == Question.AnswerType.MCQ:
+                    AnswerChoice.objects.filter(question=question).update(is_correct=False)
+
                     for sat_option in question_data['sat_options']:
                         # pop till we get a valid answer
                         while question_data['sat_answers'][0]['answers'][0] not in ['A', 'B', 'C', 'D']:
@@ -145,7 +172,7 @@ class SATMocksLoader(Loader):
                     for i, sat_answer in enumerate(question_data['sat_answers']):
                         answer, answer_created = Answer.objects.update_or_create(
                             question=question,
-                            value=sat_answer['answers'][0].strip('`').strip("'").strip('"'),
+                            value=sat_answer['answers'][0].strip('`').strip("'").strip('"') if isinstance(sat_answer['answers'][0], str) else sat_answer['answers'][0],
 
                             defaults=dict(
                                 order=i,
