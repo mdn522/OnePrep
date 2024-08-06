@@ -1,0 +1,18 @@
+{% extends "basic/base.html" %}
+
+{% block title %}Import Bulk Users - {{ block.super }}{% endblock %}
+
+{% block content %}
+    <h1 class="text-2xl">Import Bulk Users</h1>
+
+    <form method="POST">
+        <textarea name="data" cols="200" rows="15" class="textarea textarea-accent">Name	Username	Email	Password
+</textarea>
+        <br>
+        <input type="submit" class="btn btn-primary">
+    </form>
+
+    <br>
+    <div class="text-xl font-bold">Result:</div>
+    <pre class="text-lg">{{ logs }}</pre>
+{% endblock content %}
