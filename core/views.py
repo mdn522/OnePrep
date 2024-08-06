@@ -1,17 +1,20 @@
 import re
 from functools import reduce
+import json
+from datetime import datetime, timedelta
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
 from django.shortcuts import render
-import json
-from datetime import datetime, timedelta
-
+from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import make_password
 
 from questions.models import Question, AnswerChoice, UserQuestionAnswer, UserQuestionStatus
 from users.models import User
 
+from io import StringIO
+import csv
 
 import sys
 import traceback
@@ -148,6 +151,41 @@ def import_question_answer_and_status_view(request):
                 type_, value_, traceback_ = sys.exc_info()
                 logs += "Error:\n"
                 logs += ''.join(traceback.format_exception(type_, value_, traceback_))
+                # raise
 
         # print('data:', data)
     return render(request, 'basic/pages/tools/import_question_answer_and_status.html', context={'logs': logs})
+
+
+@user_passes_test(lambda u: u.is_superuser)
+@csrf_exempt
+def import_user_csv_view(request):
+    logs = ''
+
+    if request.method == 'POST':
+        users = []
+
+        raw = request.POST.get('data')
+        f = StringIO(raw)
+        reader = csv.DictReader(f, delimiter='\t')
+
+        for row in reader:
+            logs += f"Username: {row['Username']}\n"
+            users.append(User(
+                username=row['Username'],
+                email=row['Email'],
+                password=make_password(row['Password']),
+                name=row['Name'],
+                is_active=True,
+            ))
+
+        usernames = [u.username for u in users]
+
+        existing_users = User.objects.filter(username__in=usernames).only('username')
+        existing_usernames = [u.username for u in existing_users]
+        # remove user from users if username already exists
+        users = [u for u in users if u.username not in existing_usernames]
+
+        User.objects.bulk_create(users)
+
+    return render(request, 'basic/pages/tools/import_bulk_user.html', context={'logs': logs})
