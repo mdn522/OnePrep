@@ -329,3 +329,6 @@ ENVIRONMENT_NAME = env.str("ENVIRONMENT_NAME", default="development")
 ENVIRONMENT_COLOR = env.str("ENVIRONMENT_COLOR", default="black")
 
 IS_BLACKOUT = env.bool('IS_BLACKOUT', default=False)
+
+Q_LOADER_BASE_PATH = env.str('Q_LOADER_BASE_PATH', default=None)
+Q_LOADER_BASE_PATH = Path(Q_LOADER_BASE_PATH) if Q_LOADER_BASE_PATH is not None else Q_LOADER_BASE_PATH
