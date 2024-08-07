@@ -12,6 +12,11 @@
         <script src="{% static 'cdn/highcharts.11.4.6.min.js' %}"></script>
     {% endif %}
 
+    <!-- https://evanhahn.github.io/HumanizeDuration.js/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/humanize-duration/3.32.1/humanize-duration.min.js"
+            integrity="sha512-IuW3C7hqTl2pnZ+OX+lHFEc8QOYJCVyNSKmRTAmJJ9J0xwru4wYTar2MM80MSbhOiZKmGc+uypnPZKrCVga2xg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     {{ block.super }}
 {% endblock %}
 
@@ -29,6 +34,16 @@
         <div id="math-answers-chart-container"></div>
     </div>
 
+    <div class="border-2 bg-base-200 rounded p-3 mb-4">
+        <h2 class="text-2xl text-center mb-3 font-semibold">
+            Time Spent
+        </h2>
+
+        <div id="all-time-spent-chart-container"></div>
+        <div id="en-time-spent-chart-container"></div>
+        <div id="math-time-spent-chart-container"></div>
+    </div>
+
     <div id="container"></div>
 {% endblock content %}
 
@@ -36,37 +51,43 @@
     {{ block.super }}
 
     <script>
+        let base_chart_data = {
+            tooltip: {
+                shared: true,
+                split: false,
+                enabled: true
+            },
+        }
+
+        let module_titles = {
+            'all': 'All',
+            'en': 'English',
+            'math': 'Math'
+        }
+
         function answer_chart(answer_data, mark_data) {
-            let titles = {
-                'en': 'English',
-                'math': 'Math'
-            }
             for (let module of ['en', 'math']) {
                 let id = module + '-answers-chart-container';
                 let chart_data = {
-                    title: {
-                        text: titles[module],
-                        align: 'left'
-                    },
-                    yAxis: {
-                        title: {
-                            text: "Count",
-                        }
-                    },
-                    xAxis: {
-                        categories: answer_data.x_axis,
-                    },
-                    tooltip: {
-                        shared: true,
-                        split: false,
-                        enabled: true
-                    },
+                    ...base_chart_data,
                     plotOptions: {
                         line: {
                             dataLabels: {
                                 enabled: true
                             },
                             enableMouseTracking: true
+                        }
+                    },
+                    title: {
+                        text: module_titles[module],
+                        align: 'left'
+                    },
+                    xAxis: {
+                        categories: answer_data.x_axis,
+                    },
+                    yAxis: {
+                        title: {
+                            text: "Count",
                         }
                     },
                     series: [
@@ -92,11 +113,61 @@
                         },
                     ],
                 }
-                console.log(chart_data)
+                {#console.log(chart_data)#}
+                Highcharts.chart(id, chart_data);
+            }
+        }
+
+        function time_spent_chart(time_spent_data) {
+            for (let module of ['all', 'en', 'math']) {
+                let id = module + '-time-spent-chart-container';
+                let chart_data = {
+                    ...base_chart_data,
+                    title: {
+                        text: module_titles[module],
+                        align: 'left'
+                    },
+                    xAxis: {
+                        categories: time_spent_data.x_axis,
+                    },
+                    yAxis: {
+                        title: {
+                            text: "Time Spent",
+                        },
+                        labels: {
+                            enabled: false,
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    series: [
+                        {
+                            name: 'Time Spent',
+                            color: '#27ae60',
+                            data: time_spent_data[module],
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    let s = humanizeDuration(this.y * 1000);
+                                    s = s.replace(' days', 'd ').replace(' hours', 'h ').replace(' minutes', 'm ').replace(' seconds', 's ');
+                                    s = s.replace(' day', 'd ').replace(' hour', 'h ').replace(' minute', 'm ').replace(' second', 's ');
+                                    s = s.replaceAll(', ', '');
+                                    return s.trimEnd();
+                                }
+                            }
+                        },
+                    ],
+                }
+                // humanizeDuration
+                chart_data.tooltip.formatter = function () {
+                    return '<b>' + this.x + '</b><br/>' + humanizeDuration(this.y * 1000);
+                }
                 Highcharts.chart(id, chart_data);
             }
         }
 
         answer_chart({{ answer_data | jsonify }}, {{ mark_data | jsonify}})
+        time_spent_chart({{ time_given_data | jsonify }})
     </script>
 {% endblock %}
