@@ -161,13 +161,16 @@
                 }
                 // humanizeDuration
                 chart_data.tooltip.formatter = function () {
-                    return '<b>' + this.x + '</b><br/>' + humanizeDuration(this.y * 1000);
+                    return `<b>${this.x}</b><br/>Time: ${humanizeDuration(this.y * 1000)}<br/>Correct: <span style="color: green">${answer_data[module][1][this.point.index]}</span><br/>Incorrect: <span style="color: red;">${answer_data[module][0][this.point.index]}</span>`;
                 }
                 Highcharts.chart(id, chart_data);
             }
         }
 
-        answer_chart({{ answer_data | jsonify }}, {{ mark_data | jsonify}})
-        time_spent_chart({{ time_given_data | jsonify }})
+        let answer_data = {{ answer_data | jsonify }};
+        let mark_data = {{ mark_data | jsonify }};
+        let time_given_data = {{ time_given_data | jsonify }};
+        answer_chart(answer_data, mark_data)
+        time_spent_chart(time_given_data)
     </script>
 {% endblock %}
