@@ -33,11 +33,17 @@ class ExamListView(ListView):
                 .values('count')
         )
 
+        question_answer = (
+            UserQuestionAnswer.objects
+                .filter(question__exam_question_set__exam=OuterRef('pk'), user=self.request.user if self.request.user.is_authenticated else None, exam=None, is_correct=True).distinct('question')
+        )
+
         qs = (
             Exam.objects
                 .filter(is_active=True)  # is_public=True
                 .annotate(question_count=Count("exam_question_set"))
                 .annotate(marked_for_review_count=SubqueryCount(question_status))
+                .annotate(correct_count=SubqueryCount(question_answer))
                 .annotate(first_question_id=Subquery(questions[:1]))
                 .order_by('source', 'source_order', 'name')
         )
