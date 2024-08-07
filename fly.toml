@@ -7,7 +7,7 @@ app = 'oneprep'
 primary_region = 'iad'
 console_command = '/code/manage.py shell_plus'
 
-swap_size_mb = 512
+swap_size_mb = 768
 
 [build]
 
@@ -23,6 +23,7 @@ swap_size_mb = 512
 
   DJANGO_DEBUG = false
   DJANGO_ALLOWED_HOSTS = 'oneprep.fly.dev'
+  DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE = 33554432
 
   ENVIRONMENT_NAME = 'production'
   ENVIRONMENT_COLOR = 'orange'
@@ -30,6 +31,8 @@ swap_size_mb = 512
   SENTRY_TRACES_SAMPLE_RATE = 1.0
 
   Q_LOADER_BASE_PATH = '/data/data/sat'
+
+  GOOGLE_ANALYTICS_ID = 'G-9XC7HL2GZF'
 
 [mounts]
   source = "oneprep_data"

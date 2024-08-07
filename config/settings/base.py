@@ -220,6 +220,7 @@ TEMPLATES = [
                 "users.context_processors.allauth_settings",
                 "django_admin_env_notice.context_processors.from_settings",
 
+                "utils.context_processors.google_analytics_context",
                 "utils.context_processors.internet_blackout_context",
             ],
         },
@@ -230,6 +231,7 @@ TEMPLATES = [
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+DATA_UPLOAD_MAX_MEMORY_SIZE = env.int("DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE", default=1024 * 1024 * 10)
 
 # http://django-crispy-forms.readthedocs.io/en/latest/install.html#template-packs
 # CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -333,3 +335,6 @@ IS_BLACKOUT = env.bool('IS_BLACKOUT', default=False)
 
 Q_LOADER_BASE_PATH = env.str('Q_LOADER_BASE_PATH', default=None)
 Q_LOADER_BASE_PATH = Path(Q_LOADER_BASE_PATH) if Q_LOADER_BASE_PATH is not None else Q_LOADER_BASE_PATH
+
+
+GOOGLE_ANALYTICS_ID = env.str('GOOGLE_ANALYTICS_ID', default='')

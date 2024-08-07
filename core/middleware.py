@@ -13,7 +13,7 @@ class PA2FlyRedirectMiddleware:
 
         host = request.get_host().partition(":")[0]
         if host in [
-            "127.0.0.1",
+            # "127.0.0.1",
             "oneprep.pythonanywhere.com",
         ]:
             return HttpResponsePermanentRedirect("https://oneprep.fly.dev" + request.get_full_path())
