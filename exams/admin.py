@@ -12,11 +12,15 @@ class ExamAdmin(DjangoQLSearchMixin, DjangoObjectActions, admin.ModelAdmin):
         'name',
         'description',
         'time',
+        'source',
+        'source_id',
         'official',
+        'is_public',
+        'is_active',
         'question_count',
         'added_by'
     ]
-    list_filter = ['official', 'time']
+    list_filter = ['official', 'is_public', 'is_active', 'source', 'time']
     search_fields = [
         'name',
         'description',
@@ -44,7 +48,7 @@ class ExamAdmin(DjangoQLSearchMixin, DjangoObjectActions, admin.ModelAdmin):
 @admin.register(ExamQuestion)
 class ExamQuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ['exam', 'question', 'order']
-    list_filter = ['exam']
+    list_filter = []
     search_fields = ['exam__name', 'question__stem']
     raw_id_field = ['exam', 'question']
 
