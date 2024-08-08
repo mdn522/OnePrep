@@ -23,7 +23,6 @@ class User(AbstractUser):
     last_name = None  # type: ignore[assignment]
     email = EmailField(_("email address"), unique=True)
 
-    # TODO enable username back
     # username = None  # type: ignore[assignment]
 
     # TODO Organization system. multiple users

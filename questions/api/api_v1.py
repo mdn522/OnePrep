@@ -32,7 +32,6 @@ class SubmitAnswer(Schema):
     time_given: Optional[int] = None
 
 
-# TODO auth
 @router.post('/mark-for-review', auth=django_auth)
 def question_mark_for_review(request, data: MarkForReview):
     user = request.user

@@ -14,8 +14,6 @@ class CollegeBoardBlueBookLoader(Loader):
     program = 'sat'
     source = 'collegeboard_bluebook'
 
-    # TODO AI answer choice explanation from big explanation
-
     def load(self):
         program = self.get_program()
         files = self.get_file_list('collegeboard', 'bluebook*.json')

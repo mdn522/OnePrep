@@ -19,7 +19,6 @@ class PrincetonReviewLoader(Loader):
 
     def load(self):
         program = self.get_program()
-        # TODO path
         exams_file = self.get_file('princeton_review', 'exams.json')  # base_path=Path(r'D:\Workspace\Python\Notebooks\SAT-Lab')
 
         durations = {
@@ -76,7 +75,7 @@ class PrincetonReviewLoader(Loader):
                             program=program,
 
                             source_order=question_i + 1,
-                            source_raw_data=None,  # TODO strip keys
+                            source_raw_data=None,
                         )
                     )
 

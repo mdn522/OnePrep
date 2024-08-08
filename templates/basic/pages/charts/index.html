@@ -161,7 +161,8 @@
                 }
                 // humanizeDuration
                 chart_data.tooltip.formatter = function () {
-                    return `<b>${this.x}</b><br/>Time: ${humanizeDuration(this.y * 1000)}<br/>Correct: <span style="color: green">${answer_data[module][1][this.point.index]}</span><br/>Incorrect: <span style="color: red;">${answer_data[module][0][this.point.index]}</span>`;
+                    // console.log(this.points);
+                    return `<b>${this.x}</b><br/>Time: ${humanizeDuration(this.y * 1000)}<br/>Correct: <span style="color: green">${answer_data[module][1][this.point.index]}</span><br/>Incorrect Attempts: <span style="color: red;">${answer_data[module][0][this.point.index]}</span>`;
                 }
                 Highcharts.chart(id, chart_data);
             }

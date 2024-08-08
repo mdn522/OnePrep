@@ -561,7 +561,6 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # TODO only
         question = Question.objects.prefetch_related("tags").only(*[
             'module', 'program', 'difficulty',
             'stimulus', 'stem', 'answer_type', 'explanation',
@@ -588,6 +587,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
         context['user_answers_groups']: List = [f()]
         for user_answer in context['user_answers']:
             if context['user_answers_groups'][-1]['corrected']:
+                # context['user_answers_groups'][-1]['items'].reverse()
                 context['user_answers_groups'].append(f())
 
             if user_answer['is_correct']:
@@ -598,6 +598,8 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
                 context['user_answers_groups'][-1]['attempts'] += 1
 
         context['user_answers_groups'].reverse()
+
+        # print('user_answers_groups', context['user_answers_groups'])
 
         # print('user_answers', context['user_answers'])
         # print('user_answers_groups', context['user_answers_groups'])

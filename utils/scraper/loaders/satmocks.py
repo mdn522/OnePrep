@@ -140,7 +140,7 @@ class SATMocksLoader(Loader):
                         program=program,
 
                         source_order=int(exam_question_data['order']),
-                        # source_raw_data=question_data,  # TODO strip keys
+                        # source_raw_data=question_data,
                     )
                 )
 

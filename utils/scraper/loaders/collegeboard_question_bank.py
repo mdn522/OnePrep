@@ -36,7 +36,6 @@ class CollegeBoardQuestionBankLoader(Loader):
         'spr': Question.AnswerType.SPR,
     }
 
-    # TODO AI answer choice explanation from big explanation
     # TODO Exam Based on Question Types, Difficulty, and Skills
     def load(self):
         program = self.get_program()
