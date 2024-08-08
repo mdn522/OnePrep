@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Prefetch
@@ -89,9 +89,42 @@ def chart_view(request, user_id=None, username=None):
         answer_data['all'][answer.is_correct][index] += 1
         answer_data[answer.question.module][answer.is_correct][index] += 1
 
-        if answer.time_given:
-            time_given_data['all'][index] += min(answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
-            time_given_data[answer.question.module][index] += min(answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
+        # if answer.time_given:
+        #     time_given_data['all'][index] += min(answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
+        #     time_given_data[answer.question.module][index] += min(answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
+
+    # ----------------------------------------------------------------
+
+    f = lambda: {'items': [], 'corrected': False, 'attempts': 0}
+    answers_groups: List = [f()]
+    for answer in answer_set:
+        if answers_groups[-1]['corrected']:
+            answers_groups.append(f())
+
+        if answer.is_correct:
+            answers_groups[-1]['items'].append(answer)
+            answers_groups[-1]['corrected'] = True
+        else:
+            answers_groups[-1]['items'].append(answer)
+            answers_groups[-1]['attempts'] += 1
+
+    answers_groups.reverse()
+
+    # print('answers_groups', answers_groups)
+    for group in answers_groups:
+        if not group['items']:
+            continue
+        group['items'].reverse()
+        first_answer = group['items'][0]
+        index = x_axis.index(first_answer.answered_at.strftime('%Y-%m-%d'))
+        if group['corrected']:
+            time_given_data['all'][index] += min(first_answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
+            time_given_data[first_answer.question.module][index] += min(first_answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
+        else:
+            time_given_data['all'][index] += min(first_answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
+            time_given_data[first_answer.question.module][index] += min(first_answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
+
+    # ----------------------------------------------------------------
 
     status_set = user \
         .question_status_set \
