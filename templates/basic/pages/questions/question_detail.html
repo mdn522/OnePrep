@@ -295,7 +295,18 @@
                 {% for user_answers_group in user_answers_groups %}
                 	{% if user_answers_group.corrected %}
                 		<span class="flex items-center underline">
-                            <span title="{{ user_answers_group.items.0.answered_at.isoformat }}">
+                            {% with user_answers_group.items|last as item %}
+                            	<span title="{{ item.answered_at.isoformat }}">
+                                    <span class="text-success">
+                                        Solved <span x-data="{ date: new Date('{{ item.answered_at.isoformat }}') }" x-timeago.seconds="date"></span>
+                                        in {{ item.time_given | duration }}
+                                    </span>
+                                    {% if user_answers_group.attempts > 0 %}
+                                        &nbsp;(<span class="text-error">{{ user_answers_group.attempts }} {{ user_answers_group.attempts|pluralize:"Attempt,Attempts" }}</span>)
+                                    {% endif %}
+                                </span>
+                            {% endwith %}
+                            <!--<span title="{{ user_answers_group.items.0.answered_at.isoformat }}">
                                 <span class="text-success">
                                     Solved <span x-data="{ date: new Date('{{ user_answers_group.items.0.answered_at.isoformat }}') }" x-timeago.seconds="date"></span>
                                     in {{ user_answers_group.items.0.time_given | duration }}
@@ -303,7 +314,7 @@
                                 {% if user_answers_group.attempts > 0 %}
                                     &nbsp;(<span class="text-error">{{ user_answers_group.attempts }} {{ user_answers_group.attempts|pluralize:"Attempt,Attempts" }}</span>)
                                 {% endif %}
-                            </span>
+                            </span>-->
                         </span>
                     {% else %}
                         <span class="flex items-center underline">
@@ -505,7 +516,6 @@
                 };
                 if (this.is_mcq()) {
                     {#let selected_answer_choice = ;#}
-                    // TODO null check
                     let answer_choice = this.answer_choices.filter(answer_choice => answer_choice.letter === this.selected_answer_choice_letter)[0];
                     if (answer_choice.is_correct) {
                         this.has_answered_wrong = false;
@@ -548,7 +558,6 @@
             },
 
             mark_for_review() {
-                // TODO Mark for review
                 this.status.is_marked_for_review = !this.status.is_marked_for_review;
                 let API_URL = "{% url 'api_v1:question_mark_for_review' %}";
                 let data = {
