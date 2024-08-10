@@ -185,16 +185,18 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 px-2 gap-4 md:gap-16 question" id="question" x-data>
-        <div>
-            {% if question.module == Question.Module.ENGLISH %}
-            	<div style="font-family: Roboto, sans-serif" id="question-stimulus">
+    <div class="grid px-2 gap-4 md:gap-16 question {% if question.module == Question.Module.ENGLISH %}grid-cols-1 md:grid-cols-2{% endif %}{% if question.module == Question.Module.MATH %}grid-cols-1{% endif %}" id="question" x-data>
+        {% if question.module == Question.Module.ENGLISH %}
+            <div>
+{#                {% if question.module == Question.Module.ENGLISH %}#}
+                <div style="font-family: Roboto, sans-serif" id="question-stimulus">
                     <div class="">{{ question.stimulus | safe }}</div>
                 </div>
-            {% endif %}
-        </div>
+{#                {% endif %}#}
+            </div>
+        {% endif %}
 
-        <div>
+        <div class="{% if question.module == Question.Module.MATH %}max-w-3xl px-5 justify-self-center{% endif %}">
             <div class="flex bg-base-300 py-1 px-1 items-center">
                 <span class="flex items-center question-mark-for-review"
                       x-data :class="{'question-marked': $store.data.status.is_marked_for_review}"
