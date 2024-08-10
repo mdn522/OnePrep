@@ -38,7 +38,6 @@ class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'module',
         'difficulty',
         'answer_type',
-        'added_by',
     ]
     search_fields = [
         'source',
@@ -48,7 +47,7 @@ class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'stimulus',
         'stem',
         'explanation',
-        # 'added_by__username',
+        'added_by__username',
         'added_by__email',
     ]
 

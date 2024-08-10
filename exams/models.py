@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.db import models
+from django.db.models import Q
 from model_utils.models import TimeStampedModel
 from taggit.managers import TaggableManager
 
@@ -31,8 +32,8 @@ class Exam(TimeStampedModel, models.Model):
 
     added_by = models.ForeignKey('users.User', on_delete=models.CASCADE, null=True, blank=True)
 
-    source = models.CharField(max_length=128, null=True, blank=True)
-    source_id = models.CharField(max_length=255, null=True)
+    source = models.CharField(max_length=128, null=True, blank=True, default='')
+    source_id = models.CharField(max_length=255, null=True, blank=True, default='')
     source_order = models.PositiveIntegerField(null=True)  # TODO UniqueConstraint
 
     prevent_copy = models.BooleanField(default=False)
@@ -50,7 +51,11 @@ class Exam(TimeStampedModel, models.Model):
         # verbose_name = 'Exam'
         constraints = [
             # unique source id if not null
-            models.UniqueConstraint(fields=['source', 'source_id'], name='unique_exam_source_id', condition=models.Q(source__isnull=False) & models.Q(source_id__isnull=False)),
+            models.UniqueConstraint(
+                fields=['source', 'source_id'],
+                name='unique_exam_source_id',
+                condition=(Q(source__isnull=False) | ~Q(source='')) & (Q(source_id__isnull=False) | ~Q(source_id=''))
+            ),
         ]
 
     def __str__(self):

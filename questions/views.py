@@ -652,6 +652,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
             # print('question_set_questions', context['question_set_questions'])
 
             QuestionSetView.question_number(context, question)
+
             # print('question_set_filtered_queryset', question_set_filtered_queryset.__dict__)
             # print('count', question_set_filtered_queryset.count())
             # print('question_set_filter', question_set_filter)
