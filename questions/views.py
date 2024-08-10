@@ -570,6 +570,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
         context['question'] = question
         context['Question'] = Question
         context['questions_tags'] = [tag.name for tag in question.tags.all()]
+        context['mathjax_inline_ds'] = not any([tag in ['College Board', 'The Princeton Review'] for tag in context['questions_tags']])
         context['answer_choices'] = list(question.answer_choice_set.only(*['id', 'text', 'letter', 'order', 'correct', 'explanation']).order_by('order').values())
         context['answers'] = list(question.answer_set.only(*['id', 'value', 'order', 'explanation']).order_by('order').values())
 

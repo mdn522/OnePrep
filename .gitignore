@@ -333,3 +333,4 @@ dsat/media/
 .envs/*
 !.envs/.local/
 static/cdn/
+data/sat/

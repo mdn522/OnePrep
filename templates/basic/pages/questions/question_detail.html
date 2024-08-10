@@ -698,7 +698,7 @@
         jax: ["input/TeX", "output/HTML-CSS"],
         tex2jax: {
             inlineMath: [
-                {% if ('College Board' not in questions_tags) and ('The Princeton Review' not in questions_tags) %}
+                {% if mathjax_inline_ds %}
                     ["$", "$"],
                 {% endif %}
 
