@@ -9,5 +9,9 @@
 
     gtag('js', new Date());
 
-    gtag('config', '{{ GOOGLE_ANALYTICS_ID }}'); // 'G-M9V1LX18J9'
+    gtag('config', '{{ GOOGLE_ANALYTICS_ID }}', {
+        {% if request.user.is_authenticated %}
+            'user_id': '{{ request.user.id }}',
+        {% endif %}
+    }); // 'G-M9V1LX18J9'
 </script>
