@@ -7,6 +7,10 @@ from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView, RedirectView
 
+admin.site.site_header = "OnePrep Admin"
+admin.site.site_title = "OnePrep Admin Portal"
+admin.site.index_title = "Welcome to OnePrep Admin Portal"
+
 urlpatterns = [
     # path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
 
