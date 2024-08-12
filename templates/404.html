@@ -1,13 +1,13 @@
-{% extends "base.html" %}
+{% extends "basic/base.html" %}
 
 {% block title %}Page not found{% endblock title %}
 {% block content %}
-  <h1>Page not found</h1>
-  <p>
-    {% if exception %}
-      {{ exception }}
-    {% else %}
-      This is not the page you were looking for.
-    {% endif %}
-  </p>
+    <h1 class="text-4xl font-bold font-sans mb-3">Page not found</h1>
+    <p>
+        {% if exception %}
+            {{ exception }}
+        {% else %}
+            This is not the page you were looking for.
+        {% endif %}
+    </p>
 {% endblock content %}
