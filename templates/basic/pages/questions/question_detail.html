@@ -196,7 +196,7 @@
             </div>
         {% endif %}
 
-        <div class="{% if question.module == Question.Module.MATH %}max-w-3xl px-0 md:px-5 justify-self-center{% endif %}">
+        <div class="{% if question.module == Question.Module.MATH %}w-full max-w-3xl px-0 md:px-5 justify-self-center{% endif %}">
             <div class="flex bg-base-300 py-1 px-1 items-center">
                 <span class="flex items-center question-mark-for-review"
                       x-data :class="{'question-marked': $store.data.status.is_marked_for_review}"
