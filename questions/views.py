@@ -340,7 +340,6 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
         )
 
         # print(counts_marked_for_review)
-
         # print(counts)
 
         categories = []
@@ -484,9 +483,7 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
 
         context['stats'] += question_stats
 
-
         # print('question_set_questions', context['question_set_questions'])
-
         # print('question_stats', question_stats)
 
     def get_filter_from_args(self, request, question_set_filter, question_set_filter_text, question_set_filtered_queryset=None):

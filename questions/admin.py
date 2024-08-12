@@ -9,8 +9,20 @@ from .models import UserQuestionAnswer
 from .models import UserQuestionStatus, UserQuestionAnswerStatus
 
 
+class AnswerChoiceInline(admin.TabularInline):
+    model = AnswerChoice
+    extra = False
+
+
+class AnswerInline(admin.TabularInline):
+    model = Answer
+    extra = False
+
+
 @admin.register(Question)
 class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    inlines = [AnswerChoiceInline, AnswerInline]
+
     list_select_related = ['program']
     list_display = [
         'id',
