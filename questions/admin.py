@@ -62,9 +62,8 @@ class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'added_by__username',
         'added_by__email',
     ]
-
-    raw_id_field = ['added_by']
-    # date_hierarchy = 'created_at'
+    readonly_fields = ['source', 'source_id', 'source_id_2', 'source_id_3']
+    raw_id_fields = ['added_by']
 
 
 @admin.register(AnswerChoice)
@@ -101,7 +100,7 @@ class AnswerChoiceAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'explanation',
     ]
 
-    raw_id_field = ['question']
+    raw_id_fields = ['question']
 
     question_fk = easy.ForeignKeyAdminField('question')
 
@@ -169,6 +168,8 @@ class UserQuestionAnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'answer',
     ]
     raw_id_fields = ['user', 'question', 'exam', 'answer_choice']
+    readonly_fields = ['user']
+    date_hierarchy = 'answered_at'
 
     user_fk = easy.ForeignKeyAdminField('user')
     question_fk = easy.ForeignKeyAdminField('question')
@@ -215,6 +216,7 @@ class UserQuestionStatusAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'question__difficulty',
     ]
     raw_id_fields = ['user', 'exam', 'question']
+    date_hierarchy = 'marked_for_review_at'
 
     user_fk = easy.ForeignKeyAdminField('user')
     question_fk = easy.ForeignKeyAdminField('question')

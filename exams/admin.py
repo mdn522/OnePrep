@@ -1,3 +1,4 @@
+import easy
 from django.contrib import admin
 from django.db.models import Count
 from django_object_actions import DjangoObjectActions
@@ -28,7 +29,7 @@ class ExamAdmin(DjangoQLSearchMixin, DjangoObjectActions, admin.ModelAdmin):
         'added_by__email'
     ]
     readonly_fields = ['source', 'source_id']
-    raw_id_field = ['added_by']
+    raw_id_fields = ['added_by']
 
     @staticmethod
     def question_count(obj):
@@ -47,9 +48,18 @@ class ExamAdmin(DjangoQLSearchMixin, DjangoObjectActions, admin.ModelAdmin):
 
 @admin.register(ExamQuestion)
 class ExamQuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
-    list_display = ['exam', 'question', 'order']
+    list_display = [
+        'id',
+        'exam_fk',
+        'question_fk',
+        'order'
+    ]
     list_filter = []
     search_fields = ['exam__name', 'question__stem']
-    raw_id_field = ['exam', 'question']
+    raw_id_fields = ['exam', 'question']
+    list_select_related = ['exam', 'question']
+
+    question_fk = easy.ForeignKeyAdminField('question')
+    exam_fk = easy.ForeignKeyAdminField('exam')
 
     # TODO Question Details
