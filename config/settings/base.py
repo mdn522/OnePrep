@@ -74,6 +74,9 @@ DJANGO_APPS = [
     "django.contrib.admin",
     "django.forms",
 ]
+
+# TODO https://github.com/trangpham/django-admin-confirm/
+
 THIRD_PARTY_APPS = [
     "django_extensions",
 
@@ -82,6 +85,7 @@ THIRD_PARTY_APPS = [
     # "crispy_tailwind",
 
     "django_filters",
+    "mathfilters",
 
     "allauth_ui",
 

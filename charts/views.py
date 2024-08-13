@@ -1,3 +1,4 @@
+from collections import defaultdict, OrderedDict
 from typing import Optional, List
 
 from django.contrib.auth.decorators import login_required
@@ -6,7 +7,8 @@ from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
-from questions.models import Question
+from exams.models import Exam, ExamQuestion
+from questions.models import Question, UserQuestionAnswer, UserQuestionStatus
 from users.models import User
 
 
@@ -33,7 +35,6 @@ def chart_view(request, user_id=None, username=None):
             user = get_object_or_404(User, username=username)
 
     if not user:
-        # raise 404
         raise Http404
 
     # dynamic past 30 days
@@ -173,3 +174,100 @@ def chart_view(request, user_id=None, username=None):
         'mark_data': mark_data,
         'time_given_data': time_given_data,
     })
+
+
+@login_required
+def basic_exam_time_view(request, exam_id, user_id=None, username=None):
+    exam = get_object_or_404(
+        Exam.objects.prefetch_related(
+            Prefetch('exam_question_set', queryset=ExamQuestion.objects.order_by('order')),
+            Prefetch('exam_question_set__question', queryset=Question.objects.only(*['module']))),
+        id=exam_id
+    )
+
+    user: Optional[User] = None
+    if not user_id and not username:
+        user = request.user
+    else:
+        if user_id:
+            user = get_object_or_404(User, id=user_id)
+        elif username:
+            user = get_object_or_404(User, username=username)
+
+    if not user:
+        raise Http404
+
+    ctx = {}
+
+    exam_questions_answers = UserQuestionAnswer.objects \
+        .filter(user_id=user.id, question_id__in=exam.exam_question_set.values_list('question_id', flat=True)) \
+        .only(*['time_given', 'is_correct', 'started_at', 'answered_at', 'question_id', 'user_id']).order_by('answered_at')
+
+    exam_questions_status = UserQuestionStatus.objects \
+        .filter(user_id=user.id, question_id__in=exam.exam_question_set.values_list('question_id', flat=True)) \
+        .only(*['is_marked_for_review', 'marked_for_review_at', 'unmarked_for_review_at', 'question_id', 'user_id'])
+
+    exam_questions_set = exam.exam_question_set.all()
+
+    questions_order_to_id = {question.order: question.question_id for question in exam_questions_set}
+    questions_data = defaultdict(lambda: {
+        'correct_count': 0, 'correct_times': [], 'correct_time_avg': 0,
+        'incorrect_count': 0, 'incorrect_times': [], 'incorrect_time_avg': 0,
+        'attempted_count': 0, 'attempted_times': [], 'attempted_time_avg': 0,
+        'time': 0, 'answers': OrderedDict(), 'status': None
+    })
+
+    for question_answer in exam_questions_answers:
+        questions_data[question_answer.question_id]['answers'][question_answer.id] = question_answer
+
+        for k in (['correct'] if question_answer.is_correct else ['incorrect']) + ['attempted']:
+            questions_data[question_answer.question_id][f'{k}_times'].append(question_answer.time_given.total_seconds())
+            questions_data[question_answer.question_id][f'{k}_count'] += 1
+
+    for question_status in exam_questions_status:
+        questions_data[question_status.question_id]['status'] = question_status
+
+    for q_id in questions_data.keys():
+        question_data = questions_data[q_id]
+        question_data['correct_time_avg'] = sum(question_data['correct_times']) / question_data['correct_count'] if question_data['correct_count'] else 0
+        question_data['incorrect_time_avg'] = sum(question_data['incorrect_times']) / question_data['incorrect_count'] if question_data['incorrect_count'] else 0
+        question_data['attempted_time_avg'] = sum(question_data['attempted_times']) / question_data['attempted_count'] if question_data['attempted_count'] else 0
+
+    ctx['exam'] = exam
+    ctx['questions_data'] = questions_data
+    ctx['exam_questions_set'] = exam_questions_set
+    correct_times = [v['correct_times'] for v in questions_data.values()]
+    ctx['correct_count'] = sum([bool(v['correct_count']) for v in questions_data.values()])
+    ctx['incorrect_count'] = sum([bool(v['incorrect_count']) for v in questions_data.values()])
+    ctx['attempted_count'] = sum([bool(v['attempted_count']) for v in questions_data.values()])
+
+    ctx['total_correct_time_max'] = sum([max(v, default=0) for v in correct_times])
+    ctx['total_correct_time_min'] = sum([min(v, default=0) for v in correct_times])
+    ctx['total_correct_time_max_avg'] = (ctx['total_correct_time_max'] / ctx['correct_count']) if ctx['correct_count'] else 0
+    ctx['total_correct_time_min_avg'] = (ctx['total_correct_time_min'] / ctx['correct_count']) if ctx['correct_count'] else 0
+
+    # Chart
+    x_axis = [f'Q{order}' for order in questions_order_to_id.keys()]
+    correct_times_data = {
+        'x_axis': x_axis,
+        # TODO Annotate Mark for review
+        'correct_times_avg': [0] * len(x_axis),
+        'correct_times_min': [0] * len(x_axis),
+        'correct_times_max': [0] * len(x_axis),
+    }
+    for order, question_id in questions_order_to_id.items():
+        correct_times_data['correct_times_avg'][order - 1] = questions_data[question_id]['correct_time_avg']
+        correct_times_data['correct_times_min'][order - 1] = min(questions_data[question_id]['correct_times'], default=0)
+        correct_times_data['correct_times_max'][order - 1] = max(questions_data[question_id]['correct_times'], default=0)
+
+    ctx['correct_times_data'] = correct_times_data
+
+    # print('exam_questions_answers', exam_questions_answers)
+    # print('exam_questions_status', exam_questions_status)
+    # print('exam_questions_set', exam_questions_set)
+    # print('questions_data', questions_data)
+    # print(ctx)
+
+    ctx['current_user'] = user
+
+    return render(request, 'basic/pages/charts/exam_chart.html', context=ctx)

@@ -7,7 +7,7 @@
     <div class="overflow-x-auto max-w-screen-xl mx-auto">
         <h1 class="text-3xl font-bold">Practice Tests ({{ exams | length }})</h1>
 
-        <div class="alert">
+        <div class="alert mx-2 md:mx-0">
             <span>
                 Practice Environment Matters! <br>
 This website includes practice tests from the official Bluebook exam. However, it's important to understand that the actual exam experience might differ slightly. <br>
@@ -66,8 +66,14 @@ Remember: Your goal is to be fully prepared for the real exam. By practicing in 
                     {% endif %}
                     <td class="font-bold">{{ exam.question_count }}</td>
                     <td>
+                        <a class="btn btn-secondary btn-sm mr-1"
+                           href="{% url 'charts:basic_exam_time' exam_id=exam.id %}">
+                            Stats
+                        </a>
                         <a class="btn btn-neutral btn-sm"
-                           href="{% url 'questions:detail' exam.first_question_id %}?question_set=exam&exam_id={{ exam.id }}">View</a>
+                           href="{% url 'questions:detail' exam.first_question_id %}?question_set=exam&exam_id={{ exam.id }}">
+                            View
+                        </a>
                     </td>
                 </tr>
             {% endfor %}

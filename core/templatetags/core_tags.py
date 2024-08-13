@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django import template
 from django.utils.http import urlencode
 
@@ -55,6 +57,10 @@ def get_dict_from_kv(k, v):
 
 @register.filter
 def duration(td):
+    g_num = lambda s, n: s + 's' if n > 1 else s
+
+    if isinstance(td, int) or isinstance(td, float):
+        td = timedelta(seconds=td)
 
     total_seconds = int(td.total_seconds())
 
@@ -65,10 +71,34 @@ def duration(td):
     minutes = remaining_minutes // 60
     seconds = remaining_minutes % 60
 
-    days_str = f'{days} days ' if days else ''
-    hours_str = f'{hours} hours ' if hours else ''
-    minutes_str = f'{minutes} minutes ' if minutes else ''
-    seconds_str = f'{seconds} seconds' if seconds and not hours_str else ''
+    days_str = f'{days} {g_num("day", days)} ' if days else ''
+    hours_str = f'{hours} {g_num("hour", hours)} ' if hours else ''
+    minutes_str = f'{minutes} {g_num("minute", minutes)} ' if minutes else ''
+    seconds_str = f'{seconds} {g_num("second", seconds)}' if seconds and not hours_str else ''
 
     return f'{days_str}{hours_str}{minutes_str}{seconds_str}'
 
+
+@register.filter
+def duration_short(td):
+    s = duration(td)
+
+    # replace day|days with d and so on
+    s = s.replace(' days', 'd').replace(' day', 'd')
+    s = s.replace(' hours', 'h').replace(' hour', 'h')
+    s = s.replace(' minutes', 'm').replace(' minute', 'm')
+    s = s.replace(' seconds', 's').replace(' second', 's')
+    return s
+
+
+# https://stackoverflow.com/a/35568978/4854605
+@register.filter(name='range')
+def _range(_min, args=None):
+    _max, _step = None, None
+    if args:
+        if not isinstance(args, int):
+            _max, _step = map(int, args.split(','))
+        else:
+            _max = args
+    args = filter(None, (_min, _max, _step))
+    return range(*args)

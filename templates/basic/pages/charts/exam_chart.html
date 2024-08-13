@@ -1,0 +1,194 @@
+{% extends 'basic/base.html' %}
+
+{% load core_tags static mathfilters %}
+
+{% block title %}
+    {{ exam.name }}'s Charts - {{ block.super }}
+{% endblock %}
+
+{% block nav %}
+{{ block.super }}
+{% endblock %}
+
+{% block javascript %}
+    {% if not IS_BLACKOUT %}
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+    {% else %}
+        <script src="{% static 'cdn/highcharts.11.4.6.min.js' %}"></script>
+    {% endif %}
+
+    <!-- https://evanhahn.github.io/HumanizeDuration.js/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/humanize-duration/3.32.1/humanize-duration.min.js"
+            integrity="sha512-IuW3C7hqTl2pnZ+OX+lHFEc8QOYJCVyNSKmRTAmJJ9J0xwru4wYTar2MM80MSbhOiZKmGc+uypnPZKrCVga2xg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    {{ block.super }}
+{% endblock %}
+
+{% block content %}
+
+    <h1 class="text-3xl font-semibold mt-4 mb-2">
+        User: <span class="text-primary">{{ current_user.name }} - {{ current_user.username }}</span> <div class="badge ">This page may contain unwanted bugs</div> <br>
+        Practice Test: <span class="text-primary">{{ exam.name }}</span>
+    </h1>
+
+    <div class="stats">
+        <div class="stat place-items-center">
+            <div class="stat-title">Total Time for Correct Answers (Min-Max)</div>
+            {% if total_correct_time_min == total_correct_time_max %}
+                <div class="stat-value">{{ total_correct_time_max | duration_short }}</div>
+            {% else %}
+                <div class="stat-value">{{ total_correct_time_min | duration_short }}
+                    - {{ total_correct_time_max | duration_short }}</div>
+            {% endif %}
+        </div>
+        <div class="stat place-items-center">
+            <div class="stat-title">Average Time for Correct Answers (Min-Max)</div>
+            {% if total_correct_time_min_avg == total_correct_time_max_avg %}
+                <div class="stat-value">{{ total_correct_time_max_avg | duration_short }}</div>
+            {% else %}
+                <div class="stat-value">{{ total_correct_time_min_avg | duration_short }}
+                    - {{ total_correct_time_max_avg | duration_short }}</div>
+            {% endif %}
+
+        </div>
+    </div>
+
+
+    <table class="table table-zebra table-xs">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th colspan="5">
+                Times (Recent to Oldest)
+            </th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>#1</th>
+            <th>#2</th>
+            <th>#3</th>
+            <th>#4</th>
+            <th>#5</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for exam_question in exam_questions_set %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                {% with question_data=questions_data|get_item:exam_question.question_id %}
+                    {% for correct_time in question_data.correct_times|slice:":5" %}
+                        <td>{{ correct_time | duration }}</td>
+                    {% endfor %}
+
+                    {% with correct_times_length=question_data.correct_times|length %}
+                        {% with missing=5|sub:correct_times_length %}
+                            {% for n in missing|range %}
+                                <td></td>
+                            {% endfor %}
+                        {% endwith %}
+                    {% endwith %}
+                {% endwith %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="border-2 bg-base-200 rounded p-3 mb-4">
+        <h2 class="text-2xl text-center mb-3 font-semibold">
+            Correct Time Spent
+        </h2>
+
+        <div id="correct-times-chart-container"></div>
+    </div>
+{% endblock %}
+
+{% block inline_javascript %}
+    {{ block.super }}
+
+    <script>
+        let base_chart_data = {
+            tooltip: {
+                shared: true,
+                split: false,
+                enabled: true
+            },
+        }
+
+        function correct_times_chart(correct_times_data) {
+            let id = 'correct-times-chart-container';
+
+            let titles = {
+                'correct_times_min': 'Min',
+                'correct_times_max': 'Max',
+                'correct_times_avg': 'Avg',
+            }
+
+            console.log(correct_times_data)
+
+            let series = [];
+            for (let k of ['correct_times_min', 'correct_times_max', 'correct_times_avg']) {
+                if (k != 'correct_times_avg') {
+                    if (JSON.stringify(correct_times_data[k]) == JSON.stringify(correct_times_data['correct_times_avg'])) {
+                        continue;
+                    }
+                }
+
+                series.push({
+                    name: titles[k],
+                    data: correct_times_data[k],
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function () {
+                            let s = humanizeDuration(this.y * 1000);
+                            s = s.replace(' days', 'd ').replace(' hours', 'h ').replace(' minutes', 'm ').replace(' seconds', 's ');
+                            s = s.replace(' day', 'd ').replace(' hour', 'h ').replace(' minute', 'm ').replace(' second', 's ');
+                            s = s.replaceAll(', ', '');
+                            return s.trimEnd();
+                        }
+                    }
+                });
+            }
+
+            console.log(series)
+
+            let chart_data = {
+                ...base_chart_data,
+                plotOptions: {
+                    line: {
+                        dataLabels: {
+                            enabled: true
+                        },
+                        enableMouseTracking: true
+                    }
+                },
+                title: {
+                    text: 'Correct Times',
+                    align: 'left'
+                },
+                xAxis: {
+                    categories: correct_times_data.x_axis,
+                    title: {
+                        text: 'Correct Times'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Time Spent'
+                    }
+                },
+                series: series
+            }
+
+            // humanizeDuration
+            chart_data.tooltip.formatter = function () {
+                // console.log(this.points);
+                return `<b>${this.x}</b><br/>Time: ${humanizeDuration(this.y * 1000)}</span>`;
+            }
+
+            Highcharts.chart(id, chart_data);
+        }
+
+        correct_times_chart({{ correct_times_data|jsonify }});
+    </script>
+{% endblock %}
