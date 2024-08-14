@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block nav %}
-{{ block.super }}
+    {{ block.super }}
 {% endblock %}
 
 {% block javascript %}
@@ -28,43 +28,48 @@
 {% block content %}
 
     <h1 class="text-3xl font-semibold mt-4 mb-2">
-        User: <span class="text-primary">{{ current_user.name }} - {{ current_user.username }}</span> <div class="badge ">This page may contain unwanted bugs</div> <br>
+        User: <span class="text-primary">{{ current_user.name }} - {{ current_user.username }}</span>
+        <div class="badge ">This page may contain unwanted bugs</div>
+        <br>
         Practice Test: <span class="text-primary">{{ exam.name }}</span>
     </h1>
 
-    <div class="stats">
-        <div class="stat place-items-center">
-            <div class="stat-title">Total Time for Correct Answers (Min-Max)</div>
-            {% if total_correct_time_min == total_correct_time_max %}
-                <div class="stat-value">{{ total_correct_time_max | duration_short }}</div>
-            {% else %}
-                <div class="stat-value">{{ total_correct_time_min | duration_short }}
-                    - {{ total_correct_time_max | duration_short }}</div>
-            {% endif %}
-        </div>
-        <div class="stat place-items-center">
-            <div class="stat-title">Average Time for Correct Answers (Min-Max)</div>
-            {% if total_correct_time_min_avg == total_correct_time_max_avg %}
-                <div class="stat-value">{{ total_correct_time_max_avg | duration_short }}</div>
-            {% else %}
-                <div class="stat-value">{{ total_correct_time_min_avg | duration_short }}
-                    - {{ total_correct_time_max_avg | duration_short }}</div>
-            {% endif %}
+    <div class="flex justify-center">
+        <div class="stats stats-vertical lg:stats-horizontal">
+            <div class="stat place-items-center">
+                <div class="stat-title">Total Time for Correct Answers (Min-Max)</div>
+                {% if total_correct_time_min == total_correct_time_max %}
+                    <div class="stat-value">{{ total_correct_time_max | duration_short }}</div>
+                {% else %}
+                    <div class="stat-value">{{ total_correct_time_min | duration_short }}
+                        - {{ total_correct_time_max | duration_short }}</div>
+                {% endif %}
+            </div>
+            <div class="stat place-items-center">
+                <div class="stat-title">Average Time for Correct Answers (Min-Max)</div>
+                {% if total_correct_time_min_avg == total_correct_time_max_avg %}
+                    <div class="stat-value">{{ total_correct_time_max_avg | duration_short }}</div>
+                {% else %}
+                    <div class="stat-value">{{ total_correct_time_min_avg | duration_short }}
+                        - {{ total_correct_time_max_avg | duration_short }}</div>
+                {% endif %}
 
+            </div>
         </div>
     </div>
+
 
 
     <table class="table table-zebra table-xs">
         <thead>
         <tr>
-            <th>#</th>
+            <th class="text-center">#</th>
             <th colspan="5">
                 Times (Recent to Oldest)
             </th>
         </tr>
         <tr>
-            <th></th>
+            <th class=""></th>
             <th>#1</th>
             <th>#2</th>
             <th>#3</th>
@@ -75,16 +80,21 @@
         <tbody>
         {% for exam_question in exam_questions_set %}
             <tr>
-                <td>{{ forloop.counter }}</td>
+                <td class="text-center">
+                    <a class="hover:underline px-8 btn btn-xs btn-ghost underline" target="_blank"
+                       href="{% url 'questions:detail' exam_question.question_id %}?question_set=exam&exam_id={{ exam.id }}">
+                        {{ forloop.counter }}
+                    </a>
+                </td>
                 {% with question_data=questions_data|get_item:exam_question.question_id %}
                     {% for correct_time in question_data.correct_times|slice:":5" %}
-                        <td>{{ correct_time | duration }}</td>
+                        <td class="">{{ correct_time | duration }}</td>
                     {% endfor %}
 
                     {% with correct_times_length=question_data.correct_times|length %}
                         {% with missing=5|sub:correct_times_length %}
                             {% for n in missing|range %}
-                                <td></td>
+                                <td class=""></td>
                             {% endfor %}
                         {% endwith %}
                     {% endwith %}
@@ -111,7 +121,7 @@
             tooltip: {
                 shared: true,
                 split: false,
-                enabled: true
+                enabled: true,
             },
         }
 
@@ -181,9 +191,16 @@
             }
 
             // humanizeDuration
+            // https://jsfiddle.net/BlackLabel/6hy15Lp3/
+            // https://stackoverflow.com/a/19315076/4854605
             chart_data.tooltip.formatter = function () {
-                // console.log(this.points);
-                return `<b>${this.x}</b><br/>Time: ${humanizeDuration(this.y * 1000)}</span>`;
+                var s = [];
+
+                this.points.forEach(function (point, i) {
+                    s.push(`<span style="color:${point.series.color}; font-weight:bold;">${point.series.name}: ${humanizeDuration(point.y * 1000)}<span>`);
+                });
+
+                return `${this.x}: Correct Times <br/>` + s.join('<br/><br/>');
             }
 
             Highcharts.chart(id, chart_data);
