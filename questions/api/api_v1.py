@@ -6,7 +6,7 @@ from django.utils.timezone import make_aware
 from ninja import Router, Schema
 from ninja.throttling import UserRateThrottle
 from ninja.security import django_auth
-
+from django.db import transaction
 import zoneinfo
 
 from utils.datetime import tz_now_w_ms
@@ -44,12 +44,13 @@ def question_mark_for_review(request, data: MarkForReview):
         defaults['unmarked_for_review_at'] = tz_now_w_ms()
         # defaults['marked_for_review_at'] = None
 
-    UserQuestionStatus.objects.update_or_create(
-        user=user,
-        question_id=data.question_id,
-        exam_id=data.exam_id,
-        defaults=defaults
-    )
+    with transaction.atomic():
+        UserQuestionStatus.objects.update_or_create(
+            user=user,
+            question_id=data.question_id,
+            exam_id=data.exam_id,
+            defaults=defaults
+        )
 
     return 200
 
