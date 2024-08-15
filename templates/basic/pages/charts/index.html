@@ -105,14 +105,48 @@
                             name: 'Incorrect Attempts',
                             color: '#e74c3c',
                             data: answer_data[module][0],
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return this.y + ' (' + answer_data_unique[module][0][this.point.index] + ')';
+                                }
+                            }
                         },
                         {
                             name: 'Correct',
                             color: '#27ae60',
                             data: answer_data[module][1],
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return this.y + ' (' + answer_data_unique[module][1][this.point.index] + ')';
+                                }
+                            }
                         },
                     ],
                 }
+
+                chart_data.tooltip.formatter = function() {
+                    let s = [];
+
+                    this.points.forEach(function (point, i) {
+                        let extra = "";
+
+                        if (point.series.name === 'Incorrect Attempts') {
+                            extra = ` (${answer_data_unique[module][0][point.point.index]})`;
+                        } else if (point.series.name === 'Correct') {
+                            extra = ` (${answer_data_unique[module][1][point.point.index]})`;
+                        }
+
+                        s.push(`
+<span style="color: ${point.series.color};">&#x25A0;</span>
+<span style="font-weight:bold;">${point.series.name}: ${point.y}${extra}<span>
+`);
+                    });
+
+                    return `<b>${this.x}</b> <br/>` + s.join('<br/>');
+                }
+
                 {#console.log(chart_data)#}
                 Highcharts.chart(id, chart_data);
             }
@@ -162,13 +196,17 @@
                 // humanizeDuration
                 chart_data.tooltip.formatter = function () {
                     // console.log(this.points);
-                    return `<b>${this.x}</b><br/>Time: ${humanizeDuration(this.y * 1000)}<br/>Correct: <span style="color: green">${answer_data[module][1][this.point.index]}</span><br/>Incorrect Attempts: <span style="color: red;">${answer_data[module][0][this.point.index]}</span>`;
+                    return `
+<b>${this.x}</b><br/>Time: ${humanizeDuration(this.y * 1000)}
+<br/>Correct: <span style="color: green">${answer_data[module][1][this.point.index]} (${answer_data_unique[module][1][this.point.index]})</span>
+<br/>Incorrect Attempts: <span style="color: red;">${answer_data[module][0][this.point.index]} (${answer_data_unique[module][0][this.point.index]})</span>`;
                 }
                 Highcharts.chart(id, chart_data);
             }
         }
 
         let answer_data = {{ answer_data | jsonify }};
+        let answer_data_unique = {{ answer_data_unique | jsonify }};
         let mark_data = {{ mark_data | jsonify }};
         let time_given_data = {{ time_given_data | jsonify }};
         answer_chart(answer_data, mark_data)

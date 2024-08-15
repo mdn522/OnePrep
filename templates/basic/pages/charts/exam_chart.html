@@ -194,7 +194,7 @@
             // https://jsfiddle.net/BlackLabel/6hy15Lp3/
             // https://stackoverflow.com/a/19315076/4854605
             chart_data.tooltip.formatter = function () {
-                var s = [];
+                let s = [];
 
                 this.points.forEach(function (point, i) {
                     s.push(`<span style="color:${point.series.color}; font-weight:bold;">${point.series.name}: ${humanizeDuration(point.y * 1000)}<span>`);

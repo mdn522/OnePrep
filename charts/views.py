@@ -78,17 +78,44 @@ def chart_view(request, user_id=None, username=None):
             1: [0] * DAYS,
         },
     }
+
+    answer_data_unique = {
+        'x_axis': x_axis,
+        'all': {
+            0: [0] * DAYS,
+            1: [0] * DAYS,
+        },
+        Question.Module.MATH.value: {
+            0: [0] * DAYS,
+            1: [0] * DAYS,
+        },
+        Question.Module.ENGLISH.value: {
+            0: [0] * DAYS,
+            1: [0] * DAYS,
+        },
+    }
+    answer_data_unique_questions_by_day = {
+        0: [set()] * DAYS,
+        1: [set()] * DAYS,
+    }
+
     time_given_data = {
         'x_axis': x_axis,
         'all':  [0] * DAYS,
         Question.Module.MATH.value: [0] * DAYS,
         Question.Module.ENGLISH.value: [0] * DAYS,
     }
+
     for answer in answer_set:
         dts = answer.answered_at.strftime('%Y-%m-%d')
         index = x_axis.index(dts)
         answer_data['all'][answer.is_correct][index] += 1
         answer_data[answer.question.module][answer.is_correct][index] += 1
+
+        if answer.question_id not in answer_data_unique_questions_by_day[answer.is_correct][index]:
+            answer_data_unique['all'][answer.is_correct][index] += 1
+            answer_data_unique[answer.question.module][answer.is_correct][index] += 1
+            answer_data_unique_questions_by_day[answer.is_correct][index].add(answer.question_id)
 
         # if answer.time_given:
         #     time_given_data['all'][index] += min(answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
@@ -167,10 +194,12 @@ def chart_view(request, user_id=None, username=None):
             mark_data[status.question.module][status.is_marked_for_review][x_index] += 1
 
     # print('answer_data', answer_data)
+    # print('answer_data_unique', answer_data_unique)
 
     return render(request, 'basic/pages/charts/index.html', context={
         'current_user': user,
         'answer_data': answer_data,
+        'answer_data_unique': answer_data_unique,
         'mark_data': mark_data,
         'time_given_data': time_given_data,
     })
