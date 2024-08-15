@@ -1,0 +1,8 @@
+{% extends "account/login.html" %}
+
+{% block content %}
+    {{ block.super }}
+    <script>
+        document.getElementById('id_remember').checked = true;
+    </script>
+{% endblock %}
