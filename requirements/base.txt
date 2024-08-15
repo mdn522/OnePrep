@@ -11,7 +11,7 @@ pydantic  # https://github.com/pydantic/pydantic
 sortedcontainers  # https://pypi.org/project/sortedcontainers/
 python-dateutil  # https://pypi.org/project/python-dateutil/
 json-stream  # https://pypi.org/project/json-stream/
-django-mathfilters  # https://github.com/dbrgn/django-mathfilters
+geoip2
 
 # Django
 # ------------------------------------------------------------------------------
@@ -33,6 +33,10 @@ djangoql  # https://github.com/ivelum/djangoql
 django-filter  # https://github.com/carltongibson/django-filter
 django-object-actions  # https://github.com/crccheck/django-object-actions
 django-extensions==3.2.3  # https://github.com/django-extensions/django-extensions
+django-mathfilters  # https://github.com/dbrgn/django-mathfilters
+django-login-history2  # https://github.com/riquedev/django-login-history2
+django-qsessions  # https://github.com/QueraTeam/django-qsessions
+
 
 django-allauth-ui
 slippers

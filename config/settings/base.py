@@ -62,7 +62,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 DJANGO_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
+    # "django.contrib.sessions",
+    "qsessions",
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
@@ -88,6 +89,8 @@ THIRD_PARTY_APPS = [
     "mathfilters",
 
     "allauth_ui",
+
+    "django_login_history2",
 
     "allauth",
     "allauth.account",
@@ -168,7 +171,8 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "core.middleware.PA2FlyRedirectMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
+    # "django.contrib.sessions.middleware.SessionMiddleware",
+    "qsessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -177,6 +181,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
+
+SESSION_ENGINE = "qsessions.backends.db"
+
+GEOIP_PATH = env.str('GEOIP_PATH', str(BASE_DIR / "data" / "geoip"))
 
 # STATIC
 # ------------------------------------------------------------------------------
