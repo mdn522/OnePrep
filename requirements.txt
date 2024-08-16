@@ -1,1 +1,10 @@
 django
+gunicorn
+django-debug-toolbar
+django-model-utils
+django-object-actions
+djangoql
+pytest
+pytest-django
+factory-boy
+merge_production_dotenvs_in_dotenv

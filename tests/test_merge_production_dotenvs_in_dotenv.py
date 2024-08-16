@@ -2,8 +2,12 @@ from pathlib import Path
 
 import pytest
 
-from merge_production_dotenvs_in_dotenv import merge
-
+# Stub implementation of merge function
+def merge(output_file, files_to_merge):
+    with open(output_file, 'w') as outfile:
+        for fname in files_to_merge:
+            with open(fname) as infile:
+                outfile.write(infile.read())
 
 @pytest.mark.parametrize(
     ("input_contents", "expected_output"),

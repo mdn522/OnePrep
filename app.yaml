@@ -1,0 +1,9 @@
+runtime: python
+env: flex
+entrypoint: gunicorn -b :$PORT OnePrep.wsgi
+
+manual_scaling:
+  instances: 1
+
+# Optionally, you can specify the service name and other parameters
+# service: default

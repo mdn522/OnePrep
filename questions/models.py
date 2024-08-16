@@ -51,30 +51,27 @@ class Question(TimeStampedModel, models.Model):
 
     class Meta:
         constraints = [
-            # Constraints
-            # A question can only have one source and source_id if source is not null and source_id is not null
+            # Non-conditional constraints for SQLite compatibility
             models.UniqueConstraint(
                 fields=['source', 'source_id'],
-                name='unique_question_source_id',
-                condition=(Q(source__isnull=False) | ~Q(source='')) & (Q(source_id__isnull=False) | ~Q(source_id=''))
+                name='unique_question_source_id'
             ),
             models.UniqueConstraint(
                 fields=['source', 'source_id_2'],
-                name='unique_question_source_id_2',
-                condition=(Q(source__isnull=False) | ~Q(source='')) & (Q(source_id_2__isnull=False) | ~Q(source_id_2=''))
+                name='unique_question_source_id_2'
             ),
             models.UniqueConstraint(
                 fields=['source', 'source_id_3'],
-                name='unique_question_source_id_3',
-                condition=(Q(source__isnull=False) | ~Q(source='')) & (Q(source_id_3__isnull=False) | ~Q(source_id_3=''))
+                name='unique_question_source_id_3'
             ),
-
-            # Indexes
-            # Index for source
-            # models.Index(fields=['source'], name='index_question_source', condition=Q(source__isnull=False)),
-            # Index for source_id
-            # models.Index(fields=['source', 'source_id'], name='index_question_source_id', condition=(Q(source__isnull=False) | ~Q(source='')) & (Q(source_id__isnull=False) | ~Q(source_id=''))),
         ]
+        indexes = [
+            models.Index(fields=['source'], name='index_question_source'),
+            models.Index(fields=['source', 'source_id'], name='index_question_source_id'),
+        ]
+
+    # Note: Conditional constraints and indexes removed for SQLite compatibility.
+    # Application logic should handle additional validation if needed.
 
 
 class AnswerChoice(TimeStampedModel, models.Model):
@@ -89,13 +86,14 @@ class AnswerChoice(TimeStampedModel, models.Model):
     class Meta:
         verbose_name = 'Answer Choice'
         constraints = [
-            # Constraints
-            # A question can only have one correct answer choice if correct is true
-            models.UniqueConstraint(fields=['question', 'is_correct'], name='unique_question_answer_choice_correct', condition=models.Q(is_correct=True)),
             # A question can only have one answer choice with the same order
             models.UniqueConstraint(fields=['question', 'order'], name='unique_question_answer_choice_order'),
             # A question can only have one answer choice with the same letter
             models.UniqueConstraint(fields=['question', 'letter'], name='unique_question_answer_choice_letter'),
+        ]
+        indexes = [
+            # Index for efficient querying of correct answer choices
+            models.Index(fields=['question', 'is_correct'], name='idx_question_correct_answer'),
         ]
 
 
