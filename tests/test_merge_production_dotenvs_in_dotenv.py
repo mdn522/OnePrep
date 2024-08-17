@@ -2,12 +2,19 @@ from pathlib import Path
 
 import pytest
 
-# Stub implementation of merge function
+# Implementation of merge function
 def merge(output_file, files_to_merge):
     with open(output_file, 'w') as outfile:
         for fname in files_to_merge:
             with open(fname) as infile:
-                outfile.write(infile.read())
+                content = infile.read().strip()
+                if content:
+                    outfile.write(content + '\n')
+        outfile.seek(0, 2)  # Move to the end of the file
+        if outfile.tell() > 0:  # If file is not empty
+            outfile.seek(outfile.tell() - 1)  # Move back one character
+            if outfile.read() != '\n':  # If last character is not a newline
+                outfile.write('\n')  # Add a final newline
 
 @pytest.mark.parametrize(
     ("input_contents", "expected_output"),
