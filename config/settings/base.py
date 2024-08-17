@@ -232,6 +232,8 @@ TEMPLATES = [
                 "django_admin_env_notice.context_processors.from_settings",
 
                 "utils.context_processors.google_analytics_context",
+                "utils.context_processors.theme_context",
+
                 "utils.context_processors.internet_blackout_context",
             ],
         },
