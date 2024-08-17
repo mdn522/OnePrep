@@ -1,17 +1,19 @@
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
+{% if GOOGLE_ANALYTICS_ID %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
 
-    function gtag() {
-        dataLayer.push(arguments);
-    }
+        function gtag() {
+            dataLayer.push(arguments);
+        }
 
-    gtag('js', new Date());
+        gtag('js', new Date());
 
-    gtag('config', '{{ GOOGLE_ANALYTICS_ID }}', {
-        {% if request.user.is_authenticated %}
-            'user_id': '{{ request.user.id }}',
-        {% endif %}
-    }); // 'G-M9V1LX18J9'
-</script>
+        gtag('config', '{{ GOOGLE_ANALYTICS_ID }}', {
+            {% if request.user.is_authenticated %}
+                'user_id': '{{ request.user.id }}',
+            {% endif %}
+        }); // 'G-M9V1LX18J9'
+    </script>
+{% endif %} 

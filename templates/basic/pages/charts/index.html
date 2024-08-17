@@ -22,7 +22,7 @@
 
 {% block content %}
     <h1 class="text-3xl text-left font-bold mb-2">
-        {{ current_user.name }} - {{ current_user.username }}'s Chart
+        {% if current_user.name %}{{ current_user.name }} - {% endif %}{{ current_user.username }}'s Chart
     </h1>
 
     <div class="border-2 bg-base-200 rounded p-3 mb-4">
