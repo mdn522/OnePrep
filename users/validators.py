@@ -3,6 +3,6 @@ from django.core.validators import MinLengthValidator
 
 
 custom_username_validators = [
-    MinLengthValidator(5),
-    ASCIIUsernameValidator()
+    MinLengthValidator(6),
+    ASCIIUsernameValidator(),
 ]
