@@ -95,9 +95,12 @@ def chart_view(request, user_id=None, username=None):
         },
     }
     answer_data_unique_questions_by_day = {
-        0: [set()] * DAYS,
-        1: [set()] * DAYS,
+        0: [set() for n in range(DAYS)],
+        1: [set() for n in range(DAYS)],
     }
+
+    # print('answer_data_unique_questions_by_day', answer_data_unique_questions_by_day)
+    # print(len(answer_data_unique_questions_by_day[0]))
 
     time_given_data = {
         'x_axis': x_axis,
@@ -120,6 +123,9 @@ def chart_view(request, user_id=None, username=None):
         # if answer.time_given:
         #     time_given_data['all'][index] += min(answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
         #     time_given_data[answer.question.module][index] += min(answer.time_given.total_seconds(), MAX_TIME_GIVEN_LIMIT)
+
+    # print('answer_data_unique', answer_data_unique)
+    # print('answer_data_unique_questions_by_day', answer_data_unique_questions_by_day)
 
     # ----------------------------------------------------------------
 
