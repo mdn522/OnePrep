@@ -28,7 +28,7 @@
 {% block content %}
 
     <h1 class="text-3xl font-semibold mt-4 mb-2">
-        User: <span class="text-primary">{{ current_user.name }} - {{ current_user.username }}</span>
+        User: <span class="text-primary">{% if current_user.name %}{{ current_user.name }} - {% endif %}{{ current_user.username }}</span>
         <div class="badge ">This page may contain unwanted bugs</div>
         <br>
         Practice Test: <span class="text-primary">{{ exam.name }}</span>

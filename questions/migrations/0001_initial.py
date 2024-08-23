@@ -71,8 +71,30 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
-        # Removed conditional constraints and indexes for SQLite compatibility
-        # TODO: Implement alternative indexing strategy for SQLite or handle in application logic
+        migrations.AddConstraint(
+            model_name='question',
+            constraint=models.UniqueConstraint(condition=models.Q(('source__isnull', False), ('source_id__isnull', False)), fields=('source', 'source_id'), name='unique_question_source_id'),
+        ),
+        migrations.AddConstraint(
+            model_name='question',
+            constraint=models.UniqueConstraint(condition=models.Q(('source__isnull', False), ('source_id_2__isnull', False)), fields=('source', 'source_id_2'), name='unique_question_source_id_2'),
+        ),
+        migrations.AddConstraint(
+            model_name='question',
+            constraint=models.UniqueConstraint(condition=models.Q(('source__isnull', False), ('source_id_3__isnull', False)), fields=('source', 'source_id_3'), name='unique_question_source_id_3'),
+        ),
+        migrations.AddConstraint(
+            model_name='question',
+            constraint=models.Index(condition=models.Q(('source__isnull', False)), fields=['source'], name='index_question_source'),
+        ),
+        migrations.AddConstraint(
+            model_name='question',
+            constraint=models.Index(condition=models.Q(('source__isnull', False), ('source_id__isnull', False)), fields=['source', 'source_id'], name='index_question_source_id'),
+        ),
+        migrations.AddConstraint(
+            model_name='answerchoice',
+            constraint=models.UniqueConstraint(condition=models.Q(('correct', True)), fields=('question', 'correct'), name='unique_question_answer_choice_correct'),
+        ),
         migrations.AddConstraint(
             model_name='answerchoice',
             constraint=models.UniqueConstraint(fields=('question', 'order'), name='unique_question_answer_choice_order'),
