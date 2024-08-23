@@ -491,6 +491,7 @@
                 }
             },
             selected_answer_choice_letter: null,
+            previous_answer: null,
             answer_choices: {{answer_choices | jsonify}},
             answers: {{answers | jsonify}},
             user_answer: '',
@@ -507,17 +508,22 @@
                 return this.answer_choices.filter(answer_choice => answer_choice.correct)[0];
             },
             check() {
+                let current_answer = this.is_mcq() ? this.selected_answer_choice_letter : this.user_answer;
+                if (current_answer === this.previous_answer) {
+                    console.log('Answer unchanged, skipping submission');
+                    return;
+                }
+                this.previous_answer = current_answer;
+
                 let API_URL = "{% url 'api_v1:answers_submit' %}";
                 console.log('Checking answer');
                 let data = {
                     question_id: this.question_id,
                     exam_id: null,
-
                     started_at: parseInt(this.started_at.getTime() / 1000),
                     time_given: this.timer,
                 };
                 if (this.is_mcq()) {
-                    {#let selected_answer_choice = ;#}
                     let answer_choice = this.answer_choices.filter(answer_choice => answer_choice.letter === this.selected_answer_choice_letter)[0];
                     if (answer_choice.is_correct) {
                         this.has_answered_wrong = false;
