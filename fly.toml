@@ -7,7 +7,7 @@ app = 'oneprep'
 primary_region = 'iad'
 console_command = '/code/manage.py shell_plus'
 
-swap_size_mb = 768
+swap_size_mb = 767
 
 [build]
 
@@ -19,7 +19,7 @@ swap_size_mb = 768
 
   DJANGO_SETTINGS_MODULE = 'config.settings.production'
 
-  DJANGO_ACCOUNT_ALLOW_REGISTRATION = false
+  DJANGO_ACCOUNT_ALLOW_REGISTRATION = true
 
   DJANGO_DEBUG = false
   DJANGO_ALLOWED_HOSTS = 'oneprep.fly.dev'
@@ -29,11 +29,14 @@ swap_size_mb = 768
   ENVIRONMENT_COLOR = '#8e00ff'
 
   SENTRY_TRACES_SAMPLE_RATE = 1.0
+  SENTRY_PROFILES_SAMPLE_RATE = 1.0
 
   Q_LOADER_BASE_PATH = '/data/data/sat'
   GEOIP_PATH = '/data/data/geoip'
 
   GOOGLE_ANALYTICS_ID = 'G-9XC7HL2GZF'
+
+  DAISYUI_THEME = 'light'
 
 [mounts]
   source = "oneprep_data"

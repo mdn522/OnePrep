@@ -1,7 +1,8 @@
 fly.toml
 .git/
 *.sqlite3
-data/
+data/sat/
+data/geoip/
 venv/
 static/cdn/
 .env

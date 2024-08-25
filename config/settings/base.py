@@ -50,6 +50,14 @@ DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+CACHES = {
+    "memory": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "oneprep-snowflake",
+    }
+}
+
+
 # URLS
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
@@ -80,6 +88,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "django_extensions",
+    # "silk",
 
     "crispy_forms",
     "crispy_bootstrap5",
@@ -179,6 +188,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    # "silk.middleware.SilkyMiddleware"
 ]
 
 SESSION_ENGINE = "qsessions.backends.db"
@@ -370,3 +380,22 @@ Q_LOADER_BASE_PATH = Path(Q_LOADER_BASE_PATH) if Q_LOADER_BASE_PATH is not None 
 
 
 GOOGLE_ANALYTICS_ID = env.str('GOOGLE_ANALYTICS_ID', default='')
+
+# Django Silk
+# SILKY_MIDDLEWARE_CLASS = 'path.to.your.middleware.MyCustomSilkyMiddleware'
+SILKY_AUTHENTICATION = env.bool('SILKY_AUTHENTICATION', default=True)  # True  # User must login
+SILKY_AUTHORISATION = env.bool('SILKY_AUTHORISATION', default=True)  # True  # User must have permissions
+SILKY_PERMISSIONS = lambda user: user.is_superuser  # lambda user: user.is_staff  # Custom permissions
+SILKY_META = env.bool('SILKY_META', default=True)  # True  # Record the request/response headers
+SILKY_INTERCEPT_PERCENT = env.int('SILKY_INTERCEPT_PERCENT', default=100)  # 100  # Capture 100% of requests
+SILKY_PYTHON_PROFILER = env.bool('SILKY_PYTHON_PROFILER', default=True)  # True  # Use Python's built-in cProfile
+
+SILKY_MAX_REQUEST_BODY_SIZE = env.int('SILKY_MAX_REQUEST_BODY_SIZE', default=-1)  # -1  # Silk takes anything <0 as no limit
+SILKY_MAX_RESPONSE_BODY_SIZE = env.int('SILKY_MAX_RESPONSE_BODY_SIZE', default=1024)  # 1024  # If response body>1024kb, ignore
+
+SILKY_DYNAMIC_PROFILING = [
+    {'module': 'questions.views', 'function': 'QuestionListView.get'},
+    {'module': 'questions.views', 'function': 'question_set_first_question_view'},
+    {'module': 'questions.views', 'function': 'CollegeBoardQuestionBankCategoryListView.get'},
+    {'module': 'exams.views', 'function': 'ExamListView.get'},
+]

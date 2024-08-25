@@ -25,23 +25,21 @@ DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=60)
 
 # CACHES
 # ------------------------------------------------------------------------------
-CACHES = {
-    # TODO cache
-    # "default": {
-    #     "BACKEND": "django_redis.cache.RedisCache",
-    #     "LOCATION": env("REDIS_URL"),
-    #     "OPTIONS": {
-    #         "CLIENT_CLASS": "django_redis.client.DefaultClient",
-    #         # Mimicing memcache behavior.
-    #         # https://github.com/jazzband/django-redis#memcached-exceptions-behavior
-    #         "IGNORE_EXCEPTIONS": True,
-    #     },
-    # },
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "db_cache_table",
-    }
+CACHES['default'] = {
+    "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+    "LOCATION": "db_cache_table",
 }
+# TODO cache redis or memcache
+# "default": {
+#     "BACKEND": "django_redis.cache.RedisCache",
+#     "LOCATION": env("REDIS_URL"),
+#     "OPTIONS": {
+#         "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         # Mimicing memcache behavior.
+#         # https://github.com/jazzband/django-redis#memcached-exceptions-behavior
+#         "IGNORE_EXCEPTIONS": True,
+#     },
+# },
 
 # SECURITY
 # ------------------------------------------------------------------------------
@@ -108,8 +106,11 @@ INSTALLED_APPS += ["anymail"]
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
 # https://anymail.readthedocs.io/en/stable/installation/#anymail-settings-reference
 # https://anymail.readthedocs.io/en/stable/esps
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-ANYMAIL = {}
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+ANYMAIL = {
+    "BREVO_API_KEY": env("BREVO_API_KEY"),
+}
 
 
 # LOGGING

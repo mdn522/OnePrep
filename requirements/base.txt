@@ -36,6 +36,7 @@ django-extensions==3.2.3  # https://github.com/django-extensions/django-extensio
 django-mathfilters  # https://github.com/dbrgn/django-mathfilters
 django-login-history2  # https://github.com/riquedev/django-login-history2
 django-qsessions  # https://github.com/QueraTeam/django-qsessions
+# django-silk  # https://github.com/jazzband/django-silk
 
 
 django-allauth-ui

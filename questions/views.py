@@ -207,6 +207,9 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
         },
     }
 
+    question_content_type_id = ContentType.objects.get_for_model(Question).id
+    tags_map = None
+
     def filtered_queryset(self):
         qs = Question.objects
         for tag in self.tag_filter:
@@ -249,10 +252,14 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
         flat_tags = set([tag for category in self.category_map for tag in [category.module, category.primary_class, category.skill] if tag])
         flat_tags = (flat_tags - {'en', 'math'}) | {'English', 'Math'} | {'Bluebook', 'Non Bluebook'}
 
-        tags = Question.tags.through.tag_model().objects.filter(
-            name__in=self.tag_filter + list(flat_tags)
-        )
-        tags_map = {tag.name: tag for tag in tags}
+        # TODO Cache
+        if CollegeBoardQuestionBankCategoryListView.tags_map is None:
+            tags = Question.tags.through.tag_model().objects.filter(
+                name__in=self.tag_filter + list(flat_tags)
+            )
+            CollegeBoardQuestionBankCategoryListView.tags_map = {tag.name: tag for tag in tags}
+
+        tags_map = CollegeBoardQuestionBankCategoryListView.tags_map
 
         # print('tags', tags_map)
 
@@ -275,7 +282,8 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
         counts = (Question.tags.through.objects.filter(
             # tag__name__in=self.tag_filter,
             object_id__in=question_set_filtered_queryset.values('id'),  # tags__name__in=['Bluebook']
-            content_type_id=ContentType.objects.get_for_model(Question).id,
+            # TODO cache
+            content_type_id=self.question_content_type_id,
         ).annotate(
             # tag_id_=F('tag_id'),
         ).aggregate(   # .distinct('object_id')

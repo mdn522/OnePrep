@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import JsonResponse
 from django.utils.translation import gettext_lazy as _
+from djangoql.admin import DjangoQLSearchMixin
 
 from questions.models import Question, AnswerChoice
 from users.forms import UserAdminChangeForm
@@ -20,7 +21,7 @@ if settings.DJANGO_ADMIN_FORCE_ALLAUTH:
 
 
 @admin.register(User)
-class UserAdmin(auth_admin.UserAdmin):
+class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
     form = UserAdminChangeForm
     add_form = UserAdminCreationForm
     fieldsets = (
@@ -40,13 +41,18 @@ class UserAdmin(auth_admin.UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
+    date_hierarchy = "date_joined"
+
     list_display = [
         "id",
         "email",
         "username",
         "name",
         "num_user_question_answers",
-        "is_superuser"
+        "date_joined",
+        "last_login",
+        "is_staff",
+        "is_superuser",
     ]
     search_fields = ["name"]
     ordering = ["id"]

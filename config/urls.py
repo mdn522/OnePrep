@@ -33,11 +33,15 @@ urlpatterns = [
     path("users/", include("users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
-    # ...
+
+    path("", TemplateView.as_view(template_name="basic/pages/home.html"), name="home"),
+
+
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 
-    path("", TemplateView.as_view(template_name="basic/pages/home.html"), name="home"),
+
+    # path('silk/', include('silk.urls', namespace='silk'))
 ]
 
 

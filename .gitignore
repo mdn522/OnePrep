@@ -334,3 +334,4 @@ dsat/media/
 !.envs/.local/
 static/cdn/
 data/sat/
+data/geoip/

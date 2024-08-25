@@ -9,6 +9,7 @@ ENV DJANGO_SETTINGS_MODULE "config.settings.production"
 ENV DJANGO_SECRET_KEY "this is a secret key for building purposes"
 ENV DJANGO_ADMIN_URL "admin/"
 ENV DATABASE_URL "sqlite:///db.sqlite3"
+ENV BREVO_API_KEY "some api key"
 
 RUN mkdir -p /code
 
