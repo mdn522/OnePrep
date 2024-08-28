@@ -46,84 +46,86 @@
 	{{ block.super }}
 
     <style>
-    .stats-xs {}
-
-    .stats-xs .stat {
-        padding: 0.5rem 1rem;
-    }
-
-    .stats-xs .stat-title {
-        font-size: 1rem;
-        line-height: 1rem;
-    }
-
-    .stats-xs .stat-value {
-        font-size: 1.25rem;
-        line-height: 1.5rem;
-    }
-
-    /* TODO question table, list items, check original question bank for reference */
+        .stats-xs {}
+    
+        .stats-xs .stat {
+            padding: 0.5rem 1rem;
+        }
+    
+        .stats-xs .stat-title {
+            font-size: 1rem;
+            line-height: 1rem;
+        }
+    
+        .stats-xs .stat-value {
+            font-size: 1.25rem;
+            line-height: 1.5rem;
+        }
     </style>
 
     <style>
-    #question {
-        font-family: Roboto, sans-serif;
-    }
+        #answer-choices .answer-choice:not(.deleted) .answer-choice-deleted-line  {
+            display: none;
+        }
+    
+        #answer-choices .answer-choice.deleted .answer-choice-content {
+            opacity: 50%;
+        }
+    
+        .question-mark-for-review.question-marked .question-mark-for-review-icon-unmarked {
+            display: none;
+        }
+    
+        .question-mark-for-review:not(.question-marked) .question-mark-for-review-icon-marked {
+            display: none;
+        }
+    </style>
 
-    #question img {
-        display: inline-block;
-        margin: 0 3px;
-    }
-
-    #question table {
-        border: 1px solid;
-    }
-
-    #question table :where(thead, tfoot) {
-        white-space: normal !important;
-    }
-
-    #question table tr th {
-        border: 1px solid;
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
-    #question table tr td {
-        border: 1px solid;
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
-    #question ul, #question ol {
-        padding-left: 40px;
-        margin-top: 16px;
-        margin-bottom: 16px;
-    }
-
-    #question ul {
-        list-style: disc;
-    }
-
-    #question ol {
-        list-style: decimal;
-    }
-
-    #answer-choices .answer-choice:not(.deleted) .answer-choice-deleted-line  {
-        display: none;
-    }
-
-    #answer-choices .answer-choice.deleted .answer-choice-content {
-        opacity: 50%;
-    }
-
-    .question-mark-for-review.question-marked .question-mark-for-review-icon-unmarked {
-        display: none;
-    }
-
-    .question-mark-for-review:not(.question-marked) .question-mark-for-review-icon-marked {
-        display: none;
-    }
+    <style>
+        /* TODO question table, list items, check original question bank for reference */
+        /* TODO remove above TODO */
+        #question {
+            font-family: Roboto, sans-serif;
+        }
+    
+        #question img {
+            display: inline-block;
+            margin: 0 3px;
+        }
+    
+        #question table {
+            border: 1px solid;
+        }
+    
+        #question table :where(thead, tfoot) {
+            white-space: normal !important;
+        }
+    
+        #question table tr th {
+            border: 1px solid;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    
+        #question table tr td {
+            border: 1px solid;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    
+        #question ul, #question ol {
+            padding-left: 40px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+    
+        #question ul {
+            list-style: disc;
+        }
+    
+        #question ol {
+            list-style: decimal;
+        }
     </style>
 {% endblock %}
 
@@ -140,7 +142,6 @@
                                class="btn btn-secondary btn-xs ml-4">Back to Question Set</a>
                         {% endif %}
                     </div>
-        {#            <div class="text-sm">{{ question_set_description }}</div>#}
                 </div>
                 <div class="stats bg-base-200 w-full mt-2 mb-4 stats-xs">
                     {% for set_stat in set_stats %}
@@ -149,18 +150,6 @@
                             <div class="stat-value">{{ set_stat.value }}</div>
                         </div>
                     {% endfor %}
-{#                    {% for filter_key, filter in question_set_filters.items %}#}
-{#                        <div class="stat">#}
-{#                            <div class="stat-title">{{ filter.text }}</div>#}
-{#                            <div class="stat-value">#}
-{#                                {% firstof question_set_filter_text|get_item:filter_key 'All' %}#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    {% endfor %}#}
-{#                    <div class="stat">#}
-{#                        <div class="stat-title">Questions</div>#}
-{#                        <div class="stat-value">{{ question_set_questions.count }}</div>#}
-{#                    </div>#}
                 </div>
             </div>
         {% endif %}
@@ -168,7 +157,6 @@
             <div class="">
                 <div class="text-sm">Question ID</div>
                 <div class="text-2xl font-semibold flex items-center font-mono">
-                     <!--<i>###</i>-->
                     <i>#{{ question.id|stringformat:"05d" }}</i>
                 </div>
             </div>
@@ -188,11 +176,9 @@
     <div class="grid px-2 gap-4 md:gap-16 question {% if question.module == Question.Module.ENGLISH %}grid-cols-1 md:grid-cols-2{% endif %}{% if question.module == Question.Module.MATH %}grid-cols-1{% endif %}" id="question" x-data>
         {% if question.module == Question.Module.ENGLISH %}
             <div>
-{#                {% if question.module == Question.Module.ENGLISH %}#}
                 <div style="font-family: Roboto, sans-serif" id="question-stimulus">
                     <div class="">{{ question.stimulus | safe }}</div>
                 </div>
-{#                {% endif %}#}
             </div>
         {% endif %}
 
@@ -273,17 +259,11 @@
                                     {{ answer.letter }}
                                     <div class="absolute border-t-2 inset-y-2/4 -left-1 -right-1 border-neutral"></div>
                                 </div>
-{#                                <div class="underline font-semibold cursor-pointer answer-choice-delete-undo-button">Undo</div>#}
                             </div>
                         </div>
 
                     {% endfor %}
                 </div>
-{#                    <li class="p-2 border">#}
-{#                        <span class="badge badge-lg badge-primary">{{ answer.letter }}</span>#}
-{#                        <span>{{ answer.text | safe }}</span>#}
-{#                    </li>#}
-{#                {% endfor %}#}
             {% endif %}
             {% if question.answer_type == Question.AnswerType.SPR %}
                 <div x-data="{input: ''}">
@@ -308,15 +288,6 @@
                                     {% endif %}
                                 </span>
                             {% endwith %}
-                            <!--<span title="{{ user_answers_group.items.0.answered_at.isoformat }}">
-                                <span class="text-success">
-                                    Solved <span x-data="{ date: new Date('{{ user_answers_group.items.0.answered_at.isoformat }}') }" x-timeago.seconds="date"></span>
-                                    in {{ user_answers_group.items.0.time_given | duration }}
-                                </span>
-                                {% if user_answers_group.attempts > 0 %}
-                                    &nbsp;(<span class="text-error">{{ user_answers_group.attempts }} {{ user_answers_group.attempts|pluralize:"Attempt,Attempts" }}</span>)
-                                {% endif %}
-                            </span>-->
                         </span>
                     {% else %}
                         <span class="flex items-center underline">
@@ -351,14 +322,6 @@
                       x-cloak x-show="question.last_answer_correct != null"></span>
             </a>
         </template>
-{#    	{% for qs_question in question_set_questions %}#}
-{#            <a class="btn btn-sm btn-outline relative my-1 {% if qs_question.id == question.id %}btn-active{% endif %} {% if qs_question.difficulty == Question.Difficulty.EASY %}border-b-4 border-green-600{% endif %}{% if qs_question.difficulty == Question.Difficulty.MEDIUM %}border-b-4 border-orange-500{% endif %}{% if qs_question.difficulty == Question.Difficulty.HARD %}border-b-4 border-red-600{% endif %}"#}
-{#               href="{% url 'questions:detail' qs_question.id %}?{{ question_set_args }}">#}
-{#                {{ forloop.counter }}#}
-{#                <span class="absolute w-2 h-2 bg-warning top-0.5 left-0.5 rounded-full"></span>#}
-{#                <span class="absolute w-2 h-2 bg-error top-0.5 right-0.5 rounded-full"></span>#}
-{#            </a>#}
-{#    	{% endfor %}#}
     {% endif %}
 
     <div class="my-24"></div>
@@ -677,18 +640,6 @@
     }
 
     // Skip Button
-    // Check Button
-    // Choice Button
-    // Mark for Review
-    /*$('.question-mark-for-review-toggle').on('click', function() {
-        let isMarked = $(this).closest('.question-mark-for-review').hasClass('question-marked');
-        if (isMarked) {
-            $(this).text('Mark for Review')
-        } else {
-            $(this).text('Marked for Review')
-        }
-        $(this).closest('.question-mark-for-review').toggleClass('question-marked');
-    });*?
     // Delete Button
     /*$('.answer-choice-delete-toggle').on('click', function() {
         let status = $(this).hasClass('btn-secondary');
@@ -745,6 +696,4 @@
         <script type="text/javascript" id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 {#        <script src="{% static 'cdn/MathJax.2.7.7.js' %}" async id="MathJax-script"></script>#}
     {% endif %}
-
-
 {% endblock %}
