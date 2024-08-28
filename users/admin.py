@@ -1,11 +1,13 @@
+from audioop import reverse
 from typing import List, Any, Dict
 
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import admin as auth_admin
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import JsonResponse
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from djangoql.admin import DjangoQLSearchMixin
 
@@ -54,6 +56,13 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
         "is_staff",
         "is_superuser",
     ]
+    list_display_links = [
+        "id",
+        "email",
+        "username",
+    ]
+    list_per_page = 500
+    list_max_show_all = 1000
     search_fields = ["name"]
     ordering = ["id"]
     add_fieldsets = (
@@ -68,7 +77,30 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
     show_facets = admin.ShowFacets.ALWAYS
 
     def num_user_question_answers(self, obj):
-        return obj.num_user_question_answers
+        total = obj.num_user_question_answers
+        correct = obj.num_user_question_answers_correct
+        incorrect = obj.num_user_question_answers_incorrect
+        english_total = obj.num_user_question_answers_english
+        english_correct = obj.num_user_question_answers_english_correct
+        english_incorrect = obj.num_user_question_answers_english_incorrect
+        math_total = obj.num_user_question_answers_math
+        math_correct = obj.num_user_question_answers_math_correct
+        math_incorrect = obj.num_user_question_answers_math_incorrect
+
+        if not total:
+            return '-'
+
+        title = f"{(correct / total) * 100:.2f}% / {(incorrect / total) * 100:.2f}%"
+        title += f"\nEnglish: {english_correct} ({(english_correct / english_total) * 100:.2f}%) / {english_incorrect} ({(english_incorrect / english_total) * 100:.2f}%)"
+        title += f"\nMath: {math_correct} ({(math_correct / math_total) * 100:.2f}%) / {math_incorrect} ({(math_incorrect / math_total) * 100:.2f}%)"
+
+        html = f'<span title="{title}">'
+        html += f'<span style="">{total}</span> / '
+        # percentage in title
+        html += f'<span style="color: #2ECC71;">{correct}</span> / '
+        html += f'<span style="color: #E74C3C;">{incorrect}</span>'
+        html += '</span>'
+        return mark_safe(html)
 
     num_user_question_answers.label = "User Question Answers"
     num_user_question_answers.admin_order_field = 'num_user_question_answers'
@@ -76,11 +108,22 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
 
-        # self.export_user_data(request, queryset)
-
         # count of user question answers
+
         return queryset.annotate(
-            num_user_question_answers=Count("question_answer_set__id", distinct=True)
+            num_user_question_answers=Count("question_answer_set__id", distinct=True),
+            num_user_question_answers_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__is_correct=True)),
+            num_user_question_answers_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__is_correct=False)),
+
+            # English
+            num_user_question_answers_english=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.ENGLISH)),
+            num_user_question_answers_english_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.ENGLISH, question_answer_set__is_correct=True)),
+            num_user_question_answers_english_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.ENGLISH, question_answer_set__is_correct=False)),
+
+            # Math
+            num_user_question_answers_math=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.MATH)),
+            num_user_question_answers_math_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.MATH, question_answer_set__is_correct=True)),
+            num_user_question_answers_math_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.MATH, question_answer_set__is_correct=False)),
         )
 
     actions = [
