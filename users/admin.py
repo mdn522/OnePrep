@@ -65,6 +65,7 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
             },
         ),
     )
+    show_facets = admin.ShowFacets.ALWAYS
 
     def num_user_question_answers(self, obj):
         return obj.num_user_question_answers

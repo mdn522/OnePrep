@@ -1,9 +1,10 @@
 import easy
 from django.contrib import admin
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django_object_actions import DjangoObjectActions
 from djangoql.admin import DjangoQLSearchMixin
 
+from questions.models import Question
 from .models import Exam, ExamQuestion
 
 
@@ -25,9 +26,10 @@ class ExamAdmin(DjangoQLSearchMixin, DjangoObjectActions, admin.ModelAdmin):
     search_fields = [
         'name',
         'description',
-        # 'added_by__username',
+        'added_by__username',
         'added_by__email'
     ]
+    show_facets = admin.ShowFacets.ALWAYS
     readonly_fields = ['source', 'source_id']
     raw_id_fields = ['added_by']
 
@@ -54,12 +56,28 @@ class ExamQuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'question_fk',
         'order'
     ]
-    list_filter = []
+    list_filter = [
+        'question__module',
+        'exam__source',
+    ]
     search_fields = ['exam__name', 'question__stem']
+    show_facets = admin.ShowFacets.ALWAYS
     raw_id_fields = ['exam', 'question']
-    list_select_related = ['exam', 'question']
+    # list_select_related = [
+    #     Prefetch('exam', queryset=Question.objects.only('name')),
+    #     # 'exam',
+    #     'question'
+    # ]
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.prefetch_related(
+            Prefetch('exam', queryset=Exam.objects.only('name')),
+            Prefetch('question', queryset=Question.objects.only('id')),
+        )
+        return queryset
 
     question_fk = easy.ForeignKeyAdminField('question')
-    exam_fk = easy.ForeignKeyAdminField('exam')
+    exam_fk = easy.ForeignKeyAdminField('exam', display='exam.name', default='-')
 
     # TODO Question Details

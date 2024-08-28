@@ -177,7 +177,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "core.middleware.PA2FlyRedirectMiddleware",
+    # "core.middleware.PA2FlyRedirectMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     # "django.contrib.sessions.middleware.SessionMiddleware",
     "qsessions.middleware.SessionMiddleware",
@@ -399,3 +399,6 @@ SILKY_DYNAMIC_PROFILING = [
     {'module': 'questions.views', 'function': 'CollegeBoardQuestionBankCategoryListView.get'},
     {'module': 'exams.views', 'function': 'ExamListView.get'},
 ]
+
+
+LOGIN_HISTORY_GEOLOCATION_METHOD = env.str('LOGIN_HISTORY_GEOLOCATION_METHOD', default='')
