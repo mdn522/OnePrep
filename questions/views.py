@@ -209,6 +209,7 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
 
     question_content_type_id = ContentType.objects.get_for_model(Question).id
     tags_map = None
+    flat_tags = None
 
     def filtered_queryset(self):
         qs = Question.objects
@@ -249,8 +250,13 @@ class CollegeBoardQuestionBankCategoryListView(QuestionSetView, TemplateView):
         # )
 
         # flat tags from category map
-        flat_tags = set([tag for category in self.category_map for tag in [category.module, category.primary_class, category.skill] if tag])
-        flat_tags = (flat_tags - {'en', 'math'}) | {'English', 'Math'} | {'Bluebook', 'Non Bluebook'}
+
+        if CollegeBoardQuestionBankCategoryListView.flat_tags is None:
+            flat_tags = set([tag for category in self.category_map for tag in [category.module, category.primary_class, category.skill] if tag])
+            flat_tags = (flat_tags - {'en', 'math'}) | {'English', 'Math'} | {'Bluebook', 'Non Bluebook'}
+            CollegeBoardQuestionBankCategoryListView.flat_tags = flat_tags
+
+        flat_tags = CollegeBoardQuestionBankCategoryListView.flat_tags
 
         # TODO Cache
         if CollegeBoardQuestionBankCategoryListView.tags_map is None:
