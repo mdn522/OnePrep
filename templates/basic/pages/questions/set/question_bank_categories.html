@@ -2,73 +2,34 @@
 {% load core_tags %}
 
 {% block title %}
-	College Board Question Bank - {{ block.super }}
+	{{ name }} - {{ block.super }}
 {% endblock title %}
 
 {% block content %}
 
-    <h1 class="text-3xl font-bold mb-5 text-center">College Board Question Bank</h1>
+    <h1 class="text-3xl font-bold mb-5 text-center">{{ name }}</h1>
 
     <div class="bg-base-300 rounded-badge mb-4 flex mb-4 items-center text-sm border border-orange-100 p-2 font-bold flex-wrap pb-0 px-4">
-{#        {{ filters }}#}
         {% for filter_key, filter in filters.items %}
             {% if filter.show %}
             	<div class="flex items-center space-x-1 mr-8 mb-2">
                     <span>{{ filter.text }}: </span>
-{#                    <ul class="menu menu-horizontal">#}
-{#                        {{ filter.items.items }}#}
                         {% for item_key, item in filter.items.items %}
-{#                            {{ item }}#}
-{#                        	{{ item_key | safe }}<br><br>#}
-{#                            {{ item | safe }}#}
-{#                            {% if question_set_filter|get_item %}#}
-{#                            	#}
-{#                            {% endif %} #}
-{#                            {{ current_filter }}#}
                             {% update_variable filter_key|get_dict_from_kv:item_key as filter_dict %}
                             {% update_variable current_filter|merge_dict:filter_dict as qf %}
-{#                            <li>#}
                                 <a class="btn btn-sm btn-neutral btn-outline {% if item_key == current_filter|get_item:filter_key %}btn-active{% endif %}{% if current_filter|get_item:filter_key == None and item_key == 'all' %}btn-active{% endif %}"
-                                   href="{% url "questions:question-set-cbqb" %}?{{ qf | dj_urlencode | safe }}">
+                                   href="{% url url_name %}?{{ qf | dj_urlencode | safe }}">
                                     {% firstof item.text item %}
                                 </a>
-{#                            </li>#}
                         {% endfor %}
-{#                    </ul>#}
                 </div>
             {% endif %}
-{#            {{ filter_key }}#}
         {% endfor %}
-
-
-{#        <div class="flex items-center space-x-1 mr-8 mb-2">#}
-{#            <span>Filter: </span>#}
-{#            <ul class="menu menu-horizontal">#}
-{#                <li><a>All</a></li>#}
-{#                <li><a class="active">Bluebook Only</a></li>#}
-{#                <li><a>Exclude Bluebook</a></li>#}
-{#            </ul>#}
-{#        </div>#}
-{#        <div class="flex items-center space-x-1 mr-8 mb-2">#}
-{#            <span>Difficulty: </span>#}
-{#            <ul class="menu menu-horizontal">#}
-{#                <li><a class="active">All</a></li>#}
-{#                <li><a class="">Easy</a></li>#}
-{#                <li><a class="">Medium</a></li>#}
-{#                <li><a class="">Hard</a></li>#}
-{#            </ul>#}
-{#        </div>#}
     </div>
     <div class="grid gap-4 grid-cols-1 md:grid-cols-2 relative">
 
         {% for module in modules %}
             <div class="relative">
-                {#            <div class="text-4xl font-semibold">Reading and Writing ({{ module_count['english'] }})</div>#}
-                {#                <a class="text-4xl leading-10 block bg-primary hover:bg-secondary text-white flex items-center duration-200 transition-colors"#}
-                {#                   href="/question/">#}
-                {#                    <span class="w-24 text-4xl leading-8 flex items-center justify-center h-full">{{ counts.en }}</span>#}
-                {#                    <span class="flex items-center justify-center min-h-16">Reading and Writing</span>#}
-                {#                </a>#}
                 <ul class="menu menu-lg menu-horizontal bg-base-300 w-full rounded-box">
                     <li class="w-full relative">
                         <a class="" {% if counts|get_item:module > 0 %}href="{% url 'questions:set-first-question' %}?{{ modules_args|get_item:module }}"{% endif %}>
@@ -97,22 +58,5 @@
                 </ul>
             </div>
         {% endfor %}
-
-{#            <div>#}
-{#            <div class="text-4xl font-semibold">Math ({{ module_count['math'] }})</div>#}
-{#                <a class="text-4xl leading-10 block bg-orange-500 hover:bg-orange-600 text-white flex items-center duration-150 transition-colors"#}
-{#                   href="/question/">#}
-{#                    <span class="w-24 text-4xl leading-8 flex items-center justify-center h-full">{{ counts.math }}</span>#}
-{#                    <span class="flex items-center justify-center min-h-16">Math</span>#}
-{#                </a>#}
-{#                {% with primary_class=None %}#}
-{#                    {% for category in categories %}#}
-{#                        {% if category.module == 'math' and category.primary_class != primary_class %}#}
-{#                            {% include './includes/category.html' %}#}
-{#                            {% update_variable category.primary_class as primary_class %}#}
-{#                        {% endif %}#}
-{#                    {% endfor %}#}
-{#                {% endwith %}#}
-{#            </div>#}
     </div>
 {% endblock %}

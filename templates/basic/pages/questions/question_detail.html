@@ -47,16 +47,16 @@
 
     <style>
         .stats-xs {}
-    
+
         .stats-xs .stat {
             padding: 0.5rem 1rem;
         }
-    
+
         .stats-xs .stat-title {
             font-size: 1rem;
             line-height: 1rem;
         }
-    
+
         .stats-xs .stat-value {
             font-size: 1.25rem;
             line-height: 1.5rem;
@@ -67,15 +67,15 @@
         #answer-choices .answer-choice:not(.deleted) .answer-choice-deleted-line  {
             display: none;
         }
-    
+
         #answer-choices .answer-choice.deleted .answer-choice-content {
             opacity: 50%;
         }
-    
+
         .question-mark-for-review.question-marked .question-mark-for-review-icon-unmarked {
             display: none;
         }
-    
+
         .question-mark-for-review:not(.question-marked) .question-mark-for-review-icon-marked {
             display: none;
         }
@@ -87,42 +87,42 @@
         #question {
             font-family: Roboto, sans-serif;
         }
-    
+
         #question img {
             display: inline-block;
             margin: 0 3px;
         }
-    
+
         #question table {
             border: 1px solid;
         }
-    
+
         #question table :where(thead, tfoot) {
             white-space: normal !important;
         }
-    
+
         #question table tr th {
             border: 1px solid;
             padding-left: 10px;
             padding-right: 10px;
         }
-    
+
         #question table tr td {
             border: 1px solid;
             padding-left: 10px;
             padding-right: 10px;
         }
-    
+
         #question ul, #question ol {
             padding-left: 40px;
             margin-top: 16px;
             margin-bottom: 16px;
         }
-    
+
         #question ul {
             list-style: disc;
         }
-    
+
         #question ol {
             list-style: decimal;
         }
@@ -145,7 +145,7 @@
                 </div>
                 <div class="stats bg-base-200 w-full mt-2 mb-4 stats-xs">
                     {% for set_stat in set_stats %}
-                    	<div class="stat">
+                        <div class="stat">
                             <div class="stat-title">{{ set_stat.text }}</div>
                             <div class="stat-value">{{ set_stat.value }}</div>
                         </div>
