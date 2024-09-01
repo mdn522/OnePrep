@@ -5,9 +5,10 @@ whitenoise==6.6.0  # https://github.com/evansd/whitenoise
 # redis==5.0.1  # https://github.com/redis/redis-py
 # hiredis==2.3.2  # https://github.com/redis/hiredis-py
 more_itertools  # https://pypi.org/project/more-itertools/
-rich
+rich  # https://github.com/Textualize/rich
 django-taggit  # https://pypi.org/project/django-taggit/
 pydantic  # https://github.com/pydantic/pydantic
+# bidict  # https://github.com/jab/bidict
 sortedcontainers  # https://pypi.org/project/sortedcontainers/
 python-dateutil  # https://pypi.org/project/python-dateutil/
 json-stream  # https://pypi.org/project/json-stream/

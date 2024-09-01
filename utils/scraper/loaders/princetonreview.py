@@ -1,4 +1,5 @@
 import json
+import re
 from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
@@ -17,7 +18,7 @@ class PrincetonReviewLoader(Loader):
     program = 'sat'
     source = 'princeton_review'
 
-    def load(self):
+    def load(self, mock: bool = False):
         program = self.get_program()
         exams_file = self.get_file('princeton_review', 'exams.json')  # base_path=Path(r'D:\Workspace\Python\Notebooks\SAT-Lab')
 
@@ -32,6 +33,13 @@ class PrincetonReviewLoader(Loader):
         exam_order = 1
         for exam_name, exams_data in exams.items():
             exam_name = exam_name
+
+            exam_year = None
+            try:
+                exam_year = re.search(r'\d{4}', exam_name).group(0)
+            except AttributeError:
+                pass
+
             for module, diff, exam_data in [
                 ('english', '', exams_data['english']),
                 ('english', 'easy', exams_data['english_easy']),
@@ -55,7 +63,7 @@ class PrincetonReviewLoader(Loader):
                 )
                 exam_order += 1
 
-                exam.tags.add('The Princeton Review', 'Exam', 'SAT', module.title())
+                exam.tags.add('The Princeton Review', 'Exam', 'SAT', module.title(), *([exam_year] if exam_year else []))
 
                 print(exam, exam_created)
 
