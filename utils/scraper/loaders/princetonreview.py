@@ -88,7 +88,7 @@ class PrincetonReviewLoader(Loader):
                     )
 
                     question.tags.add(
-                        'The Princeton Review', 'SAT', module.title(),
+                        'The Princeton Review', 'Practice Test', 'SAT', module.title(),
                         *question_data['concepts']
                     )
 

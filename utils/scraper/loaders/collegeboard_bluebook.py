@@ -97,7 +97,7 @@ class CollegeBoardBlueBookLoader(Loader):
                     )
 
                     question.tags.add(
-                        'College Board', 'Bluebook', 'SAT', module.title(),
+                        'College Board', 'Bluebook', 'Practice Test', 'SAT', module.title(),
                     )
 
                     if question_data['answer']['style'] == 'Multiple Choice':
