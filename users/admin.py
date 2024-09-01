@@ -91,8 +91,10 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
             return '-'
 
         title = f"{(correct / total) * 100:.2f}% / {(incorrect / total) * 100:.2f}%"
-        title += f"\nEnglish: {english_correct} ({(english_correct / english_total) * 100:.2f}%) / {english_incorrect} ({(english_incorrect / english_total) * 100:.2f}%)"
-        title += f"\nMath: {math_correct} ({(math_correct / math_total) * 100:.2f}%) / {math_incorrect} ({(math_incorrect / math_total) * 100:.2f}%)"
+        if english_total:
+            title += f"\nEnglish: {english_correct} ({(english_correct / english_total) * 100:.2f}%) / {english_incorrect} ({(english_incorrect / english_total) * 100:.2f}%)"
+        if math_total:
+            title += f"\nMath: {math_correct} ({(math_correct / math_total) * 100:.2f}%) / {math_incorrect} ({(math_incorrect / math_total) * 100:.2f}%)"
 
         html = f'<span title="{title}">'
         html += f'<span style="">{total}</span> / '
