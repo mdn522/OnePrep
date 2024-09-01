@@ -56,17 +56,17 @@ class Question(TimeStampedModel, models.Model):
             models.UniqueConstraint(
                 fields=['source', 'source_id'],
                 name='unique_question_source_id',
-                condition=(Q(source__isnull=False) | ~Q(source='')) & (Q(source_id__isnull=False) | ~Q(source_id=''))
+                condition=(Q(source__isnull=False) & ~Q(source='')) & (Q(source_id__isnull=False) & ~Q(source_id=''))
             ),
             models.UniqueConstraint(
                 fields=['source', 'source_id_2'],
                 name='unique_question_source_id_2',
-                condition=(Q(source__isnull=False) | ~Q(source='')) & (Q(source_id_2__isnull=False) | ~Q(source_id_2=''))
+                condition=(Q(source__isnull=False) & ~Q(source='')) & (Q(source_id_2__isnull=False) & ~Q(source_id_2=''))
             ),
             models.UniqueConstraint(
                 fields=['source', 'source_id_3'],
                 name='unique_question_source_id_3',
-                condition=(Q(source__isnull=False) | ~Q(source='')) & (Q(source_id_3__isnull=False) | ~Q(source_id_3=''))
+                condition=(Q(source__isnull=False) & ~Q(source='')) & (Q(source_id_3__isnull=False) & ~Q(source_id_3=''))
             ),
 
             # Indexes

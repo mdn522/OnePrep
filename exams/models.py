@@ -54,7 +54,7 @@ class Exam(TimeStampedModel, models.Model):
             models.UniqueConstraint(
                 fields=['source', 'source_id'],
                 name='unique_exam_source_id',
-                condition=(Q(source__isnull=False) | ~Q(source='')) & (Q(source_id__isnull=False) | ~Q(source_id=''))
+                condition=(Q(source__isnull=False) & ~Q(source='')) & (Q(source_id__isnull=False) & ~Q(source_id=''))
             ),
         ]
 

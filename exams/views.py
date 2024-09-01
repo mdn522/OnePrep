@@ -18,10 +18,8 @@ class ExamListView(ListView):
     paginate_by = 500
 
     # TODO user answers count
-    # TODO user correct answers count
     # TODO user correct percentage
     # TODO user time spent
-    # TODO user marked for review count
 
     def get_queryset(self):
         questions = Question.objects.filter(exam_question_set__exam=OuterRef('pk')).order_by('exam_question_set__order').values('id')
@@ -40,7 +38,7 @@ class ExamListView(ListView):
 
         qs = (
             Exam.objects
-                .filter(is_active=True)  # is_public=True
+                .filter(is_active=True)  # TODO is_public=True
                 .annotate(question_count=Count("exam_question_set"))
                 .annotate(marked_for_review_count=SubqueryCount(question_status))
                 .annotate(correct_count=SubqueryCount(question_answer))
