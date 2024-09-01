@@ -4,29 +4,25 @@
 
 {% block title %}
     User:
-    {{ object.name }}
+    {% firstof user.name '' %}
 {% endblock title %}
 {% block content %}
-    <div class="container">
-        <div class="row">
+    <div class="text-center">
+        <h2 class="text-3xl">
+            {{ object.name }}
+        </h2>
+    </div>
+    {% if object == request.user %}
+        <!-- Action buttons -->
+        <div class="text-center mt-4">
             <div class="col-sm-12">
-                <h2>
-                    {{ object.name }}
-                </h2>
+                <a class="btn btn-primary" href="{% url 'users:update' %}" role="button">My Info</a>
+                <a class="btn btn-primary"
+                   href="{% url 'account_email' %}"
+                   role="button">E-Mail</a>
+                <!-- Your Stuff: Custom user template urls -->
             </div>
         </div>
-        {% if object == request.user %}
-            <!-- Action buttons -->
-            <div class="row">
-                <div class="col-sm-12">
-                    <a class="btn btn-primary" href="{% url 'users:update' %}" role="button">My Info</a>
-                    <a class="btn btn-primary"
-                       href="{% url 'account_email' %}"
-                       role="button">E-Mail</a>
-                    <!-- Your Stuff: Custom user template urls -->
-                </div>
-            </div>
-            <!-- End Action buttons -->
-        {% endif %}
-    </div>
+        <!-- End Action buttons -->
+    {% endif %}
 {% endblock content %}
