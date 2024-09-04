@@ -245,6 +245,7 @@ def basic_exam_time_view(request, exam_id, user_id=None, username=None):
     exam_questions_set = exam.exam_question_set.all()
 
     questions_order_to_id = {question.order: question.question_id for question in exam_questions_set}
+    # k -> question_id, v -> dict
     questions_data = defaultdict(lambda: {
         'correct_count': 0, 'correct_times': [], 'correct_time_avg': 0,
         'incorrect_count': 0, 'incorrect_times': [], 'incorrect_time_avg': 0,

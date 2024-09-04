@@ -55,6 +55,11 @@ Remember: Your goal is to be fully prepared for the real exam. By practicing in 
                                     {{ exam.correct_count }}
                                 </span>
                             {% endif %}
+                            {% if exam.incorrect_count > 0 %}
+                                <span class="badge badge-error text-error-content">
+                                    {{ exam.incorrect_count }}
+                                </span>
+                            {% endif %}
                         </td>
                         <td class="text-center">
                             {% if exam.marked_for_review_count > 0 %}

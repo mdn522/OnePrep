@@ -141,6 +141,13 @@
                         	<a href="{% url 'questions:question-set' question_set_key %}?{{ question_set_categories_args }}"
                                class="btn btn-secondary btn-xs ml-4">Back to Question Set</a>
                         {% endif %}
+                        {% if question_set_exam_id %}
+                        	<!-- Show chart link -->
+                            <a href="{% url 'charts:basic_exam_time' exam_id=question_set_exam_id %}"
+                               class="btn btn-accent btn-xs ml-4">
+                                Stats
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="stats bg-base-200 w-full mt-2 mb-4 stats-xs">

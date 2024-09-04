@@ -22,18 +22,26 @@ class ExamListView(ListView):
     # TODO user time spent
 
     def get_queryset(self):
+        user = self.request.user if self.request.user.is_authenticated else None
+
         questions = Question.objects.filter(exam_question_set__exam=OuterRef('pk')).order_by('exam_question_set__order').values('id')
         question_status = (
             UserQuestionStatus.objects
-                .filter(question__exam_question_set__exam=OuterRef('pk'), user=self.request.user if self.request.user.is_authenticated else None, exam=None, is_marked_for_review=True)
+                .filter(question__exam_question_set__exam=OuterRef('pk'), user=user, exam=None, is_marked_for_review=True)
                 .annotate(count=Count('id'))
                 .order_by('question__exam_question_set__exam')
                 .values('count')
         )
 
+
         question_answer = (
             UserQuestionAnswer.objects
-                .filter(question__exam_question_set__exam=OuterRef('pk'), user=self.request.user if self.request.user.is_authenticated else None, exam=None, is_correct=True).distinct('question')
+                .filter(question__exam_question_set__exam=OuterRef('pk'), user=user, exam=None, is_correct=True).distinct('question')
+        )
+
+        question_answer_incorrect = (
+            UserQuestionAnswer.objects
+                .filter(question__exam_question_set__exam=OuterRef('pk'), user=user, exam=None, is_correct=False).distinct('question')
         )
 
         qs = (
@@ -42,6 +50,7 @@ class ExamListView(ListView):
                 .annotate(question_count=Count("exam_question_set"))
                 .annotate(marked_for_review_count=SubqueryCount(question_status))
                 .annotate(correct_count=SubqueryCount(question_answer))
+                .annotate(incorrect_count=SubqueryCount(question_answer_incorrect))
                 .annotate(first_question_id=Subquery(questions[:1]))
                 .order_by('source', 'source_order', 'name')
         )

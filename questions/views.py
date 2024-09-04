@@ -80,6 +80,8 @@ class ExamQuestionSet(QuestionSetView):
         context['question_set_args'] = urlencode(question_set_filter)
         context['question_set_back'] = False
 
+        context['question_set_exam_id'] = exam.id
+
         question_set_filtered_queryset = self.filtered_queryset(exam_id=exam.id).order_by('source_order').only('id', 'source_order', 'difficulty', 'module')
         context['question_set_questions'] = question_set_filtered_queryset
 
@@ -384,8 +386,6 @@ class QuestionBankCategoryListView(QuestionSetView):
                     question_set_filter_text[filter_key] = dict(filter_data['choices'].choices).get(item_value)
 
         return question_set_filtered_queryset
-
-
 
 
 class CollegeBoardQuestionBankCategoryListView(QuestionBankCategoryListView):
