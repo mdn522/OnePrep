@@ -1,6 +1,6 @@
 {% load static i18n %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}
-<html lang="{{ LANGUAGE_CODE }}">
+<html lang="{{ LANGUAGE_CODE }}" data-theme="{{ DAISYUI_THEME }}">
 <head>
     {% include "basic/components/google_analytics.html" %}
     <meta charset="utf-8"/>
@@ -11,9 +11,9 @@
         {% endblock title %}
     </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="description" content="OnePrep"/>
-    <meta name="author" content="Abdullah Mallik"/>
-    <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}"/>
+    
+    {% include 'components/head_meta.html' %}
+
     {% block css %}
         <!-- Latest compiled and minified Bootstrap CSS -->
         {% if not IS_BLACKOUT %}
