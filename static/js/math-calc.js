@@ -1,5 +1,5 @@
 // Draggable Window Script
-let mg_starting_z_index = 1000;
+let mg_starting_z_index = 200;
 let windowWidth = window.innerWidth;
 let windowHeight = window.innerHeight;
 window.addEventListener('load', function () {
@@ -69,8 +69,10 @@ function initDragElement() {
         document.onmouseup = null;
         document.onmousemove = null;
         let calc = Alpine.store('calculator');
-        calc.x = Math.max(5, element.offsetLeft - pos1);
-        calc.y = Math.max(5, element.offsetTop - pos2);
+        calc.x = parseInt(element.style.left, 10);
+        calc.y = parseInt(element.style.top, 10);
+        // calc.x = Math.max(5, element.offsetLeft - pos1);
+        // calc.y = Math.max(5, element.offsetTop - pos2);
     }
 
     function getHeader(element) {
@@ -85,30 +87,30 @@ function initDragElement() {
 }
 
 function initResizeElement() {
-    var popups = document.getElementsByClassName("mg-popup");
+    let popups = document.getElementsByClassName("mg-popup");
 
-    var element = null;
-    var startX, startY, startWidth, startHeight;
+    let element = null;
+    let startX, startY, startWidth, startHeight;
 
-    for (var i = 0; i < popups.length; i++) {
-        var p = popups[i];
+    for (let i = 0; i < popups.length; i++) {
+        let p = popups[i];
         if (p.classList.contains('mg-no-resizer')) {
             continue;
         }
 
-        var right = document.createElement("div");
+        let right = document.createElement("div");
         right.className = "resizer-right";
         p.appendChild(right);
         right.addEventListener("mousedown", initDrag, false);
         right.parentPopup = p;
 
-        var bottom = document.createElement("div");
+        let bottom = document.createElement("div");
         bottom.className = "resizer-bottom";
         p.appendChild(bottom);
         bottom.addEventListener("mousedown", initDrag, false);
         bottom.parentPopup = p;
 
-        var both = document.createElement("div");
+        let both = document.createElement("div");
         both.className = "resizer-both";
         p.appendChild(both);
         both.addEventListener("mousedown", initDrag, false);
@@ -135,9 +137,14 @@ function initResizeElement() {
     function doDrag(e) {
         element.style.width = startWidth + e.clientX - startX + "px";
         element.style.height = startHeight + e.clientY - startY + "px";
+        // console.log('do drag', element.style.width, element.style.height);
     }
 
-    function stopDrag() {
+    function stopDrag(e) {
+        let calc = Alpine.store('calculator');
+        // console.log('stop drag', element.style.width, element.style.height);
+        calc.width = parseInt(element.style.width, 10);
+        calc.height = parseInt(element.style.height, 10);
         document.documentElement.removeEventListener(
             "mousemove",
             doDrag,
@@ -150,7 +157,6 @@ function initResizeElement() {
         );
     }
 }
-
 
 // Popup
 document.addEventListener("click", (e) => {
@@ -173,7 +179,7 @@ document.addEventListener("click", (e) => {
 
 document.addEventListener("mousedown", (e) => {
     if (e.target.closest(".mg-popup")) {
-        mg_starting_z_index += 1;
+        // mg_starting_z_index += 1;
         e.target.closest(".mg-popup").style.zIndex = mg_starting_z_index;
     }
 });
