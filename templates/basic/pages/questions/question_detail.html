@@ -28,7 +28,7 @@
     <!-- Alpine Plugins -->
     {% if not IS_BLACKOUT %}
         <script src="https://cdn.jsdelivr.net/npm/@marcreichel/alpine-timeago@latest/dist/alpine-timeago.min.js" defer></script>
-        <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
     {% else %}
         <script src="{% static 'cdn/alpine-timeago.min.js' %}" defer></script>
         <script src="{% static 'cdn/alpine-persist.min.js' %}" defer></script>
@@ -40,10 +40,19 @@
     {% else %}
         <script src="{% static 'cdn/alpine.3.x.x.min.js' %}" defer></script>
     {% endif %}
+
+    {% if question.module == Question.Module.MATH %}
+        <script src="https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+        <script src="{% static 'js/math-calc.js' %}"></script>
+    {% endif %}
 {% endblock %}
 
 {% block css %}
 	{{ block.super }}
+
+    {% if question.module == Question.Module.MATH %}
+        <link rel="stylesheet" href="{% static 'css/math-calc.css' %}">
+    {% endif %}
 
     <style>
         .stats-xs {}
@@ -162,6 +171,14 @@
         {% endif %}
         <div id="question-meta" class="">
             <div class="">
+                {% if question.module == Question.Module.MATH %}
+                <div class="" x-data>
+                    <span class="btn float-right mt-1 mr-2"
+                          :class="{'btn-primary': $store.calculator.show}" @click="calc_resize(); $store.calculator.show = !$store.calculator.show">
+                        <svg class="size-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V13.5Zm0 2.25h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V18Zm2.498-6.75h.007v.008h-.007v-.008Zm0 2.25h.007v.008h-.007V13.5Zm0 2.25h.007v.008h-.007v-.008Zm0 2.25h.007v.008h-.007V18Zm2.504-6.75h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5Zm0 2.25h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V18Zm2.498-6.75h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5ZM8.25 6h7.5v2.25h-7.5V6ZM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.65 4.5 4.757V19.5a2.25 2.25 0 0 0 2.25 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25V4.757c0-1.108-.806-2.057-1.907-2.185A48.507 48.507 0 0 0 12 2.25Z" /></svg>
+                    </span>
+                </div>
+                {% endif %}
                 <div class="text-sm">Question ID</div>
                 <div class="text-2xl font-semibold flex items-center font-mono">
                     <i>#{{ question.id|stringformat:"05d" }}</i>
@@ -189,7 +206,8 @@
             </div>
         {% endif %}
 
-        <div class="{% if question.module == Question.Module.MATH %}w-full max-w-3xl px-0 md:px-5 justify-self-center{% endif %}">
+        <div class="{% if question.module == Question.Module.MATH %}w-full max-w-3xl px-0 md:px-5 justify-self-center{% endif %}"
+             {% if question.module == Question.Module.MATH %}:class="{'justify-self-end': $store.calculator.show, 'justify-self-center': !$store.calculator.show}" x-data{% endif %}>
             <div class="flex bg-base-300 py-1 px-1 items-center">
                 <span class="flex items-center question-mark-for-review"
                       x-data :class="{'question-marked': $store.data.status.is_marked_for_review}"
@@ -388,6 +406,43 @@
             </button>
         </div>
     </div>
+
+    {% if question.module == Question.Module.MATH %}
+        <div style="position: fixed; overflow-x: hidden; max-width: 100%; width: 100%; z-index: 200;">
+            <div class="mg mg-popup border-base-content border" id="calculator-window"
+                 style="position: fixed; z-index: 200; min-width: 410px; min-height: 578px;"
+                 :style="{ top: $store.calculator.y + 'px', left: $store.calculator.x + 'px', width: $store.calculator.width + 'px', height: $store.calculator.height + 'px' }"
+                 :class="{'mg-popup-minimized': $store.calculator.minimized, 'mg-popup-enlarged': $store.calculator.enlarged}"
+                 x-data x-cloak x-show="$store.calculator.show">
+                <div class="mg-popup-top bg-base-content text-base-100">
+                    <div class="mg-popup-title text-lg leading-lg flex h-full items-center pl-3 font-bold">
+                        Calculator
+                    </div>
+                    <div class="mg-popup-move-icon h-full pt-1">
+                        <svg class="w-6 h-6" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="3" d="M6 12h.01m6 0h.01m5.99 0h.01"/></svg>
+                        <svg class="w-6 h-6 -translate-y-4" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="3" d="M6 12h.01m6 0h.01m5.99 0h.01"/></svg>
+                    </div>
+                    <div class="h-full flex items-center justify-end">
+                        <button class="mg-popup-minimize pr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" /></svg>
+                        </button>
+                        <button class="mg-popup-size-switch pr-3 hidden md:block" @click="calc_resize(); $store.calculator.enlarged = !$store.calculator.enlarged; $store.calculator.minimized = false; let ss = $store.calculator.size_sets[+$store.calculator.enlarged]; $store.calculator.width = ss.width; $store.calculator.height = ss.height;">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" x-show="$store.calculator.enlarged"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 outward" x-show="!$store.calculator.enlarged"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
+                        </button>
+                        <button class="mg-popup-close pr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+
+                </div>
+                <div class="mg-popup-content bg-base-100">
+                    <div id="desmos-calculator" style="width: 100%; height: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
 {% endblock %}
 
 {% block inline_javascript %}
@@ -399,7 +454,7 @@
         return question_url;
     }
 
-    document.addEventListener('alpine:init', () => {
+    document.addEventListener('alpine:init', function () {
         Alpine.store('data', {
             // ID, SavedAnswer, MarkedForReviewStatus, TimeSpent
             notes: '',
@@ -569,6 +624,20 @@
             args: {{ question_set_args | jsonify }},
         {% endif %}
         });
+
+        Alpine.store('calculator', {
+            'show': Alpine.$persist(false).as('calc-show'),
+            'minimized': Alpine.$persist(false).as('calc-minimized'),
+            'enlarged': Alpine.$persist(false).as('calc-enlarged'),
+            'x': Alpine.$persist(20).as('calc-x'),
+            'y': Alpine.$persist(20).as('calc-y'),
+            'width': Alpine.$persist(410).as('calc-width'),
+            'height': Alpine.$persist(578).as('calc-height'),
+            size_sets: [
+                {width: 410, height: 578},
+                {width: 820, height: 640},
+            ]
+        })
     })
 
     function timer_data(start) {
@@ -697,6 +766,14 @@
             }
         }
     </script>
+
+    {% if question.module == Question.Module.MATH %}
+        <script>
+            let elt = document.getElementById('desmos-calculator');
+            let calculator = Desmos.GraphingCalculator(elt, {images: false, notes: false, folders: false});
+        </script>
+    {% endif %}
+
     {% if not IS_BLACKOUT %}
         <script type="text/javascript" id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
     {% else %}
@@ -704,3 +781,4 @@
 {#        <script src="{% static 'cdn/MathJax.2.7.7.js' %}" async id="MathJax-script"></script>#}
     {% endif %}
 {% endblock %}
+

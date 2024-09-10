@@ -1,0 +1,105 @@
+.mg-popup {
+    /* TODO */
+    z-index: 999;
+    position: fixed;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.1), -1px 1px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: hidden;
+}
+
+.mg-popup:not(.mg-popup-minimized) {
+    /*   !*enable this to css resize*! */
+    resize: both;
+}
+
+.mg-popup-top {
+    text-align: right;
+    height: 40px;
+    user-select: none;
+    cursor: move;
+    position: relative;
+  }
+
+.mg-popup-title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-family: sans-serif;
+}
+
+.mg-popup-move-icon {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    cursor: move;
+}
+
+.mg-popup-top .round {
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    border: none;
+    margin-left: 0;
+    box-shadow: 0 0 5px #999;
+    cursor: pointer;
+}
+
+.mg-popup.mg-popup-minimized {
+    min-height: 42px !important;
+    height: 42px !important;
+    overflow-y: hidden;
+    opacity: 0.40;
+    transition: opacity 0.15s ease;
+}
+
+.mg-popup.mg-popup-minimized:hover {
+    opacity: 1;
+}
+
+.mg-popup-minimized .mg-popup-content {
+    visibility: hidden;
+}
+
+.mg-popup.mg-popup-minimized .resizer-right,
+.mg-popup.mg-popup-minimized .resizer-bottom,
+.mg-popup.mg-popup-minimized .resizer-both {
+    visibility: hidden;
+}
+
+.mg-popup .resizer-right {
+    width: 5px;
+    height: 100%;
+    background: transparent;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    cursor: e-resize;
+}
+
+.mg-popup .resizer-bottom {
+    width: 100%;
+    height: 5px;
+    background: transparent;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    cursor: n-resize;
+}
+
+.mg-popup .resizer-both {
+    width: 5px;
+    height: 5px;
+    background: transparent;
+    z-index: 10;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    cursor: nw-resize;
+}
+
+.mg-popup-content {
+    position: relative;
+    height: calc(100% - 40px);
+    overflow-y: hidden;
+}
