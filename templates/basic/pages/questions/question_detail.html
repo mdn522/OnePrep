@@ -47,7 +47,7 @@
         {% if not IS_BLACKOUT %}
             <script src="https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
         {% else %}
-            <script src="{% static 'cdn/desmos-calculator.1.9.1.min.js' %}" defer></script>
+            <script src="{% static 'cdn/desmos-calculator.1.9.1.min.js' %}"></script>
         {% endif %}
         
         <script src="{% static 'js/math-calc.js' %}"></script>
