@@ -2,6 +2,7 @@ import json
 from collections import namedtuple, OrderedDict, defaultdict
 from typing import Any, Dict, List
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
@@ -744,5 +745,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
             # print('filters',  QuestionSetView.filters)
 
         # print(question.__dict__)
+
+        context['PREFETCH_QUESTION'] = settings.DOC_PREFETCH_QUESTION
 
         return context

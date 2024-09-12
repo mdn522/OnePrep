@@ -7,12 +7,14 @@
 	{{ block.super }}
 
     {% if is_question_set %}
-    	{% if question_set_next_question_id %}
-    		<link rel="prefetch" href="{% url "questions:detail" question_set_next_question_id %}?{{ question_set_args }}">
-    	{% endif %}
-        {% if question_set_previous_question_id %}
-        	<link rel="prefetch" href="{% url "questions:detail" question_set_previous_question_id %}?{{ question_set_args }}">
-        {% endif %}
+        {% if PREFETCH_QUESTION %}
+            {% if question_set_next_question_id %}
+        		<link rel="prefetch" href="{% url "questions:detail" question_set_next_question_id %}?{{ question_set_args }}">
+            {% endif %}
+            {% if question_set_previous_question_id %}
+            	<link rel="prefetch" href="{% url "questions:detail" question_set_previous_question_id %}?{{ question_set_args }}">
+            {% endif %}
+            {% endif %} 
     {% endif %}
 {% endblock %}
 
@@ -42,7 +44,12 @@
     {% endif %}
 
     {% if question.module == Question.Module.MATH %}
-        <script src="https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+        {% if not IS_BLACKOUT %}
+            <script src="https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+        {% else %}
+            <script src="{% static 'desmo-calculator.1.9.1.min.js' %}" defer></script>
+        {% endif %}
+        
         <script src="{% static 'js/math-calc.js' %}"></script>
     {% endif %}
 {% endblock %}
