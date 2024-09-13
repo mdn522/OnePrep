@@ -9,8 +9,12 @@ urlpatterns = [
     path("user/<str:username>/charts/", views.chart_view, name="chart_with_username"),
     path("user/charts/", views.chart_view, name="chart"),
 
+    path('charts/admin/', views.admin_chart_view, name="admin_chart"),
+
 
     # path("charts/user/<int:user_id>/exam/<int:exam_id>/basic-time", views.basic_exam_time_view),
     path("charts/user/<str:username>/exam/<int:exam_id>/basic-time", views.basic_exam_time_view),
     path("charts/user/exam/<int:exam_id>/basic-time", views.basic_exam_time_view, name="basic_exam_time"),
+
+
 ]

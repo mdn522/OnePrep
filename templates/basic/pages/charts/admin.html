@@ -1,0 +1,133 @@
+{% extends "basic/pages/charts/base.html" %}
+{% load core_tags static %}
+
+{% block title %}Admin Chart - {{ block.super }}{% endblock %}
+
+{% block content %}
+    {% if kpi %}
+        <div class="stats">
+            {% for stats in kpi %}
+                <div class="stat">
+                    <div class="stat-title">{{ stats.title }}</div>
+                    <div class="stat-value">{{ stats.metric }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div>
+        <h2 class="text-3xl font-bold">
+            New users in last {{ days }} days
+        </h2>
+        <div id="users-chart" style="max-height: 300px;"></div>
+            <script>
+                let chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'users-chart',
+                        backgroundColor: 'transparent'
+                    },
+                    title: {text: '', style: {display: 'none'}},
+                    subtitle: {text: '', style: {display: 'none'}},
+                    xAxis: {
+                        categories: {{ chart_users_data.axis | jsonify }},
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Registrations'
+                        }
+                    },
+                    series: [{
+                        name: 'Users',
+                        data: {{ chart_users_data.values | jsonify }},
+                    }],
+                    legend:{enabled:false},
+                    credits: {enabled: false},
+                });
+            </script>
+    </div>
+
+    <div>
+        <h2 class="text-3xl font-bold">
+            New attempts in last {{ days }} days
+        </h2>
+        <div id="attempts-chart" style="max-height: 400px;"></div>
+        <h3 class="text-xl font-bold">English</h3>
+        <div id="english-attempts-chart" style="max-height: 400px;"></div>
+        <h3 class="text-xl font-bold">Math</h3>
+        <div id="math-attempts-chart" style="max-height: 400px;"></div>
+            <script>
+                let chart_attempts_base = {
+                    tooltip: {
+                        shared: true,
+                        split: false,
+                        enabled: true
+                    },
+                    xAxis: {
+                        categories: {{ chart_attempts_data.axis | jsonify }},
+                    },
+                    title: {text: '', style: {display: 'none'}},
+                    subtitle: {text: '', style: {display: 'none'}},
+                    credits: {enabled: false},
+                }
+                let values = {{ chart_attempts_data | jsonify }};
+                let chart_attempts = new Highcharts.Chart({
+                    ...chart_attempts_base,
+                    chart: {
+                        renderTo: 'attempts-chart',
+                        backgroundColor: 'transparent'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Attempts'
+                        }
+                    },
+                    series: [
+                        {name: 'Attempts', data: values.all.all},
+                        {name: 'Incorrect Attempts', data: values.all.incorrect, color: '#e74c3c'},
+                        {name: 'Correct Attempts', data: values.all.correct, color: '#27ae60'},
+                        {name: 'Questions Count', data: values.questions.all},
+                        {name: 'Users Count', data: values.users.all},
+                    ],
+                });
+                let chart_english_attempts = new Highcharts.Chart({
+                    ...chart_attempts_base,
+                    chart: {
+                        renderTo: 'english-attempts-chart',
+                        backgroundColor: 'transparent'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Attempts (English)'
+                        }
+                    },
+                    series: [
+                        {name: 'Attempts', data: values.en.all},
+                        {name: 'Incorrect Attempts', data: values.en.incorrect, color: '#e74c3c'},
+                        {name: 'Correct Attempts', data: values.en.correct, color: '#27ae60'},
+                        {name: 'Questions Count', data: values.questions.en},
+                        {name: 'Users Count', data: values.users.en},
+                    ],
+                });
+                let chart_math_attempts = new Highcharts.Chart({
+                    ...chart_attempts_base,
+                    chart: {
+                        renderTo: 'math-attempts-chart',
+                        backgroundColor: 'transparent'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Attempts (Math)'
+                        }
+                    },
+                    series: [
+                        {name: 'Attempts', data: values.math.all},
+                        {name: 'Incorrect Attempts', data: values.math.incorrect, color: '#e74c3c'},
+                        {name: 'Correct Attempts', data: values.math.correct, color: '#27ae60'},
+                        {name: 'Questions Count', data: values.questions.math},
+                        {name: 'Users Count', data: values.users.math},
+                    ],
+                });
+            </script>
+    </div>
+
+{% endblock content %}

@@ -1,8 +1,10 @@
 from collections import defaultdict, OrderedDict
+from datetime import timedelta
 from typing import Optional, List
 
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, Count
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -11,16 +13,7 @@ from exams.models import Exam, ExamQuestion
 from questions.models import Question, UserQuestionAnswer, UserQuestionStatus
 from users.models import User
 
-
-def get_date_range(start_date, end_date):
-    res = []
-    current_date = start_date.date()
-    end_date = end_date.date()
-    while current_date <= end_date:
-        res.append(current_date)
-        current_date += timezone.timedelta(days=1)
-
-    return res
+from utils.datetime import get_date_range, get_date_format
 
 
 @login_required
@@ -307,3 +300,134 @@ def basic_exam_time_view(request, exam_id, user_id=None, username=None):
     ctx['current_user'] = user
 
     return render(request, 'basic/pages/charts/exam_chart.html', context=ctx)
+
+
+@staff_member_required
+def admin_chart_view(request):
+    ctx = {
+        'kpi': []
+    }
+
+    # KPI
+    ctx['kpi'].append({
+        'title': 'New Users T/Y/W/M/A',
+        'metric': str(User.objects.filter(date_joined__date=timezone.now().date()).count()) + ' / ' +
+                  str(User.objects.filter(date_joined__date=timezone.now().date() - timedelta(days=1)).count()) + ' / ' +
+                  str(User.objects.filter(date_joined__date__gte=timezone.now().date() - timedelta(days=7)).count()) + ' / ' +
+                  str(User.objects.filter(date_joined__date__gte=timezone.now().date() - timedelta(days=30)).count()) + ' / ' +
+                  str(User.objects.count())
+    })
+
+    # Chart Data
+    DAYS = 60
+    try:
+        DAYS = int(request.GET.get('days'))
+    except:
+        pass
+    DAYS = min(DAYS, 360)
+    ctx['days'] = DAYS
+    x_axis = [get_date_format(dt) for dt in get_date_range(timezone.now() - timezone.timedelta(days=DAYS - 1), timezone.now())]
+    print(x_axis)
+    print(len(x_axis))
+    print(timezone.now() - timezone.timedelta(days=DAYS - 1))
+
+
+    # Chart Users
+    chart_users_days = DAYS
+    date__gte = (timezone.now() - timezone.timedelta(days=chart_users_days - 1)).date()
+    data = User.objects.filter(date_joined__date__gte=date__gte).values('date_joined__date').annotate(count=Count('id')).order_by('date_joined__date')
+    values = [0] * chart_users_days
+    for d in data:
+        index = x_axis.index(get_date_format(d['date_joined__date']))
+        values[index] = d['count']
+    ctx['chart_users_data'] = {
+        'axis': x_axis,
+        'values': values
+    }
+
+    # Chart Attempts
+    chart_attempts_days = DAYS
+    date__gte = (timezone.now() - timezone.timedelta(days=chart_attempts_days - 1)).date()
+    data = (
+        UserQuestionAnswer.objects
+        .filter(answered_at__date__gte=date__gte)
+        .values('answered_at__date')
+        .annotate(
+            count=Count('id'),
+            correct_count=Count('id', filter=Q(answer_choice__is_correct=True)),
+            incorrect_count=Count('id', filter=Q(answer_choice__is_correct=False)),
+
+            english_count=Count('id', filter=Q(question__module=Question.Module.ENGLISH)),
+            english_correct_count=Count('id', filter=Q(question__module=Question.Module.ENGLISH, answer_choice__is_correct=True)),
+            english_incorrect_count=Count('id', filter=Q(question__module=Question.Module.ENGLISH, answer_choice__is_correct=False)),
+
+            math_count=Count('id', filter=Q(question__module=Question.Module.MATH)),
+            math_correct_count=Count('id', filter=Q(question__module=Question.Module.MATH, answer_choice__is_correct=True)),
+            math_incorrect_count=Count('id', filter=Q(question__module=Question.Module.MATH, answer_choice__is_correct=False)),
+
+            # Unique questions
+            questions_count=Count('question', distinct=True),
+            english_questions_count=Count('question', filter=Q(question__module=Question.Module.ENGLISH), distinct=True),
+            math_questions_count=Count('question', filter=Q(question__module=Question.Module.MATH), distinct=True),
+
+            # Unique users
+            users_count=Count('user', distinct=True),
+            english_users_count=Count('user', filter=Q(question__module=Question.Module.ENGLISH), distinct=True),
+            math_users_count=Count('user', filter=Q(question__module=Question.Module.MATH), distinct=True),
+        )
+        .order_by('answered_at__date')
+    )
+    values = {
+        'axis': x_axis,
+        'all': {
+            'all': [0] * chart_attempts_days,
+            'correct': [0] * chart_attempts_days,
+            'incorrect': [0] * chart_attempts_days,
+        },
+        Question.Module.ENGLISH.value: {
+            'all': [0] * chart_attempts_days,
+            'correct': [0] * chart_attempts_days,
+            'incorrect': [0] * chart_attempts_days,
+        },
+        Question.Module.MATH.value: {
+            'all': [0] * chart_attempts_days,
+            'correct': [0] * chart_attempts_days,
+            'incorrect': [0] * chart_attempts_days,
+        },
+        'questions': {
+            'all': [0] * chart_attempts_days,
+            Question.Module.ENGLISH.value: [0] * chart_attempts_days,
+            Question.Module.MATH.value: [0] * chart_attempts_days,
+        },
+        'users': {
+            'all': [0] * chart_attempts_days,
+            Question.Module.ENGLISH.value: [0] * chart_attempts_days,
+            Question.Module.MATH.value: [0] * chart_attempts_days,
+        }
+    }
+
+    for d in data:
+        index = x_axis.index(get_date_format(d['answered_at__date']))
+        values['all']['all'][index] = d['count']
+        values['all']['correct'][index] = d['correct_count']
+        values['all']['incorrect'][index] = d['incorrect_count']
+
+        values[Question.Module.ENGLISH.value]['all'][index] = d['english_count']
+        values[Question.Module.ENGLISH.value]['correct'][index] = d['english_correct_count']
+        values[Question.Module.ENGLISH.value]['incorrect'][index] = d['english_incorrect_count']
+
+        values[Question.Module.MATH.value]['all'][index] = d['math_count']
+        values[Question.Module.MATH.value]['correct'][index] = d['math_correct_count']
+        values[Question.Module.MATH.value]['incorrect'][index] = d['math_incorrect_count']
+
+        values['questions']['all'][index] = d['questions_count']
+        values['questions'][Question.Module.ENGLISH.value][index] = d['english_questions_count']
+        values['questions'][Question.Module.MATH.value][index] = d['math_questions_count']
+
+        values['users']['all'][index] = d['users_count']
+        values['users'][Question.Module.ENGLISH.value][index] = d['english_users_count']
+        values['users'][Question.Module.MATH.value][index] = d['math_users_count']
+
+    ctx['chart_attempts_data'] = values
+
+    return render(request, 'basic/pages/charts/admin.html', ctx)

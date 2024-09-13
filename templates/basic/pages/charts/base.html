@@ -1,0 +1,18 @@
+{% extends "basic/base.html" %}
+{% load core_tags static %}
+
+{% block javascript %}
+    {% if not IS_BLACKOUT %}
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+    {% else %}
+        <script src="{% static 'cdn/highcharts.11.4.6.min.js' %}"></script>
+    {% endif %}
+
+    <!-- https://evanhahn.github.io/HumanizeDuration.js/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/humanize-duration/3.32.1/humanize-duration.min.js"
+            integrity="sha512-IuW3C7hqTl2pnZ+OX+lHFEc8QOYJCVyNSKmRTAmJJ9J0xwru4wYTar2MM80MSbhOiZKmGc+uypnPZKrCVga2xg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    {{ block.super }}
+{% endblock %}
+
