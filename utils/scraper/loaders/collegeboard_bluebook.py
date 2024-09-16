@@ -11,7 +11,6 @@ from rich import print
 
 
 class CollegeBoardBlueBookLoader(Loader):
-    program = 'sat'
     source = 'collegeboard_bluebook'
 
     def load(self):

@@ -10,6 +10,8 @@ from pathlib import Path
 
 # Abstract loader from file
 class Loader:
+    program = 'sat'
+
     def get_program(self):
         program = Program.objects.get(name__iexact=self.program)
         return program

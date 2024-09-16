@@ -13,7 +13,6 @@ from rich import print
 
 
 class CollegeBoardQuestionBankLoader(Loader):
-    program = 'sat'
     source = 'collegeboard_question_bank'
     modules = {
         'math': Question.Module.MATH,
@@ -66,7 +65,7 @@ class CollegeBoardQuestionBankLoader(Loader):
                 missing_spr_answers[q_id].sort(key=lambda x: (x.count('.'), x.count('/')))
         del answers
 
-        missing_mcq_answers: Dict[str, List[str]] = {}
+        missing_mcq_answers: Dict[str, str] = {}
         with missing_mcq_answer_file.open(encoding='utf-8') as fp:
             for line in fp.read().splitlines():
                 if not line.strip():

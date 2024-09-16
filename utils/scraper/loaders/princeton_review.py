@@ -2,7 +2,6 @@ import json
 import re
 from collections import defaultdict
 from datetime import timedelta
-from pathlib import Path
 
 from django.utils.text import slugify
 
@@ -15,7 +14,6 @@ from rich import print
 
 
 class PrincetonReviewLoader(Loader):
-    program = 'sat'
     source = 'princeton_review'
 
     def load(self, mock: bool = False):

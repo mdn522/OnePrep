@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from utils.scraper.loaders.collegeboard_bluebook import CollegeBoardBlueBookLoader
 from utils.scraper.loaders.collegeboard_question_bank import CollegeBoardQuestionBankLoader
-from utils.scraper.loaders.princetonreview import PrincetonReviewLoader
+from utils.scraper.loaders.princeton_review import PrincetonReviewLoader
 from utils.scraper.loaders.satmocks import SATMocksLoader
 
 
