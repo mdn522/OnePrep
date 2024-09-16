@@ -3,6 +3,7 @@ from django.db.models import Q
 
 from model_utils.models import TimeStampedModel
 from taggit.managers import TaggableManager
+import uuid
 
 from core.models import SkillTagged
 from programs.models import Program
@@ -22,6 +23,8 @@ class Question(TimeStampedModel, models.Model):
     class AnswerType(models.TextChoices):
         MCQ = 'mcq', 'Multiple Choice'
         SPR = 'spr', 'SPR'
+
+    uuid = models.UUIDField(editable=False, default=uuid.uuid4, unique=True, db_index=True, verbose_name='UUID')
 
     source = models.CharField(max_length=128, null=True, blank=True, default='')
     source_id = models.CharField(max_length=255, null=True, blank=True, default='')
@@ -68,6 +71,11 @@ class Question(TimeStampedModel, models.Model):
                 name='unique_question_source_id_3',
                 condition=(Q(source__isnull=False) & ~Q(source='')) & (Q(source_id_3__isnull=False) & ~Q(source_id_3=''))
             ),
+            # models.UniqueConstraint(
+            #     fields=['uuid'],
+            #     name='unique_question_uuid_if_not_null',
+            #     condition=~Q(uuid=None)
+            # )
 
             # Indexes
             # Index for source

@@ -30,7 +30,7 @@ class ExamAdmin(DjangoQLSearchMixin, DjangoObjectActions, admin.ModelAdmin):
         'added_by__email'
     ]
     show_facets = admin.ShowFacets.ALWAYS
-    readonly_fields = ['source', 'source_id']
+    readonly_fields = ['source', 'source_id', 'uuid']
     raw_id_fields = ['added_by']
 
     @staticmethod

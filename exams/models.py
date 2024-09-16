@@ -6,6 +6,7 @@ from model_utils.models import TimeStampedModel
 from taggit.managers import TaggableManager
 
 from core.models import SkillTagged
+import uuid
 
 
 class Exam(TimeStampedModel, models.Model):
@@ -18,6 +19,7 @@ class Exam(TimeStampedModel, models.Model):
     #     EXAM = 'exam', 'Exam'
 
     # TODO module/ or use tags
+    uuid = models.UUIDField(editable=False, default=uuid.uuid4, unique=True, db_index=True, verbose_name='UUID')
     name = models.CharField(max_length=128)
     description = models.TextField(default='', blank=True)
     time = models.DurationField(blank=True, null=True)
@@ -56,6 +58,11 @@ class Exam(TimeStampedModel, models.Model):
                 name='unique_exam_source_id',
                 condition=(Q(source__isnull=False) & ~Q(source='')) & (Q(source_id__isnull=False) & ~Q(source_id=''))
             ),
+            # models.UniqueConstraint(
+            #     fields=['uuid'],
+            #     name='unique_exam_uuid_if_not_null',
+            #     condition=~Q(uuid=None)
+            # )
         ]
 
     def __str__(self):

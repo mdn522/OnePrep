@@ -66,7 +66,7 @@ class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'added_by__username',
         'added_by__email',
     ]
-    readonly_fields = ['source', 'source_id', 'source_id_2', 'source_id_3']
+    readonly_fields = ['source', 'source_id', 'source_id_2', 'source_id_3', 'uuid']
     raw_id_fields = ['added_by']
     show_facets = admin.ShowFacets.ALWAYS
     inlines = [AnswerChoiceInline, AnswerInline]
