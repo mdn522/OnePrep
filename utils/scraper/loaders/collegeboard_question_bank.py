@@ -150,7 +150,7 @@ class CollegeBoardQuestionBankLoader(Loader):
 
             question_defaults = dict(
                 source_id_2=q_meta['questionId'],
-                source_raw_data=q_meta,
+                source_raw_data=None,  # q_meta,
                 source_order=q_i,
 
                 module=self.modules[q_meta['module']],

@@ -91,7 +91,7 @@ class CollegeBoardBlueBookLoader(Loader):
                             program=program,
 
                             source_order=int(question_data['displayNumber']),
-                            source_raw_data=question_data,  # TODO strip keys
+                            source_raw_data=None,  # question_data,  # TODO strip keys
                         )
                     )
 
