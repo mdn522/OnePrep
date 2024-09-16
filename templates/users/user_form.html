@@ -4,9 +4,7 @@
 {% load allauth_ui %}
 {% load widget_tweaks %}
 
-{% block title %}
-    {{ user.name }}
-{% endblock title %}
+{% block title %}{{ user.name }}{% endblock title %}
 {% block content %}
     <h1 class="text-3xl mb-2">
         {{ user.name }}
