@@ -1,9 +1,7 @@
 {% extends "basic/pages/charts/base.html" %}
 {% load core_tags static %}
 
-{% block title %}
-    {{ current_user.username }}'s Charts - {{ block.super }}
-{% endblock %}
+{% block title %}{{ current_user.username }}'s Charts - {{ block.super }}{% endblock %}
 
 {% block content %}
     <h1 class="text-3xl text-left font-bold mb-2">
