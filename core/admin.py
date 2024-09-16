@@ -61,6 +61,9 @@ class LoginAdmin2(DjangoQLSearchMixin, LoginAdmin):
 
     user_fk = USER_FK
 
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+
 admin.site.unregister(EmailAddress)
 admin.site.register(EmailAddress, EmailAddressAdmin2)
 
