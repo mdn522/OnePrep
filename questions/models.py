@@ -15,7 +15,7 @@ class Question(TimeStampedModel, models.Model):
         MATH = 'math', 'Math'
 
     class Difficulty(models.TextChoices):
-        # UNSPECIFIED = None, 'Unspecified'
+        UNSPECIFIED = '', 'Unspecified'
         EASY = 'E', 'Easy'
         MEDIUM = 'M', 'Medium'
         HARD = 'H', 'Hard'
@@ -38,7 +38,7 @@ class Question(TimeStampedModel, models.Model):
 
     stimulus = models.TextField(default='', blank=True)
     stem = models.TextField(default='', blank=True)
-    difficulty = models.CharField(choices=Difficulty.choices, max_length=2, null=True, blank=True)
+    difficulty = models.CharField(choices=Difficulty.choices, max_length=2, blank=True, default='')
     answer_type = models.CharField(max_length=24, default='', choices=AnswerType.choices)
     explanation = models.TextField(default='', blank=True)
 

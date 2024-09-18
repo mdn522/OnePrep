@@ -14,7 +14,7 @@
             {% if question_set_previous_question_id %}
             	<link rel="prefetch" href="{% url "questions:detail" question_set_previous_question_id %}?{{ question_set_args }}">
             {% endif %}
-            {% endif %} 
+            {% endif %}
     {% endif %}
 {% endblock %}
 
@@ -49,7 +49,7 @@
         {% else %}
             <script src="{% static 'cdn/desmos-calculator.1.9.1.min.js' %}"></script>
         {% endif %}
-        
+
         <script src="{% static 'js/math-calc.js' %}"></script>
     {% endif %}
 {% endblock %}
@@ -141,6 +141,12 @@
 
         #question ol {
             list-style: decimal;
+        }
+
+        /* TN */
+        .tn-q p {
+            margin
+            margin-bottom: 1rem;
         }
     </style>
 {% endblock %}
