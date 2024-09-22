@@ -2,7 +2,7 @@ import json
 from collections import defaultdict
 from datetime import timedelta
 
-from questions.models import Question, AnswerChoice, Answer
+from questions.models import Question, AnswerChoice, Answer, Module
 from exams.models import Exam, ExamQuestion
 from ..loaders import Loader
 
@@ -87,7 +87,7 @@ class CollegeBoardBlueBookLoader(Loader):
                             explanation=question_data['answer']['rationale'],
                             answer_type={'SPR': Question.AnswerType.SPR, 'Multiple Choice': Question.AnswerType.MCQ}[question_data['answer']['style']],
 
-                            module={'english': Question.Module.ENGLISH, 'math': Question.Module.MATH}[module],
+                            module={'english': Module.ENGLISH, 'math': Module.MATH}[module],
                             program=program,
 
                             source_order=int(question_data['displayNumber']),

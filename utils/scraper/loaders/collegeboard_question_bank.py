@@ -4,7 +4,7 @@ from datetime import timedelta
 from typing import Dict, List
 from sortedcontainers import SortedDict
 
-from questions.models import Question, AnswerChoice, Answer
+from questions.models import Question, AnswerChoice, Answer, Module
 from exams.models import Exam, ExamQuestion
 from ..loaders import Loader
 
@@ -15,8 +15,8 @@ from rich import print
 class CollegeBoardQuestionBankLoader(Loader):
     source = 'collegeboard_question_bank'
     modules = {
-        'math': Question.Module.MATH,
-        'english': Question.Module.ENGLISH,
+        'math': Module.MATH,
+        'english': Module.ENGLISH,
     }
     difficulty_map = {
         'E': Question.Difficulty.EASY,

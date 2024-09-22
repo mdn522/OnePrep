@@ -12,6 +12,11 @@ from pathlib import Path
 class Loader:
     program = 'sat'
 
+    module_title = {
+        'en': 'English',
+        'math': 'Math',
+    }
+
     def get_program(self):
         program = Program.objects.get(name__iexact=self.program)
         return program
