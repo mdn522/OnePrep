@@ -89,6 +89,7 @@ class AnswerChoiceAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'is_correct',
         'letter',
     ]
+    list_per_page = 1000
     search_fields = [
         'question__source_id',
         'question__source_id_2',
@@ -132,6 +133,7 @@ class AnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_filter = []
     show_facets = admin.ShowFacets.ALWAYS
     raw_id_fields = ['question']
+    list_per_page = 1000
 
     question_fk = QUESTION_FK
 
