@@ -10,7 +10,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
 from exams.models import Exam, ExamQuestion
-from questions.models import Question, UserQuestionAnswer, UserQuestionStatus
+from questions.models import Question, UserQuestionAnswer, UserQuestionStatus, Module
 from users.models import User
 
 from utils.datetime import get_date_range, get_date_format
@@ -62,11 +62,11 @@ def chart_view(request, user_id=None, username=None):
             0: [0] * DAYS,
             1: [0] * DAYS,
         },
-        Question.Module.MATH.value: {
+        Module.MATH.value: {
             0: [0] * DAYS,
             1: [0] * DAYS,
         },
-        Question.Module.ENGLISH.value: {
+        Module.ENGLISH.value: {
             0: [0] * DAYS,
             1: [0] * DAYS,
         },
@@ -78,11 +78,11 @@ def chart_view(request, user_id=None, username=None):
             0: [0] * DAYS,
             1: [0] * DAYS,
         },
-        Question.Module.MATH.value: {
+        Module.MATH.value: {
             0: [0] * DAYS,
             1: [0] * DAYS,
         },
-        Question.Module.ENGLISH.value: {
+        Module.ENGLISH.value: {
             0: [0] * DAYS,
             1: [0] * DAYS,
         },
@@ -98,8 +98,8 @@ def chart_view(request, user_id=None, username=None):
     time_given_data = {
         'x_axis': x_axis,
         'all':  [0] * DAYS,
-        Question.Module.MATH.value: [0] * DAYS,
-        Question.Module.ENGLISH.value: [0] * DAYS,
+        Module.MATH.value: [0] * DAYS,
+        Module.ENGLISH.value: [0] * DAYS,
     }
 
     for answer in answer_set:
@@ -167,11 +167,11 @@ def chart_view(request, user_id=None, username=None):
             0: [0] * DAYS,
             1: [0] * DAYS,
         },
-        Question.Module.MATH.value: {
+        Module.MATH.value: {
             0: [0] * DAYS,
             1: [0] * DAYS,
         },
-        Question.Module.ENGLISH.value: {
+        Module.ENGLISH.value: {
             0: [0] * DAYS,
             1: [0] * DAYS,
         },
@@ -357,23 +357,23 @@ def admin_chart_view(request):
             correct_count=Count('id', filter=Q(answer_choice__is_correct=True)),
             incorrect_count=Count('id', filter=Q(answer_choice__is_correct=False)),
 
-            english_count=Count('id', filter=Q(question__module=Question.Module.ENGLISH)),
-            english_correct_count=Count('id', filter=Q(question__module=Question.Module.ENGLISH, answer_choice__is_correct=True)),
-            english_incorrect_count=Count('id', filter=Q(question__module=Question.Module.ENGLISH, answer_choice__is_correct=False)),
+            english_count=Count('id', filter=Q(question__module=Module.ENGLISH)),
+            english_correct_count=Count('id', filter=Q(question__module=Module.ENGLISH, answer_choice__is_correct=True)),
+            english_incorrect_count=Count('id', filter=Q(question__module=Module.ENGLISH, answer_choice__is_correct=False)),
 
-            math_count=Count('id', filter=Q(question__module=Question.Module.MATH)),
-            math_correct_count=Count('id', filter=Q(question__module=Question.Module.MATH, answer_choice__is_correct=True)),
-            math_incorrect_count=Count('id', filter=Q(question__module=Question.Module.MATH, answer_choice__is_correct=False)),
+            math_count=Count('id', filter=Q(question__module=Module.MATH)),
+            math_correct_count=Count('id', filter=Q(question__module=Module.MATH, answer_choice__is_correct=True)),
+            math_incorrect_count=Count('id', filter=Q(question__module=Module.MATH, answer_choice__is_correct=False)),
 
             # Unique questions
             questions_count=Count('question', distinct=True),
-            english_questions_count=Count('question', filter=Q(question__module=Question.Module.ENGLISH), distinct=True),
-            math_questions_count=Count('question', filter=Q(question__module=Question.Module.MATH), distinct=True),
+            english_questions_count=Count('question', filter=Q(question__module=Module.ENGLISH), distinct=True),
+            math_questions_count=Count('question', filter=Q(question__module=Module.MATH), distinct=True),
 
             # Unique users
             users_count=Count('user', distinct=True),
-            english_users_count=Count('user', filter=Q(question__module=Question.Module.ENGLISH), distinct=True),
-            math_users_count=Count('user', filter=Q(question__module=Question.Module.MATH), distinct=True),
+            english_users_count=Count('user', filter=Q(question__module=Module.ENGLISH), distinct=True),
+            math_users_count=Count('user', filter=Q(question__module=Module.MATH), distinct=True),
         )
         .order_by('answered_at__date')
     )
@@ -384,25 +384,25 @@ def admin_chart_view(request):
             'correct': [0] * chart_attempts_days,
             'incorrect': [0] * chart_attempts_days,
         },
-        Question.Module.ENGLISH.value: {
+        Module.ENGLISH.value: {
             'all': [0] * chart_attempts_days,
             'correct': [0] * chart_attempts_days,
             'incorrect': [0] * chart_attempts_days,
         },
-        Question.Module.MATH.value: {
+        Module.MATH.value: {
             'all': [0] * chart_attempts_days,
             'correct': [0] * chart_attempts_days,
             'incorrect': [0] * chart_attempts_days,
         },
         'questions': {
             'all': [0] * chart_attempts_days,
-            Question.Module.ENGLISH.value: [0] * chart_attempts_days,
-            Question.Module.MATH.value: [0] * chart_attempts_days,
+            Module.ENGLISH.value: [0] * chart_attempts_days,
+            Module.MATH.value: [0] * chart_attempts_days,
         },
         'users': {
             'all': [0] * chart_attempts_days,
-            Question.Module.ENGLISH.value: [0] * chart_attempts_days,
-            Question.Module.MATH.value: [0] * chart_attempts_days,
+            Module.ENGLISH.value: [0] * chart_attempts_days,
+            Module.MATH.value: [0] * chart_attempts_days,
         }
     }
 
@@ -412,21 +412,21 @@ def admin_chart_view(request):
         values['all']['correct'][index] = d['correct_count']
         values['all']['incorrect'][index] = d['incorrect_count']
 
-        values[Question.Module.ENGLISH.value]['all'][index] = d['english_count']
-        values[Question.Module.ENGLISH.value]['correct'][index] = d['english_correct_count']
-        values[Question.Module.ENGLISH.value]['incorrect'][index] = d['english_incorrect_count']
+        values[Module.ENGLISH.value]['all'][index] = d['english_count']
+        values[Module.ENGLISH.value]['correct'][index] = d['english_correct_count']
+        values[Module.ENGLISH.value]['incorrect'][index] = d['english_incorrect_count']
 
-        values[Question.Module.MATH.value]['all'][index] = d['math_count']
-        values[Question.Module.MATH.value]['correct'][index] = d['math_correct_count']
-        values[Question.Module.MATH.value]['incorrect'][index] = d['math_incorrect_count']
+        values[Module.MATH.value]['all'][index] = d['math_count']
+        values[Module.MATH.value]['correct'][index] = d['math_correct_count']
+        values[Module.MATH.value]['incorrect'][index] = d['math_incorrect_count']
 
         values['questions']['all'][index] = d['questions_count']
-        values['questions'][Question.Module.ENGLISH.value][index] = d['english_questions_count']
-        values['questions'][Question.Module.MATH.value][index] = d['math_questions_count']
+        values['questions'][Module.ENGLISH.value][index] = d['english_questions_count']
+        values['questions'][Module.MATH.value][index] = d['math_questions_count']
 
         values['users']['all'][index] = d['users_count']
-        values['users'][Question.Module.ENGLISH.value][index] = d['english_users_count']
-        values['users'][Question.Module.MATH.value][index] = d['math_users_count']
+        values['users'][Module.ENGLISH.value][index] = d['english_users_count']
+        values['users'][Module.MATH.value][index] = d['math_users_count']
 
     ctx['chart_attempts_data'] = values
 

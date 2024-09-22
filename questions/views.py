@@ -17,7 +17,7 @@ from django.views.generic import TemplateView, ListView
 
 from core.models import SubqueryCount
 from exams.models import Exam
-from .models import Question, UserQuestionAnswer, UserQuestionStatus
+from .models import Question, UserQuestionAnswer, UserQuestionStatus, Module
 
 # TODO remove later. temp mem cache
 memcache = defaultdict(dict)
@@ -32,8 +32,8 @@ class QuestionListView(ListView):
 
 class QuestionSetView(TemplateView):
     module_tag_map = {
-        Question.Module.ENGLISH: 'English',
-        Question.Module.MATH: 'Math',
+        Module.ENGLISH: 'English',
+        Module.MATH: 'Math',
     }
 
     set_stats = []
@@ -443,7 +443,7 @@ class CollegeBoardQuestionBankCategoryListView(QuestionBankCategoryListView):
     filters = {
         'module': {
             'text': 'Module',
-            'choices': Question.Module,
+            'choices': Module,
             'orm_field': 'module',
         },
         'active': {
@@ -551,7 +551,7 @@ class PrincetonReviewPracticeTestsQuestionBankCategoryListView(CollegeBoardQuest
     filters = {
         'module': {
             'text': 'Module',
-            'choices': Question.Module,
+            'choices': Module,
             'orm_field': 'module',
         },
 
@@ -653,6 +653,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
         ]).get(pk=kwargs['pk'])
         context['question'] = question
         context['Question'] = Question
+        context['Module'] = Module
         context['questions_tags'] = [tag.name for tag in question.tags.all()]
         context['mathjax_inline_ds'] = not any([tag in ['College Board', 'The Princeton Review'] for tag in context['questions_tags']])
         context['answer_choices'] = list(question.answer_choice_set.only(*['id', 'text', 'letter', 'order', 'correct', 'explanation']).order_by('order').values())

@@ -8,6 +8,8 @@ from taggit.managers import TaggableManager
 from core.models import SkillTagged
 import uuid
 
+from questions.models import Module
+
 
 class Exam(TimeStampedModel, models.Model):
     # class Type(models.TextChoices):
@@ -23,6 +25,8 @@ class Exam(TimeStampedModel, models.Model):
     name = models.CharField(max_length=128)
     description = models.TextField(default='', blank=True)
     time = models.DurationField(blank=True, null=True)
+
+    module = models.CharField(choices=Module.choices, max_length=4, null=True, blank=True)
 
     is_active = models.BooleanField(default=True)
     is_public = models.BooleanField(default=False)

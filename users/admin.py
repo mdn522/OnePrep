@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from djangoql.admin import DjangoQLSearchMixin
 
-from questions.models import Question, AnswerChoice
+from questions.models import Question, AnswerChoice, Module
 from users.forms import UserAdminChangeForm
 from users.forms import UserAdminCreationForm
 from users.models import User
@@ -118,14 +118,14 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
             num_user_question_answers_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__is_correct=False)),
 
             # English
-            num_user_question_answers_english=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.ENGLISH)),
-            num_user_question_answers_english_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.ENGLISH, question_answer_set__is_correct=True)),
-            num_user_question_answers_english_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.ENGLISH, question_answer_set__is_correct=False)),
+            num_user_question_answers_english=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.ENGLISH)),
+            num_user_question_answers_english_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.ENGLISH, question_answer_set__is_correct=True)),
+            num_user_question_answers_english_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.ENGLISH, question_answer_set__is_correct=False)),
 
             # Math
-            num_user_question_answers_math=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.MATH)),
-            num_user_question_answers_math_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.MATH, question_answer_set__is_correct=True)),
-            num_user_question_answers_math_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.MATH, question_answer_set__is_correct=False)),
+            num_user_question_answers_math=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.MATH)),
+            num_user_question_answers_math_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.MATH, question_answer_set__is_correct=True)),
+            num_user_question_answers_math_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.MATH, question_answer_set__is_correct=False)),
         )
 
     actions = [

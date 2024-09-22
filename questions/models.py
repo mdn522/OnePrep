@@ -9,11 +9,11 @@ from core.models import SkillTagged
 from programs.models import Program
 
 
-class Question(TimeStampedModel, models.Model):
-    class Module(models.TextChoices):
-        ENGLISH = 'en', 'English'
-        MATH = 'math', 'Math'
+class Module(models.TextChoices):
+    ENGLISH = 'en', 'English'
+    MATH = 'math', 'Math'
 
+class Question(TimeStampedModel, models.Model):
     class Difficulty(models.TextChoices):
         # UNSPECIFIED = None, 'Unspecified'
         EASY = 'E', 'Easy'
