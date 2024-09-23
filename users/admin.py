@@ -104,7 +104,7 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
         html += '</span>'
         return mark_safe(html)
 
-    num_user_question_answers.label = "User Question Answers"
+    num_user_question_answers.label = "Attempts"
     num_user_question_answers.admin_order_field = 'num_user_question_answers'
 
     def get_queryset(self, request):

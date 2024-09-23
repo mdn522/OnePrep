@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from djangoql.admin import DjangoQLSearchMixin
 from import_export import resources
 import easy
@@ -34,13 +34,15 @@ class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         # 'source_id_2',
         # 'source_id_3',
         'module',
-        'program',
+        # 'program',
         # 'stimulus',
         # 'stem',
         'difficulty',
         'answer_type',
         # 'explanation',
         # 'raw',
+        'attempts',
+        'users',
         'source',
         'source_order',
         'created',
@@ -55,21 +57,26 @@ class QuestionAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'difficulty',
         'answer_type',
     ]
-    search_fields = [
-        'source',
-        'source_id',
-        'source_id_2',
-        'source_id_3',
-        'stimulus',
-        'stem',
-        'explanation',
-        'added_by__username',
-        'added_by__email',
-    ]
     readonly_fields = ['source', 'source_id', 'source_id_2', 'source_id_3', 'uuid']
     raw_id_fields = ['added_by']
     show_facets = admin.ShowFacets.ALWAYS
     inlines = [AnswerChoiceInline, AnswerInline]
+    list_per_page = 1000
+
+    attempts = easy.SimpleAdminField('attempts', short_description='Attempts', admin_order_field='attempts')
+    users = easy.SimpleAdminField('users', short_description='Users', admin_order_field='users')
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # annotate count of attempts
+        qs = (
+            qs.annotate(
+                attempts=Count('user_question_answer_set'),
+                users=Count('user_question_answer_set__user', distinct=True),
+            )
+        )
+
+        return qs
 
 
 @admin.register(AnswerChoice)
@@ -90,33 +97,17 @@ class AnswerChoiceAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'letter',
     ]
     list_per_page = 1000
-    search_fields = [
-        'question__source_id',
-        'question__source_id_2',
-        'question__source_id_3',
-        'question__source',
-        'question__module',
-        'question__stimulus',
-        'question__stem',
-        'question__difficulty',
-        'question__explanation',
-        # 'question__added_by__username',
-        'question__added_by__email',
-        'question__tags__name',
-        'text',
-        'explanation',
-    ]
     show_facets = admin.ShowFacets.ALWAYS
     raw_id_fields = ['question']
 
     question_fk = QUESTION_FK
 
     def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        queryset = queryset.prefetch_related(
+        qs = super().get_queryset(request)
+        qs = qs.prefetch_related(
             Prefetch('question', queryset=Question.objects.only('id')),
         )
-        return queryset
+        return qs
 
 
 @admin.register(Answer)
@@ -138,11 +129,11 @@ class AnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     question_fk = QUESTION_FK
 
     def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        queryset = queryset.prefetch_related(
+        qs = super().get_queryset(request)
+        qs = qs.prefetch_related(
             Prefetch('question', queryset=Question.objects.only('id')),
         )
-        return queryset
+        return qs
 
 
 @admin.register(UserQuestionAnswer)
@@ -150,11 +141,7 @@ class UserQuestionAnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     # list_select_related = ['user', 'question', 'exam', 'answer_choice']
     list_display = [
         'id',
-        # 'user',
-        # 'question',
-        # 'exam',
-        # 'answer_choice',
-        # 'answer',
+        # 'user', 'question', 'exam', 'answer_choice', 'answer',
 
         'user_fk',
         'exam_fk',
@@ -172,28 +159,11 @@ class UserQuestionAnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'is_correct',
         'question__module',
     ]
-    search_fields = [
-        'user__username',
-        'user__email',
-        'question__source_id',
-        'question__source_id_2',
-        'question__source_id_3',
-        'question__source',
-        'question__module',
-        'question__stimulus',
-        'question__stem',
-        'question__difficulty',
-        'question__explanation',
-        'question__added_by__username',
-        'question__added_by__email',
-        'question__tags__name',
-        'answer_choice__text',
-        'answer',
-    ]
     show_facets = admin.ShowFacets.ALWAYS
     raw_id_fields = ['user', 'question', 'exam', 'answer_choice']
     readonly_fields = ['user']
     date_hierarchy = 'answered_at'
+    list_per_page = 1000
 
     user_fk = USER_FK
     question_fk = QUESTION_FK
@@ -203,14 +173,14 @@ class UserQuestionAnswerAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     question_module = easy.SimpleAdminField('question.module', short_description='Question Module')
 
     def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        queryset = queryset.prefetch_related(
+        qs = super().get_queryset(request)
+        qs = qs.prefetch_related(
             Prefetch('question', queryset=Question.objects.only('id', 'module')),
             Prefetch('exam', queryset=Exam.objects.only('id', 'name')),
             Prefetch('answer_choice', queryset=AnswerChoice.objects.only('id', 'letter')),
             Prefetch('user', queryset=User.objects.only('id', 'username')),
         )
-        return queryset
+        return qs
 
 
 @admin.register(UserQuestionStatus)
@@ -237,21 +207,10 @@ class UserQuestionStatusAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         'is_marked_for_review',
         'question__module',
     ]
-    search_fields = [
-        'user__username',
-        'user__email',
-        'question__source_id',
-        'question__source_id_2',
-        'question__source_id_3',
-        'question__source',
-        'question__module',
-        'question__stimulus',
-        'question__stem',
-        'question__difficulty',
-    ]
     show_facets = admin.ShowFacets.ALWAYS
     raw_id_fields = ['user', 'exam', 'question']
     date_hierarchy = 'marked_for_review_at'
+    list_per_page = 1000
 
     user_fk = USER_FK
     question_fk = QUESTION_FK
@@ -260,12 +219,12 @@ class UserQuestionStatusAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     question_module = easy.SimpleAdminField('question.module', short_description='Question Module')
 
     def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        queryset = queryset.prefetch_related(
+        qs = super().get_queryset(request)
+        qs = qs.prefetch_related(
             Prefetch('question', queryset=Question.objects.only('id', 'module')),
             Prefetch('exam', queryset=Exam.objects.only('id', 'name')),
             Prefetch('user', queryset=User.objects.only('id', 'username')),
         )
-        return queryset
+        return qs
 
 
