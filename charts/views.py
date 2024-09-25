@@ -229,7 +229,7 @@ def basic_exam_time_view(request, exam_id, user_id=None, username=None):
 
     exam_questions_answers = UserQuestionAnswer.objects \
         .filter(user_id=user.id, question_id__in=exam.exam_question_set.values_list('question_id', flat=True)) \
-        .only(*['time_given', 'is_correct', 'started_at', 'answered_at', 'question_id', 'user_id']).order_by('answered_at')
+        .only(*['time_given', 'is_correct', 'started_at', 'answered_at', 'question_id', 'user_id']).order_by('-answered_at')
 
     exam_questions_status = UserQuestionStatus.objects \
         .filter(user_id=user.id, question_id__in=exam.exam_question_set.values_list('question_id', flat=True)) \
