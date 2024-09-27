@@ -517,9 +517,6 @@ class QuestionBankFilterBase(django_filters.FilterSet):
     module = django_filters.ChoiceFilter(choices=Module, empty_label='')
     marked_for_review = django_filters.ChoiceFilter(choices=[('all', 'All'), ('true', 'Yes'), ('false', 'No')], method='filter_marked_for_review')
 
-    primary_class = django_filters.ChoiceFilter(choices=[(category.primary_class, category.primary_class) for category in COLLEGE_BOARD_QUESTION_BANK_CATEGORIES_MAP if category.primary_class and category.skill is None], method='filter_primary_class')
-    skill = django_filters.ChoiceFilter(choices=[(category.skill, category.skill) for category in COLLEGE_BOARD_QUESTION_BANK_CATEGORIES_MAP if category.skill], method='filter_skill')
-
     def filter_marked_for_review(self, queryset, name, value):
         if self.request is None:
             return queryset
@@ -547,6 +544,9 @@ class CollegeBoardQuestionBankFilter(QuestionBankFilterBase):
     active = django_filters.ChoiceFilter(choices=[('all', 'All'), ('bluebook-only', 'Bluebook Only'), ('non-bluebook', 'Exclude Bluebook')], method='filter_active', empty_label='All')
     difficulty = django_filters.MultipleChoiceFilter(choices=Question.Difficulty, label='Difficulty', method='filter_difficulty')
 
+    primary_class = django_filters.ChoiceFilter(choices=[(category.primary_class, category.primary_class) for category in COLLEGE_BOARD_QUESTION_BANK_CATEGORIES_MAP if category.primary_class and category.skill is None], method='filter_primary_class')
+    skill = django_filters.ChoiceFilter(choices=[(category.skill, category.skill) for category in COLLEGE_BOARD_QUESTION_BANK_CATEGORIES_MAP if category.skill], method='filter_skill')
+
     def filter_active(self, queryset, name, value):
         if value == 'bluebook-only':
             return queryset.filter(tags__name='Bluebook')
@@ -571,6 +571,9 @@ class CollegeBoardQuestionBankFilter(QuestionBankFilterBase):
 
 
 class PrincetonReviewPracticeTestsQuestionBankFilter(QuestionBankFilterBase):
+    primary_class = django_filters.ChoiceFilter(choices=[(category.primary_class, category.primary_class) for category in PRINCETON_REVIEW_PRACTICE_TESTS_QUESTION_BANK_CATEGORIES_MAP if category.primary_class and category.skill is None], method='filter_primary_class')
+    skill = django_filters.ChoiceFilter(choices=[(category.skill, category.skill) for category in PRINCETON_REVIEW_PRACTICE_TESTS_QUESTION_BANK_CATEGORIES_MAP if category.skill], method='filter_skill')
+
     class Meta:
         model = Question
         fields = ['module']
