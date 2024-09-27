@@ -210,12 +210,12 @@ class QuestionBankCategoryListView(QuestionSetView):
         context = super().get_context_data(**kwargs)
 
         # print('request', self.request)
-        qs, f = self.filtered_queryset()
-        print('errors', f.errors)
-        print('filter', f)
-        print('length', len(f.qs))
-        print('form dir', dir(f.form))
-        print('form data', f.form.cleaned_data)
+        # qs, f = self.filtered_queryset()
+        # print('errors', f.errors)
+        # print('filter', f)
+        # print('length', len(f.qs))
+        # print('form dir', dir(f.form))
+        # print('form data', f.form.cleaned_data)
         # print('difficulty', dir(f.form.fields['difficulty']))
 
         # flat tags from category map
@@ -409,8 +409,8 @@ class QuestionBankCategoryListView(QuestionSetView):
         context['question_set_filters'] = self.filters  # TODO remove
         context['question_set_terms'] = self.terms # TODO remove
         # url encode using urllib
-        context['question_set_args'] = urlencode_f(question_set_filter)
-        context['question_set_categories_args'] = urlencode_f({k: v for k, v in question_set_filter.items() if k not in ['module', 'question_set', 'primary_class', 'skill']})
+        context['question_set_args'] = urlencode_f({'question_set': question_set} | f.form.cleaned_data)
+        context['question_set_categories_args'] = urlencode_f({k: v for k, v in f.form.cleaned_data.items() if k not in ['module', 'question_set', 'primary_class', 'skill']})
         context['question_set_back'] = True
 
         # print('question_set_args', context['question_set_args'])
@@ -836,8 +836,8 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
             try:
                 QuestionSetView.get_question_context_data(question, self.request, context)
             except Exception as e:
-                print(e)
-                raise e
+                # print(e)
+                # raise e
                 context['is_question_set'] = False
 
             # question_set_filtered_queryset = question_set_filtered_queryset.only('id', 'source_order', 'difficulty')
