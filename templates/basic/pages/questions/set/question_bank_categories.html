@@ -10,19 +10,59 @@
     <div class="bg-base-300 rounded-badge mb-4 flex mb-4 items-center text-sm border border-orange-100 p-2 font-bold flex-wrap pb-0 px-4">
         {% for filter_key, filter in filters.items %}
             {% if filter.show %}
-            	<div class="flex items-center space-x-1 mr-8 mb-2">
+                <div class="flex items-center space-x-1 mr-8 mb-2">
                     <span>{{ filter.text }}: </span>
-                        {% for item_key, item in filter.items.items %}
-                            {% update_variable filter_key|get_dict_from_kv:item_key as filter_dict %}
-                            {% update_variable current_filter|merge_dict:filter_dict as qf %}
-                                <a class="btn btn-sm btn-neutral btn-outline {% if item_key == current_filter|get_item:filter_key %}btn-active{% endif %}{% if current_filter|get_item:filter_key == None and item_key == 'all' %}btn-active{% endif %}"
-                                   href="{% url url_name %}?{{ qf | dj_urlencode | safe }}">
-                                    {% firstof item.text item %}
+                    {% update_variable current_filter.form.fields|get_item:filter_key as field %}
+                    {% update_variable current_filter.form.cleaned_data|get_item:filter_key as data %}
+                    {% if field.choices %}
+                        {% if filter.include_all %}
+                            {% update_variable filter_key|get_dict_from_kv:'all' as filter_dict %}
+                            {% update_variable current_filter.form.cleaned_data|merge_dict:filter_dict as qf %}
+                            <a href="{% url url_name %}?{{ qf | dj_urlencode | safe }}"
+                               class="btn btn-sm btn-neutral btn-outline {% if not data or '' in data or 'all' in data %}btn-active{% endif %}">
+                                All
+                            </a>
+                        {% endif %}
+                        {% for choice in field.choices %}
+                            {% if not filter.ignore_values or choice.0 not in filter.ignore_values %}
+                                {% if filter.multiple %}
+                                    {% update_variable data|v_or_list as data %}
+                                    {% if choice.0 in data %}
+                                        {% update_variable data|remove:choice.0 as filter_data %}
+                                    {% else %}
+                                        {% update_variable data|append:choice.0 as filter_data %}
+                                    {% endif %}
+                                    {% update_variable filter_key|get_dict_from_kv:filter_data as filter_dict %}
+                                {% else %}
+                                    {% update_variable filter_key|get_dict_from_kv:choice.0 as filter_dict %}
+                                {% endif %}
+                                {% update_variable current_filter.form.cleaned_data|merge_dict:filter_dict as qf %}
+                            	<a href="{% url url_name %}?{{ qf | dj_urlencode | safe }}"
+                                   class="btn btn-sm btn-neutral btn-outline {% if data == choice.0 or choice.0 in data %}btn-active{% elif choice.0 == 'all' and data == '' %}btn-active{% endif %}">
+                                    {{ choice.1 }}
                                 </a>
+                            {% endif %}
                         {% endfor %}
+                    {% endif %}
                 </div>
             {% endif %}
         {% endfor %}
+
+{#        {% for filter_key, filter in filters.items %}#}
+{#            {% if filter.show %}#}
+{#            	<div class="flex items-center space-x-1 mr-8 mb-2">#}
+{#                    <span>{{ filter.text }}: </span>#}
+{#                        {% for item_key, item in filter.items.items %}#}
+{#                            {% update_variable filter_key|get_dict_from_kv:item_key as filter_dict %}#}
+{#                            {% update_variable current_filter|merge_dict:filter_dict as qf %}#}
+{#                                <a class="btn btn-sm btn-neutral btn-outline {% if item_key == current_filter|get_item:filter_key %}btn-active{% endif %}{% if current_filter|get_item:filter_key == None and item_key == 'all' %}btn-active{% endif %}"#}
+{#                                   href="{% url url_name %}?{{ qf | dj_urlencode | safe }}">#}
+{#                                    {% firstof item.text item %}#}
+{#                                </a>#}
+{#                        {% endfor %}#}
+{#                </div>#}
+{#            {% endif %}#}
+{#        {% endfor %}#}
     </div>
     <div class="grid gap-4 grid-cols-1 md:grid-cols-2 relative">
 

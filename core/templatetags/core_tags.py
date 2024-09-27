@@ -37,7 +37,21 @@ def get_item(dictionary, key):
 
 @register.filter
 def dj_urlencode(value):
-    return urlencode(value)
+    return urlencode_f(value)
+    # return urlencode(value)
+
+
+def urlencode_f(args):
+    e_args = []
+    for k, v in args.items():
+        if isinstance(v, list):
+            for v1 in v:
+                e_args.append(urlencode({k: v1}))
+        elif v:
+            e_args.append(urlencode({k: v}))
+
+    return "&".join(e_args)
+
 
 
 @register.filter
@@ -49,6 +63,21 @@ def merge_dict(dict1, dict2):
 def get_dict_from_kv(k, v):
     return {k: v}
 
+@register.filter
+def append(lst, item):
+    return lst + [item]
+
+@register.filter
+def prepend(lst, item):
+    return [item] + lst
+
+@register.filter
+def remove(lst, item):
+    return [x for x in lst if x != item]
+
+@register.filter
+def v_or_list(item):
+    return item or []
 
 # @register.filter
 # def dict_update_kv(dict1, dict2):
