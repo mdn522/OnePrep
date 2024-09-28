@@ -1,3 +1,5 @@
+import time
+
 import django_filters
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -72,11 +74,12 @@ class ExamListView(ListView):
         filter = ExamFilter(self.request.GET, qs)
         ctx["filter"] = filter
 
-        if 'sources' not in cache:
+        if 'sources' not in cache or (time.time() - cache['sources'][0]) > 300:
             sources = Exam.objects.filter(is_active=True).values_list('source', flat=True).order_by('source').distinct()  # TODO cache
-            cache['sources'] = sources  # TODO Use better caching with timeout
+            cache['sources'] = (time.time(), sources)  # TODO Use better caching with timeout
 
-        ctx['sources'] = cache['sources']
+        # Add count along with source
+        ctx['sources'] = cache['sources'][1]
         ctx['sources_friendly_names'] = {
             'collegeboard_bluebook': 'College Board Bluebook',
             'sat_panda': 'SAT Panda',
