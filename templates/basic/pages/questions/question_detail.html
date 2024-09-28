@@ -299,7 +299,7 @@
             {% endif %}
             {% if question.answer_type == Question.AnswerType.SPR %}
                 <div x-data="{input: ''}">
-                    <input type="text" placeholder="Answer" maxlength="6"
+                    <input type="text" placeholder="Answer" maxlength="10"
                        class="input input-bordered input-primary mt-2"
                        x-model="input" @input="$store.data.input_user_answer(input)"/>
                 </div>
