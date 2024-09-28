@@ -5,6 +5,7 @@ from utils.scraper.loaders.collegeboard_question_bank import CollegeBoardQuestio
 from utils.scraper.loaders.princeton_review import PrincetonReviewLoader
 from utils.scraper.loaders.satmocks import SATMocksLoader
 from utils.scraper.loaders.sat_panda import SATPandaLoader
+from utils.scraper.loaders.test_ninjas import TestNinjasLoader
 
 
 loaders = OrderedDict([
@@ -12,7 +13,8 @@ loaders = OrderedDict([
     ('collegeboard_bluebook', CollegeBoardBlueBookLoader()),
     ('princeton_review', PrincetonReviewLoader()),
     ('sat_mocks', SATMocksLoader()),
-    ('sat_panda', SATPandaLoader())
+    ('sat_panda', SATPandaLoader()),
+    ('test_ninjas', TestNinjasLoader()),
 ])
 
 

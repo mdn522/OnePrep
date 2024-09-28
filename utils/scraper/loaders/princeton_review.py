@@ -1,6 +1,5 @@
 import json
 import re
-from collections import defaultdict
 from datetime import timedelta
 
 from django.utils.text import slugify
@@ -9,7 +8,6 @@ from questions.models import Question, AnswerChoice, Answer, Module
 from exams.models import Exam, ExamQuestion
 from ..loaders import Loader
 
-import more_itertools
 from rich import print
 
 
