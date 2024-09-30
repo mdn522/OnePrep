@@ -22,13 +22,10 @@ class ExamAdmin(DjangoQLSearchMixin, DjangoObjectActions, admin.ModelAdmin):
         'question_count',
         'added_by'
     ]
-    list_filter = ['official', 'is_public', 'is_active', 'source', 'time']
-    search_fields = [
-        'name',
-        'description',
-        'added_by__username',
-        'added_by__email'
+    list_filter = [
+        'module', 'source', 'official', 'is_public', 'is_active', 'time',
     ]
+    search_fields = []
     show_facets = admin.ShowFacets.ALWAYS
     readonly_fields = ['source', 'source_id', 'uuid']
     raw_id_fields = ['added_by']

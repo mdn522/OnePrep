@@ -48,6 +48,7 @@ def chart_view(request, user_id=None, username=None):
     # Attempts Chart
     answer_set = user \
         .question_answer_set \
+        .order_by('answered_at') \
         .filter(answered_at__date__gt=date__gte) \
         .prefetch_related(
             Prefetch('question', queryset=Question.objects.only('module'))
@@ -327,9 +328,9 @@ def admin_chart_view(request):
     DAYS = min(DAYS, 360)
     ctx['days'] = DAYS
     x_axis = [get_date_format(dt) for dt in get_date_range(timezone.now() - timezone.timedelta(days=DAYS - 1), timezone.now())]
-    print(x_axis)
-    print(len(x_axis))
-    print(timezone.now() - timezone.timedelta(days=DAYS - 1))
+    # print(x_axis)
+    # print(len(x_axis))
+    # print(timezone.now() - timezone.timedelta(days=DAYS - 1))
 
 
     # Chart Users
