@@ -1,4 +1,6 @@
 from django.urls import path
+from setuptools.extern import names
+
 from . import views
 
 
@@ -6,5 +8,7 @@ from . import views
 urlpatterns = [
     path('tools/import-qans/', views.import_question_answer_and_status_view),
     path('tools/import-users/', views.import_user_csv_view),
+
+    path('donate/', views.donate_view, name='donate'),
 ]
 

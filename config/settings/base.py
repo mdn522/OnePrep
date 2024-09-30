@@ -75,7 +75,7 @@ DJANGO_APPS = [
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "django.contrib.humanize", # Handy template tags
+    "django.contrib.humanize", # Handy template tags
 
     "django_admin_env_notice",
     "related_admin",
@@ -260,7 +260,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = env.int("DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE", defa
 # CRISPY_TEMPLATE_PACK = "bootstrap5"
 # CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "tailwind"
-CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+CRISPY_ALLOWED_TEMPLATE_PACKS = ("tailwind", "bootstrap5")
 
 DAISYUI_THEME = ALLAUTH_UI_THEME = env.str("DAISYUI_THEME", default="light")
 

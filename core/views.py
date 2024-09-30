@@ -9,7 +9,9 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
+from qsessions.geoip import ip_to_location_info
 
+from exams.models import Exam
 from questions.models import Question, AnswerChoice, UserQuestionAnswer, UserQuestionStatus
 from users.models import User
 
@@ -189,3 +191,44 @@ def import_user_csv_view(request):
         User.objects.bulk_create(users)
 
     return render(request, 'basic/pages/tools/import_bulk_user.html', context={'logs': logs})
+
+
+from ipware import get_client_ip
+# Donation
+def donate_view(request):
+    user_ip = get_client_ip(request)
+    try:
+        loc_info = ip_to_location_info(user_ip)
+    except:
+        loc_info = {}
+        pass
+
+    country_code = request.GET.get('country_code', None)
+    country_code = country_code or (loc_info or {}).get('country_code')
+
+    ctx = {
+        'location_info': loc_info,
+        'has_country_specific': country_code in ['BD'],
+        'country_code': country_code,
+
+        'kpi': [
+            {
+                'title': 'Questions',
+                'value': Question.objects.count(),
+            },
+            {
+                'title': 'Practice Tests',
+                'value': Exam.objects.filter(is_active=True, is_public=True).count(),
+            },
+            # {
+            #     'title': 'Users',
+            #     'value': User.objects.count(),
+            # },
+            {
+                'title': 'User Attempts',
+                'value': UserQuestionAnswer.objects.count(),
+            },
+        ],
+    }
+
+    return render(request, 'basic/pages/donate/home.html', ctx)
