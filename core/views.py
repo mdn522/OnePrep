@@ -9,7 +9,9 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
+from ipware import get_client_ip
 from qsessions.geoip import ip_to_location_info
+
 
 from exams.models import Exam
 from questions.models import Question, AnswerChoice, UserQuestionAnswer, UserQuestionStatus
@@ -193,24 +195,25 @@ def import_user_csv_view(request):
     return render(request, 'basic/pages/tools/import_bulk_user.html', context={'logs': logs})
 
 
-from ipware import get_client_ip
+
 # Donation
 def donate_view(request):
-    user_ip = get_client_ip(request)
+    user_ip = None
     try:
+        user_ip = get_client_ip(request)[0]
         loc_info = ip_to_location_info(user_ip)
     except:
         loc_info = {}
-        pass
 
-    country_code = request.GET.get('country_code', None)
-    country_code = country_code or (loc_info or {}).get('country_code')
+    country_code = request.GET.get('country_code', '')
+    country_code = country_code or (loc_info or {}).get('country_code', '').upper()
 
     ctx = {
-        'location_info': loc_info,
         'has_country_specific': country_code in ['BD'],
         'country_code': country_code,
+        'user_ip': user_ip,
 
+        # TODO cache for x seconds
         'kpi': [
             {
                 'title': 'Questions',
@@ -229,6 +232,54 @@ def donate_view(request):
                 'value': UserQuestionAnswer.objects.count(),
             },
         ],
+
+        'crypto_list': [
+            {
+                'name': 'USDC',
+                'addresses': [
+                    {
+                        'address': 'AyCDYTzvN7F1gRYe18mWXSc336MX4j4wQoUmgBfARBFf',
+                        'label': 'Solana',
+                        'label_code': 'SOL',
+                    },
+                    {
+                        'address': '0x7c5380c83cdf93db015794362488b9afe33b9836',
+                        'label': 'BNB Smart Chain (BEP20)',
+                        'label_code': 'BSC',
+                    },
+                ],
+            },
+            {
+                'name': 'BUSD',
+                'addresses': [
+                    {
+                        'address': '0x7c5380c83cdf93db015794362488b9afe33b9836',
+                        'label': 'BNB Smart Chain (BEP20)',
+                        'label_code': 'BSC',
+                    },
+                    {
+                        'address': 'TTivVPe5exmvzF79JERoSW7uj8tJAsGhpB',
+                        'label': 'Tron (TRC20)',
+                        'label_code': 'TRX',
+                    },
+                ],
+            },
+            {
+                'name': 'USDT',
+                'addresses': [
+                    {
+                        'address': 'TTivVPe5exmvzF79JERoSW7uj8tJAsGhpB',
+                        'label': 'Tron (TRC20)',
+                        'label_code': 'TRX',
+                    },
+                    {
+                        'address': '0xa7054ccd87d6224561b380a9b1d38bb163c84888',
+                        'label': 'BNB Smart Chain (BEP20)',
+                        'label_code': 'BSC',
+                    },
+                ],
+            },
+        ]
     }
 
     return render(request, 'basic/pages/donate/home.html', ctx)

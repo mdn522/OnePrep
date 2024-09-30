@@ -243,6 +243,7 @@ TEMPLATES = [
 
                 "utils.context_processors.google_analytics_context",
                 "utils.context_processors.theme_context",
+                "utils.context_processors.ip_address_context",
 
                 "utils.context_processors.internet_blackout_context",
             ],
