@@ -7,12 +7,12 @@ app = 'oneprep'
 primary_region = 'iad'
 console_command = '/code/manage.py shell_plus'
 
-swap_size_mb = 767
+swap_size_mb = 700
 
 [build]
 
 [deploy]
-   release_command = "python manage.py migrate"
+  release_command = "python manage.py migrate"
 
 [env]
   PORT = '8000'
@@ -49,6 +49,10 @@ swap_size_mb = 767
   auto_start_machines = true
   min_machines_running = 1
   processes = ['app']
+
+  [http_services.concurrency]
+    type = "connections"
+    soft_limit = 200
 
 [[vm]]
   size = 'shared-cpu-1x'
