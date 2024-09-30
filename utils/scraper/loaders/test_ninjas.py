@@ -72,7 +72,8 @@ class TestNinjasLoader(Loader):
             name = f"Test Ninjas - Full-length Practice Test #{test_n}"
             test_id = f"pt_fl_{test_n}"
 
-            for section_i in [0, 4, 2, 1, 5, 3]:
+            # for section_i in [0, 4, 2, 1, 5, 3]:
+            for section_i in [0, 4, 1, 2, 5, 3]:
                 section = test[section_i]
                 module, module_title, section_diff_name = section_map[section_i]
                 section_name = f'{name} - {module_title}'
