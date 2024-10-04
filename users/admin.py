@@ -210,7 +210,7 @@ USER_FK = easy.ForeignKeyAdminField('user', display='user.username')
 class ProfileAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     list_display = ['id', 'user_fk', 'timezone', 'theme', 'notes', 'has_donated', 'last_donated_at', 'last_donation_amount', 'last_donation_currency', 'disable_donation_notice', 'disable_donation_notice_until']
     list_editable = ['notes', 'has_donated', 'last_donated_at', 'last_donation_amount', 'last_donation_currency', 'disable_donation_notice', 'disable_donation_notice_until']
-    list_filter = ['has_donated']
+    list_filter = ['has_donated', 'disable_donation_notice']
     raw_id_fields = ['user']
     # readonly_fields = ['user']
     search_fields = ['user__username', 'user__email']

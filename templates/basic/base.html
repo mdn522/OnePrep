@@ -65,6 +65,12 @@
                 donation</a> will help us upgrade our servers and make our website faster and more reliable for
                 everyone. By supporting us, you'll ensure that our platform remains accessible and reliable for all
                 users. Thank you for your understanding and support.
+
+                {% include 'basic/components/donation_notice_progress.html' %}
+                
+                <div class="text-center mt-1">
+                    <a href="/donate/" class="btn btn-success btn-sm btn-wide">Donate Now</a>
+                </div>
             </div>
         </div>
         {% if HAS_DONATED_RECENTLY and not HIDE_DONATION_SUCCESS_NOTICE %}
@@ -77,6 +83,8 @@
                     Thank you for your <a class='text-primary font-semibold underline' href='/donate'>generous
                     donation</a>! Your support helps us keep our question bank running smoothly and accessible to
                     everyone. We appreciate your contribution.
+
+                    {% include 'basic/components/donation_notice_progress.html' %}
                 </div>
             </div>
         {% endif %}

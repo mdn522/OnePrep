@@ -89,7 +89,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "django_extensions",
     # "silk",
-    # "constance",
+    "constance",
 
     "crispy_forms",
     "crispy_bootstrap5",
@@ -418,11 +418,17 @@ CONSTANCE_IGNORE_ADMIN_VERSION_CHECK = True
 CONSTANCE_CONFIG = OrderedDict([
     ('DONATION_NOTICE_ENABLED', (False, 'Enable Donation Notice', bool)),
     ('DONATION_NOTICE_TEXT', ('', """""", str)),
+    ('DONATION_TARGET', (0, 'Donation Target', int)),
+    ('DONATION_AMOUNT', (0, 'Donation Amount', int)),
+
 ])
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ('Donation', {
-        'fields': ['DONATION_NOTICE_ENABLED', 'DONATION_NOTICE_TEXT'],
+        'fields': [
+            'DONATION_NOTICE_ENABLED', 'DONATION_NOTICE_TEXT',
+            'DONATION_AMOUNT', 'DONATION_TARGET',
+        ],
         'collapse': True
     }),
 ])

@@ -67,8 +67,6 @@ class Profile(models.Model):
     disable_donation_notice = models.BooleanField(default=False, blank=True, verbose_name="Disable Donation Notice")
     disable_donation_notice_until = models.DateTimeField(blank=True, null=True, verbose_name="Disable Donation Notice Until")
     has_donated = models.BooleanField(default=False, blank=True, verbose_name="Has Donated?")
-    # donation history
     last_donated_at = models.DateTimeField(blank=True, null=True, verbose_name="Last Donated At")
     last_donation_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, default=0, verbose_name="Last Donation Amount")
     last_donation_currency = models.CharField(max_length=3, blank=True, null=True, verbose_name="Last Donation Currency")
-    # last_donat
