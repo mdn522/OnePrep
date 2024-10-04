@@ -274,7 +274,8 @@
                                                 'border-neutral': !$store.data.answer_choices_status[letter].is_submitted,
                                                 'border-primary bg-primary text-primary-content': !$store.data.answer_choices_status[letter].is_submitted && $store.data.answer_choices_status[letter].is_selected,
                                                 'border-success bg-success text-success-content': $store.data.answer_choices_status[letter].is_submitted && $store.data.answer_choices_status[letter].is_correct,
-                                                'border-error bg-error text-error-content': $store.data.answer_choices_status[letter].is_submitted && !$store.data.answer_choices_status[letter].is_correct
+                                                'border-error bg-error text-error-content': $store.data.answer_choices_status[letter].is_submitted && !$store.data.answer_choices_status[letter].is_correct,
+                                                'text-primary': !$store.data.answer_choices_status[letter].is_submitted,
                                              }">
                                             {{ answer.letter }}
                                         </div>
