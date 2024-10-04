@@ -766,6 +766,8 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        context['HIDE_DONATION_SUCCESS_NOTICE'] = True
+
         question = Question.objects.prefetch_related("tags").only(*[
             'module', 'program', 'difficulty',
             'stimulus', 'stem', 'answer_type', 'explanation',

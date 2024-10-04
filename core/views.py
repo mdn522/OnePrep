@@ -4,7 +4,8 @@ import json
 from datetime import datetime, timedelta
 
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Q
+from django.db import models
+from django.db.models import Q, Sum, Case, When, F
 from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.csrf import csrf_exempt
@@ -151,7 +152,7 @@ def import_question_answer_and_status_view(request):
                     # print('answer_choices_id_2_id', answer_choices_id_2_id)
 
                     logs += '\n\n'
-            except Exception as e:
+            except Exception:
                 type_, value_, traceback_ = sys.exc_info()
                 logs += "Error:\n"
                 logs += ''.join(traceback.format_exception(type_, value_, traceback_))
@@ -213,8 +214,14 @@ def donate_view(request):
         'country_code': country_code,
         'user_ip': user_ip,
 
+        'DISABLE_DONATION_NOTICE': True,
+
         # TODO cache for x seconds
         'kpi': [
+            {
+                'title': 'Time Spent Developing OnePrep',
+                'value': '170+ hours',
+            },
             {
                 'title': 'Questions',
                 'value': Question.objects.count(),
@@ -281,5 +288,31 @@ def donate_view(request):
             },
         ]
     }
+
+    try:
+        time_given_threshold = timedelta(minutes=210)
+        time_spent_duration = UserQuestionAnswer.objects.aggregate(
+            total_time_spent=Sum(
+                Case(
+                    When(time_given__gt=time_given_threshold, then=time_given_threshold),
+                    default=F('time_given'),
+                    output_field=models.DurationField()
+                )
+            )
+        )['total_time_spent']
+
+        if time_spent_duration:
+            # TODO add year
+            days = time_spent_duration.days
+            hours = int((time_spent_duration.total_seconds() - (time_spent_duration.days * 86400)) // 3600)
+
+            time_spent = (f'{days:,}d ' if days else '') + (f'{hours}h' if hours else '')
+            if time_spent.strip():
+                ctx['kpi'].append({
+                    'title': 'User Time Spent',
+                    'value': time_spent,
+                })
+    except:
+        pass
 
     return render(request, 'basic/pages/donate/home.html', ctx)

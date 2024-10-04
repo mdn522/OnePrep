@@ -1,6 +1,6 @@
 # ruff: noqa: ERA001, E501
 """Base settings to build other settings files upon."""
-
+from collections import OrderedDict
 from pathlib import Path
 
 import environ
@@ -89,6 +89,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "django_extensions",
     # "silk",
+    # "constance",
 
     "crispy_forms",
     "crispy_bootstrap5",
@@ -189,6 +190,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     # "silk.middleware.SilkyMiddleware"
+
+    "core.middleware.ProfileMiddleware",
 ]
 
 SESSION_ENGINE = "qsessions.backends.db"
@@ -241,6 +244,7 @@ TEMPLATES = [
                 "users.context_processors.allauth_settings",
                 "django_admin_env_notice.context_processors.from_settings",
 
+                "utils.context_processors.base_context",
                 "utils.context_processors.google_analytics_context",
                 "utils.context_processors.theme_context",
                 "utils.context_processors.ip_address_context",
@@ -405,3 +409,20 @@ SILKY_DYNAMIC_PROFILING = [
 LOGIN_HISTORY_GEOLOCATION_METHOD = env.str('LOGIN_HISTORY_GEOLOCATION_METHOD', default='')
 
 DOC_PREFETCH_QUESTION = env.bool('DOC_PREFETCH_QUESTION', default=False)
+
+
+# Constance
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+# CONSTANCE_DATABASE_CACHE_BACKEND = 'memory'
+CONSTANCE_IGNORE_ADMIN_VERSION_CHECK = True
+CONSTANCE_CONFIG = OrderedDict([
+    ('DONATION_NOTICE_ENABLED', (False, 'Enable Donation Notice', bool)),
+    ('DONATION_NOTICE_TEXT', ('', """""", str)),
+])
+
+CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
+    ('Donation', {
+        'fields': ['DONATION_NOTICE_ENABLED', 'DONATION_NOTICE_TEXT'],
+        'collapse': True
+    }),
+])

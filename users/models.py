@@ -7,6 +7,7 @@ from django.db.models import CharField, OneToOneField
 from django.db.models import EmailField
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from timezone_field import TimeZoneField
 
 from users.managers import UserManager
 
@@ -48,14 +49,26 @@ class User(AbstractUser):
         return reverse("users:detail", kwargs={"pk": self.id})
 
 
-# class Profile(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     # TODO Profile picture
-#     # TODO bio
-#     # TODO social media links
-#     # TODO website
-#     # TODO location
-#     # TODO phone number
-#     # TODO date of birth
-#     # TODO timezone
-#     theme = models.CharField(max_length=255, default="light")
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # TODO Profile picture
+    # TODO bio
+    # TODO social media links
+    # TODO website
+    # TODO location
+    # TODO phone number
+    # TODO date of birth
+    # TODO timezone
+    timezone = TimeZoneField(choices_display="WITH_GMT_OFFSET", default='UTC', blank=True)
+    theme = models.CharField(max_length=255, default="light")
+    notes = models.TextField(blank=True, default='')
+    bio = models.TextField(blank=True, default='', max_length=240)
+
+    disable_donation_notice = models.BooleanField(default=False, blank=True, verbose_name="Disable Donation Notice")
+    disable_donation_notice_until = models.DateTimeField(blank=True, null=True, verbose_name="Disable Donation Notice Until")
+    has_donated = models.BooleanField(default=False, blank=True, verbose_name="Has Donated?")
+    # donation history
+    last_donated_at = models.DateTimeField(blank=True, null=True, verbose_name="Last Donated At")
+    last_donation_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, default=0, verbose_name="Last Donation Amount")
+    last_donation_currency = models.CharField(max_length=3, blank=True, null=True, verbose_name="Last Donation Currency")
+    # last_donat

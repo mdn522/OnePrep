@@ -1,10 +1,12 @@
 from audioop import reverse
 from typing import List, Any, Dict
 
+import easy
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import admin as auth_admin
 from django.contrib.auth.decorators import login_required
+from django.db import models
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.utils.safestring import mark_safe
@@ -14,7 +16,7 @@ from djangoql.admin import DjangoQLSearchMixin
 from questions.models import Question, AnswerChoice, Module
 from users.forms import UserAdminChangeForm
 from users.forms import UserAdminCreationForm
-from users.models import User
+from users.models import User, Profile
 
 if settings.DJANGO_ADMIN_FORCE_ALLAUTH:
     # Force the `admin` sign in process to go through the `django-allauth` workflow:
@@ -61,7 +63,7 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
         "email",
         "username",
     ]
-    list_per_page = 500
+    list_per_page = 250
     list_max_show_all = 1000
     search_fields = ["name"]
     ordering = ["id"]
@@ -200,3 +202,26 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
         return response
 
     export_user_data.short_description = "Export Data"
+
+
+USER_FK = easy.ForeignKeyAdminField('user', display='user.username')
+
+@admin.register(Profile)
+class ProfileAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    list_display = ['id', 'user_fk', 'timezone', 'theme', 'notes', 'has_donated', 'last_donated_at', 'last_donation_amount', 'last_donation_currency', 'disable_donation_notice', 'disable_donation_notice_until']
+    list_editable = ['notes', 'has_donated', 'last_donated_at', 'last_donation_amount', 'last_donation_currency', 'disable_donation_notice', 'disable_donation_notice_until']
+    list_filter = ['has_donated']
+    raw_id_fields = ['user']
+    # readonly_fields = ['user']
+    search_fields = ['user__username', 'user__email']
+    list_select_related = ['user']
+    list_per_page = 250
+    list_max_show_all = 1000
+    ordering = ['id']
+
+    user_fk = USER_FK
+
+    formfield_overrides = {
+        models.TextField: {'widget': admin.widgets.AdminTextareaWidget(attrs={'rows': 4, 'cols': 40, 'class': ''})},
+    }
+

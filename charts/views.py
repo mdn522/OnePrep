@@ -306,7 +306,8 @@ def basic_exam_time_view(request, exam_id, user_id=None, username=None):
 @staff_member_required
 def admin_chart_view(request):
     ctx = {
-        'kpi': []
+        'kpi': [],
+        'DISABLE_DONATION_NOTICE': True,
     }
 
     # KPI
@@ -331,7 +332,6 @@ def admin_chart_view(request):
     # print(x_axis)
     # print(len(x_axis))
     # print(timezone.now() - timezone.timedelta(days=DAYS - 1))
-
 
     # Chart Users
     chart_users_days = DAYS
