@@ -1,4 +1,5 @@
 import importlib
+from json import JSONDecodeError
 
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
@@ -86,11 +87,14 @@ def post_login(sender, user, request, **kwargs):
                 raise ValueError("Invalid geolocation method specified in settings.\n", er) from er
 
     if not result:
-        result = get_geolocation_data(client_ip)
+        try:
+            result = get_geolocation_data(client_ip)
+        except JSONDecodeError:
+            result = {}
+
         assert isinstance(result, dict)
 
         for key, value in result.items():
-
             if key in GEOLOCATION_BLOCK_FIELDS:
                 continue
 
