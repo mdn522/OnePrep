@@ -1,6 +1,10 @@
 {% extends "basic/base.html" %}
 
 {% block content %}
+
+    <h1 class="text-4xl text-center font-semibold font-sans">Your Ultimate Digital SAT Question Bank</h1>
+    <p class="text-center text-lg mt-1 text-base-content/75">More than 11,000 questions</p>
+
     <div class="flex flex-wrap space-x-2 justify-center mt-10">
         <a href="{% url 'exams:list' %}" class="btn btn-lg btn-accent my-2">Practice Tests</a>
         <a href="{% url 'questions:question-set-cbqb' %}" class="btn btn-lg btn-accent my-2 text-pretty max-w-[95%]">

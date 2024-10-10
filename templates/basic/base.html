@@ -51,44 +51,48 @@
 
 {% block content_root %}{% endblock content_root %}
 
-<div class="container mx-auto mt-4">
-    {% if not DISABLE_DONATION_NOTICE %}
-        <div class="mx-2 mb-2 {% if HIDE_DONATION_NOTICE %}hidden{% endif %}">
-            <div
-                class="max-w-3xl w-full mx-auto text-warning-content border-neutral border-y-4 border-y-error border rounded-xl px-2 py-1">
-                <h3 class="text-xl font-semibold mb-2">
-                    Important Notice: Our Website is Under Heavy Load
-                </h3>
-                We're experiencing <span class="text-error">increased traffic</span> on our question bank, which means
-                our website might be a little slow or even crash from time to time. We're working hard to fix this, but
-                we need your help. Your <a class='text-primary font-semibold underline' href='/donate'>generous
-                donation</a> will help us upgrade our servers and make our website faster and more reliable for
-                everyone. By supporting us, you'll ensure that our platform remains accessible and reliable for all
-                users. Thank you for your understanding and support.
+<div class="container mx-auto mt-4 relative">
+{#    <div class="fixed top-0 left-0 right-0 bottom-0 bg-black opacity-75 pointer-events-none" style="z-index: 2"></div>#}
 
-                {% include 'basic/components/donation_notice_progress.html' %}
-                
-                <div class="text-center mt-1">
-                    <a href="/donate/" class="btn btn-success btn-sm btn-wide">Donate Now</a>
-                </div>
-            </div>
-        </div>
-        {% if HAS_DONATED_RECENTLY and not HIDE_DONATION_SUCCESS_NOTICE %}
-            <div class="mx-2 mb-2">
+    <div class="" style="z-index: 4;">
+        {% if not DISABLE_DONATION_NOTICE %}
+            <div class="mx-2 mb-2 {% if HIDE_DONATION_NOTICE %}hidden{% endif %}">
                 <div
-                    class="max-w-3xl w-full mx-auto text-success-content border-neutral border-y-4 border-y-success border rounded-xl px-2 py-1">
+                    class="max-w-3xl w-full mx-auto text-warning-content border-neutral border-y-4 border-y-error border rounded-xl px-2 py-1">
                     <h3 class="text-xl font-semibold mb-2">
-                        Thank you for your donation!
+                        Important Notice: Our Website is Under Heavy Load
                     </h3>
-                    Thank you for your <a class='text-primary font-semibold underline' href='/donate'>generous
-                    donation</a>! Your support helps us keep our question bank running smoothly and accessible to
-                    everyone. We appreciate your contribution.
+                    We're experiencing <span class="text-error">increased traffic</span> on our question bank, which means
+                    our website might be a little slow or even crash from time to time. We're working hard to fix this, but
+                    we need your help. Your <a class='text-primary font-semibold underline' href='/donate/?utm_source=oneprep&utm_medium=donation-notice-text'>generous
+                    donation</a> will help us upgrade our servers and make our website faster and more reliable for
+                    everyone. By supporting us, you'll ensure that our platform remains accessible and reliable for all
+                    users. Thank you for your understanding and support.
 
                     {% include 'basic/components/donation_notice_progress.html' %}
+
+                    <div class="text-center mt-1">
+                        <a href="/donate/?utm_source=oneprep&utm_medium=donation-notice-button" class="btn btn-success btn-sm btn-wide">Donate Now</a>
+                    </div>
                 </div>
             </div>
+            {% if HAS_DONATED_RECENTLY and not HIDE_DONATION_SUCCESS_NOTICE %}
+                <div class="mx-2 mb-2">
+                    <div
+                        class="max-w-3xl w-full mx-auto text-success-content border-neutral border-y-4 border-y-success border rounded-xl px-2 py-1">
+                        <h3 class="text-xl font-semibold mb-2">
+                            Thank you for your donation!
+                        </h3>
+                        Thank you for your <a class='text-primary font-semibold underline' href='/donate/?utm_source=oneprep&utm_medium=donation-success-text'>generous
+                        donation</a>! Your support helps us keep our question bank running smoothly and accessible to
+                        everyone. We appreciate your contribution.
+
+                        {% include 'basic/components/donation_notice_progress.html' %}
+                    </div>
+                </div>
+            {% endif %}
         {% endif %}
-    {% endif %}
+    </div>
 
     {% block content %}{% endblock content %}
 </div>

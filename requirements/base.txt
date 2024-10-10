@@ -35,7 +35,8 @@ django-filter  # https://github.com/carltongibson/django-filter
 django-object-actions  # https://github.com/crccheck/django-object-actions
 django-extensions==3.2.3  # https://github.com/django-extensions/django-extensions
 django-mathfilters  # https://github.com/dbrgn/django-mathfilters
-django-login-history2  # https://github.com/riquedev/django-login-history2
+# django-login-history2  # https://github.com/riquedev/django-login-history2
+git+https://github.com/mdn522/django-login-history2  # https://github.com/mdn522/django-login-history2
 django-qsessions  # https://github.com/QueraTeam/django-qsessions
 # django-silk  # https://github.com/jazzband/django-silk
 django-constance  # https://github.com/jazzband/django-constance
