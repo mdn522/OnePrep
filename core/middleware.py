@@ -1,6 +1,8 @@
 # myapp/middleware.py
 from django.http import HttpResponsePermanentRedirect
 
+from users.models import Profile
+
 
 class PA2FlyRedirectMiddleware:
     def __init__(self, get_response):
@@ -19,3 +21,15 @@ class PA2FlyRedirectMiddleware:
             return HttpResponsePermanentRedirect("https://oneprep.fly.dev" + request.get_full_path())
         else:
             return self.get_response(request)
+
+class ProfileMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated:
+            try:
+                request.user.profile  # Access the profile to trigger prefetching
+            except Profile.DoesNotExist:
+                request.user.profile = Profile.objects.create(user=request.user)
+        return self.get_response(request)

@@ -8,7 +8,7 @@ from typing import List
 
 from json_stream.base import StreamingJSONList, StreamingJSONObject
 
-from questions.models import Question, AnswerChoice, Answer
+from questions.models import Question, AnswerChoice, Answer, Module
 from exams.models import Exam, ExamQuestion
 from ..loaders import Loader
 
@@ -30,16 +30,16 @@ class SATMocksLoader(Loader):
     source = 'satmocks'
 
     subject_id_to_module_map = {
-        1: Question.Module.ENGLISH,
-        2: Question.Module.ENGLISH,
-        3: Question.Module.MATH,
-        4: Question.Module.MATH,
-        5: Question.Module.ENGLISH,
+        1: Module.ENGLISH,
+        2: Module.ENGLISH,
+        3: Module.MATH,
+        4: Module.MATH,
+        5: Module.ENGLISH,
     }
 
     module_to_text = {
-        Question.Module.ENGLISH: 'English',
-        Question.Module.MATH: 'Math',
+        Module.ENGLISH: 'English',
+        Module.MATH: 'Math',
     }
 
     def load(self):

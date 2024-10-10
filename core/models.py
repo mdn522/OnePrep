@@ -1,8 +1,23 @@
+import importlib
+from json import JSONDecodeError
+
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.db.models import Subquery, PositiveIntegerField
+from django_login_history2.models import Login
 
 from taggit.managers import TaggableManager
 from taggit.models import TagBase, GenericTaggedItemBase
+
+from django.dispatch import receiver
+from django.contrib.auth.signals import user_logged_in
+from django_login_history2.app_settings import (GEOLOCATION_METHOD, GEOLOCATION_BLOCK_FIELDS,
+                           GEOLOCATION_PLACEHOLDER_IP)
+from ipware import get_client_ip
+from django_login_history2.utils import get_geolocation_data
+from django.contrib.auth.signals import user_logged_in
+
+from users.models import User
 
 
 class SubqueryCount(Subquery):
@@ -46,3 +61,59 @@ class SkillTagged(GenericTaggedItemBase):
         on_delete=models.CASCADE,
         related_name="%(app_label)s_%(class)s_items",
     )
+
+
+# @receiver(user_logged_in)
+# def post_login(sender, user, request, **kwargs):
+#     client_ip, is_routable = get_client_ip(request)
+#     method_path = GEOLOCATION_METHOD
+#     result = None
+#     mapped_fields = {}
+#
+#     if not client_ip:
+#         client_ip = GEOLOCATION_PLACEHOLDER_IP
+#
+#     else:
+#         if not is_routable:
+#             result = {"error": True, "reason": "Address not routable"}
+#
+#         elif method_path:
+#             module_name, func_name = method_path.rsplit('.', 1)
+#             try:
+#                 module = importlib.import_module(module_name)
+#                 geolocation_func = getattr(module, func_name)
+#                 result = geolocation_func(client_ip)
+#             except (ImportError, AttributeError) as er:
+#                 raise ValueError("Invalid geolocation method specified in settings.\n", er) from er
+#
+#     if not result:
+#         try:
+#             result = get_geolocation_data(client_ip)
+#         except JSONDecodeError:
+#             result = {}
+#
+#         assert isinstance(result, dict)
+#
+#         for key, value in result.items():
+#             if key in GEOLOCATION_BLOCK_FIELDS:
+#                 continue
+#
+#             try:
+#                 _ = Login._meta.get_field(key)
+#                 mapped_fields[key] = value or ''
+#             except FieldDoesNotExist:
+#                 pass
+#
+#     _ = Login.objects.create(
+#         user=user,
+#         ip=client_ip,
+#         user_agent=request.META.get('HTTP_USER_AGENT', ''),
+#         ip_info=result,
+#         **mapped_fields
+#     )
+#
+#
+# for x in user_logged_in._live_receivers(User)[0]:
+#     if str(x.__module__).startswith('django_login_history2'):
+#         print('Removed user_logged_in receiver:', x, x.__module__)
+#         user_logged_in.disconnect(x)

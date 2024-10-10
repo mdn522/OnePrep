@@ -23,7 +23,7 @@ urlpatterns = [
 
     path(
         "about/",
-        TemplateView.as_view(template_name="pages/about.html"),
+        TemplateView.as_view(template_name="pages/about.html", extra_context={"DISABLE_DONATION_NOTICE": True}),
         name="about",
     ),
     # Django Admin, use {% url 'admin:index' %}
@@ -33,7 +33,7 @@ urlpatterns = [
     path("users/", include("users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
 
-    path("", TemplateView.as_view(template_name="basic/pages/home.html"), name="home"),
+    path("", TemplateView.as_view(template_name="basic/pages/home.html", extra_context={"DISABLE_DONATION_NOTICE": True}), name="home"),
 
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),

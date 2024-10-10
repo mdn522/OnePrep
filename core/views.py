@@ -4,12 +4,17 @@ import json
 from datetime import datetime, timedelta
 
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Q
+from django.db import models
+from django.db.models import Q, Sum, Case, When, F
 from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
+from ipware import get_client_ip
+from qsessions.geoip import ip_to_location_info
 
+
+from exams.models import Exam
 from questions.models import Question, AnswerChoice, UserQuestionAnswer, UserQuestionStatus
 from users.models import User
 
@@ -147,7 +152,7 @@ def import_question_answer_and_status_view(request):
                     # print('answer_choices_id_2_id', answer_choices_id_2_id)
 
                     logs += '\n\n'
-            except Exception as e:
+            except Exception:
                 type_, value_, traceback_ = sys.exc_info()
                 logs += "Error:\n"
                 logs += ''.join(traceback.format_exception(type_, value_, traceback_))
@@ -189,3 +194,125 @@ def import_user_csv_view(request):
         User.objects.bulk_create(users)
 
     return render(request, 'basic/pages/tools/import_bulk_user.html', context={'logs': logs})
+
+
+
+# Donation
+def donate_view(request):
+    user_ip = None
+    try:
+        user_ip = get_client_ip(request)[0]
+        loc_info = ip_to_location_info(user_ip)
+    except:
+        loc_info = {}
+
+    country_code = request.GET.get('country_code', '')
+    country_code = country_code or (loc_info or {}).get('country_code', '').upper()
+
+    ctx = {
+        'has_country_specific': country_code in ['BD'],
+        'country_code': country_code,
+        'user_ip': user_ip,
+
+        'DISABLE_DONATION_NOTICE': True,
+
+        # TODO cache for x seconds
+        'kpi': [
+            {
+                'title': 'Time Spent Developing OnePrep',
+                'value': '170+ hours',
+            },
+            {
+                'title': 'Questions',
+                'value': Question.objects.count(),
+            },
+            {
+                'title': 'Practice Tests',
+                'value': Exam.objects.filter(is_active=True, is_public=True).count(),
+            },
+            # {
+            #     'title': 'Users',
+            #     'value': User.objects.count(),
+            # },
+            {
+                'title': 'User Attempts',
+                'value': UserQuestionAnswer.objects.count(),
+            },
+        ],
+
+        'crypto_list': [
+            {
+                'name': 'USDC',
+                'addresses': [
+                    {
+                        'address': 'AyCDYTzvN7F1gRYe18mWXSc336MX4j4wQoUmgBfARBFf',
+                        'label': 'Solana',
+                        'label_code': 'SOL',
+                    },
+                    {
+                        'address': '0x7c5380c83cdf93db015794362488b9afe33b9836',
+                        'label': 'BNB Smart Chain (BEP20)',
+                        'label_code': 'BSC',
+                    },
+                ],
+            },
+            {
+                'name': 'BUSD',
+                'addresses': [
+                    {
+                        'address': '0x7c5380c83cdf93db015794362488b9afe33b9836',
+                        'label': 'BNB Smart Chain (BEP20)',
+                        'label_code': 'BSC',
+                    },
+                    {
+                        'address': 'TTivVPe5exmvzF79JERoSW7uj8tJAsGhpB',
+                        'label': 'Tron (TRC20)',
+                        'label_code': 'TRX',
+                    },
+                ],
+            },
+            {
+                'name': 'USDT',
+                'addresses': [
+                    {
+                        'address': 'TTivVPe5exmvzF79JERoSW7uj8tJAsGhpB',
+                        'label': 'Tron (TRC20)',
+                        'label_code': 'TRX',
+                    },
+                    {
+                        'address': '0xa7054ccd87d6224561b380a9b1d38bb163c84888',
+                        'label': 'BNB Smart Chain (BEP20)',
+                        'label_code': 'BSC',
+                    },
+                ],
+            },
+        ]
+    }
+
+    try:
+        time_given_threshold = timedelta(minutes=210)
+        time_spent_duration = UserQuestionAnswer.objects.aggregate(
+            total_time_spent=Sum(
+                Case(
+                    When(time_given__gt=time_given_threshold, then=time_given_threshold),
+                    default=F('time_given'),
+                    output_field=models.DurationField()
+                )
+            )
+        )['total_time_spent']
+
+        if time_spent_duration:
+            # TODO add year
+            days = time_spent_duration.days
+            hours = int((time_spent_duration.total_seconds() - (time_spent_duration.days * 86400)) // 3600)
+
+            time_spent = (f'{days:,}d ' if days else '') + (f'{hours}h' if hours else '')
+            if time_spent.strip():
+                ctx['kpi'].append({
+                    'title': 'User Time Spent',
+                    'value': time_spent,
+                })
+    except:
+        pass
+
+    return render(request, 'basic/pages/donate/home.html', ctx)

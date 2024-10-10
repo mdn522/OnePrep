@@ -1,27 +1,114 @@
 import json
 from collections import namedtuple, OrderedDict, defaultdict
-from typing import Any, Dict, List
+from distutils.util import strtobool
+from typing import Any, Dict, List, Tuple
 
+import django_filters
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import Q, Count, Field, Value, F, Min, Subquery, OuterRef
+from django.db.models import Q, Count, Field, Value, F, Min, Subquery, OuterRef, QuerySet
 from django.db.models.functions import Coalesce
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.views.generic import TemplateView, ListView
 
 from core.models import SubqueryCount
+from core.templatetags.core_tags import urlencode_f
 from exams.models import Exam
-from .models import Question, UserQuestionAnswer, UserQuestionStatus
+from users.models import User
+from .models import Question, UserQuestionAnswer, UserQuestionStatus, Module
 
-# TODO remove later. temp mem cache
+QuestionBankCategoryCategoryMap = namedtuple('QuestionBankCategoryCategoryMap', ['module', 'primary_class', 'skill', 'primary_class_cd', 'skill_cd'], defaults=(None,) * 5)
+COLLEGE_BOARD_QUESTION_BANK_CATEGORIES_MAP = [
+    QuestionBankCategoryCategoryMap(module='en', primary_class=None, skill=None),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='CAS', skill=None),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='CAS', skill='CTC'),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='CAS', skill='TSP'),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='CAS', skill='WIC'),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='EOI', skill=None),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='EOI', skill='SYN'),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='EOI', skill='TRA'),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='INI', skill=None),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='INI', skill='CID'),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='INI', skill='COE'),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='INI', skill='INF'),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='SEC', skill=None),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='SEC', skill='BOU'),
+    QuestionBankCategoryCategoryMap(module='en', primary_class='SEC', skill='FSS'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class=None, skill=None),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill=None),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill='H.A.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill='H.B.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill='H.C.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill='H.D.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill='H.E.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='P', skill=None),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='P', skill='P.A.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='P', skill='P.B.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='P', skill='P.C.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill=None),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.A.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.B.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.C.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.D.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.E.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.F.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.G.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='S', skill=None),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='S', skill='S.A.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='S', skill='S.B.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='S', skill='S.C.'),
+    QuestionBankCategoryCategoryMap(module='math', primary_class='S', skill='S.D.'),
+]
+PRINCETON_REVIEW_PRACTICE_TESTS_QUESTION_BANK_CATEGORIES_MAP = [
+        QuestionBankCategoryCategoryMap(module='en', primary_class=None, skill=None),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill=None),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Vocabulary'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Purpose'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Retrieval'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Charts'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Main Ideas'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Dual Texts'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Claims'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Conclusions'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill=None),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Complete Sentences'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Connecting Clauses'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Lists'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Modifiers'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='No Punctuation'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Nouns'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Pronouns'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Punctuation with Describing Phrases'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Verbs'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rhetoric', skill=None),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rhetoric', skill='Transitions'),
+        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rhetoric', skill='Rhetorical Synthesis'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class=None, skill=None),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill=None),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill='Coordinate Geometry'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill='Functions'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill='Linear Solving'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill='Nonlinear Solving'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill='Representation and Interpretation'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Problem-Solving and Data Analysis', skill=None),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Problem-Solving and Data Analysis', skill='Proportional Relationships'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Problem-Solving and Data Analysis', skill='Working with Data'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Strategies', skill=None),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Strategies', skill='Plugging In'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Strategies', skill='Plugging In the Answers'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Geometry and Trigonometry', skill=None),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Geometry and Trigonometry', skill='Advanced Coordinate Geometry'),
+        QuestionBankCategoryCategoryMap(module='math', primary_class='Geometry and Trigonometry', skill='Geometry and Trigonometry'),
+    ]
+
+# TODO remove later. temp memory cache
 memcache = defaultdict(dict)
-
 
 class QuestionListView(ListView):
     template_name = 'basic/pages/questions/question_list.html'
@@ -32,8 +119,8 @@ class QuestionListView(ListView):
 
 class QuestionSetView(TemplateView):
     module_tag_map = {
-        Question.Module.ENGLISH: 'English',
-        Question.Module.MATH: 'Math',
+        Module.ENGLISH: 'English',
+        Module.MATH: 'Math',
     }
 
     set_stats = []
@@ -78,7 +165,7 @@ class ExamQuestionSet(QuestionSetView):
         context['question_set_name'] = exam.name
         context['question_set_key'] = f'exam'
         context['question_set_filter'] = {}
-        context['question_set_args'] = urlencode(question_set_filter)
+        context['question_set_args'] = urlencode_f(question_set_filter)
         context['question_set_back'] = False
 
         context['question_set_exam_id'] = exam.id
@@ -98,26 +185,38 @@ class ExamQuestionSet(QuestionSetView):
         # self.question_number(context, question)
 
 
-QuestionBankCategoryCategoryMap = namedtuple('QuestionBankCategoryCategoryMap', ['module', 'primary_class', 'skill', 'primary_class_cd', 'skill_cd'], defaults=(None,) * 5)
-
-
 class QuestionBankCategoryListView(QuestionSetView):
     template_name = 'basic/pages/questions/set/question_bank_categories.html'  # TODO rename
     question_content_type_id = ContentType.objects.get_for_model(Question).id
 
     category_map = []
 
-    def filtered_queryset(self):
+    def filtered_queryset(self, use_filter_class=True, request=None) -> Tuple[QuerySet, django_filters.FilterSet]:
         qs = Question.objects
         for tag in self.tag_filter:
             qs = qs.filter(tags__name=tag)
 
         qs = qs.distinct()
-        return qs
+
+        if use_filter_class:
+            filter = self.filter_class((request or self.request).GET, request=request or self.request, queryset=qs)
+            filter.errors
+            return filter.qs, filter
+
+        return qs, None
 
     # noinspection PyUnresolvedReferences
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # print('request', self.request)
+        # qs, f = self.filtered_queryset()
+        # print('errors', f.errors)
+        # print('filter', f)
+        # print('length', len(f.qs))
+        # print('form dir', dir(f.form))
+        # print('form data', f.form.cleaned_data)
+        # print('difficulty', dir(f.form.fields['difficulty']))
 
         # flat tags from category map
 
@@ -139,16 +238,18 @@ class QuestionBankCategoryListView(QuestionSetView):
 
         # print('tags_map', tags_map)
 
-        question_set_filter = {}
-        question_set_filtered_queryset = self.filtered_queryset()
-        question_set_filtered_queryset = self.get_filter_from_args(self.request, question_set_filter, {}, question_set_filtered_queryset)
+        # question_set_filter = {}
+        question_set_filtered_queryset, question_set_filter = self.filtered_queryset()
+        # question_set_filtered_queryset = self.get_filter_from_args(self.request, question_set_filter, {}, question_set_filtered_queryset)
         # print('filter_from_args', question_set_filter)
 
         # print(len(question_set_filtered_queryset))
 
+        question_ids = list(question_set_filtered_queryset.values_list('id', flat=True))
+
         counts = (Question.tags.through.objects.filter(
             # tag__name__in=self.tag_filter,
-            object_id__in=question_set_filtered_queryset.values('id'),  # tags__name__in=['Bluebook']
+            object_id__in=question_ids,  # tags__name__in=['Bluebook']
             # TODO cache
             content_type_id=self.question_content_type_id,
         ).annotate(
@@ -185,7 +286,7 @@ class QuestionBankCategoryListView(QuestionSetView):
         counts_marked_for_review = (
             UserQuestionStatus.objects.filter(
                 user=self.request.user if self.request.user.is_authenticated else None, exam=None,
-                question_id__in=question_set_filtered_queryset.values('id'),
+                question_id__in=question_ids,
                 is_marked_for_review=True
             ).aggregate(
                 count=Count('question_id', distinct=True),
@@ -213,7 +314,7 @@ class QuestionBankCategoryListView(QuestionSetView):
         categories = []
         modules_args = {}
 
-        question_set_filter_wo_modules: Dict = {**question_set_filter}
+        question_set_filter_wo_modules: Dict = {**question_set_filter.form.cleaned_data}
         if 'module' in question_set_filter_wo_modules:
             del question_set_filter_wo_modules['module']
 
@@ -228,20 +329,20 @@ class QuestionBankCategoryListView(QuestionSetView):
                 'module': _m,
                 'module_count': counts[m],
                 'module_marked_count': counts_marked_for_review[m],
-                'module_args': urlencode({'question_set': self.key} | question_set_filter_wo_modules| {'module': _m}),
+                'module_args': urlencode_f({'question_set': self.key} | question_set_filter_wo_modules| {'module': _m}),
                 'primary_class': _pc,
                 'primary_class_count': counts[m + '_' + pc],
                 'primary_class_marked_count': counts_marked_for_review[m + '_' + pc],
-                'primary_class_args': urlencode({'question_set': self.key} | question_set_filter_wo_modules | {'module': _m, 'primary_class': _pc}),
+                'primary_class_args': urlencode_f({'question_set': self.key} | question_set_filter_wo_modules | {'module': _m, 'primary_class': _pc}),
                 'skill': _s,
                 'skill_count': counts[m + '_' + pc + '_' + s],
                 'skill_marked_count': counts_marked_for_review[m + '_' + pc + '_' + s],
-                'skill_args': urlencode({'question_set': self.key} | question_set_filter_wo_modules| {'module': _m, 'primary_class': _pc, 'skill': _s}),
+                'skill_args': urlencode_f({'question_set': self.key} | question_set_filter_wo_modules| {'module': _m, 'primary_class': _pc, 'skill': _s}),
                 # 'primary_class': [],
             })
 
             if m not in modules_args:
-                modules_args[m] = urlencode({'question_set': self.key} | question_set_filter_wo_modules | {'module': m})
+                modules_args[m] = urlencode_f({'question_set': self.key} | question_set_filter_wo_modules | {'module': m})
 
             # print('key', key)
 
@@ -273,9 +374,32 @@ class QuestionBankCategoryListView(QuestionSetView):
         question_set = request.GET.get('question_set')
 
         question_set_filter['question_set'] = question_set
-        question_set_filtered_queryset = self.filtered_queryset().order_by('source_order').only('id', 'source_order', 'difficulty', 'module')
-        # print('QuestionSetView', QuestionSetView.terms)
-        question_set_filtered_queryset = self.get_filter_from_args(request, question_set_filter, question_set_filter_text, question_set_filtered_queryset)
+        question_set_filtered_queryset, f = self.filtered_queryset(request=request)
+        question_set_filtered_queryset = question_set_filtered_queryset.order_by('source_order').only('id', 'source_order', 'difficulty', 'module')
+        # question_set_filtered_queryset = self.get_filter_from_args(request, question_set_filter, question_set_filter_text, question_set_filtered_ queryset)
+        for field_name in f.form.fields:
+            # field = f.form.fields[field_name]
+            data = f.form.cleaned_data.get(field_name)
+            term = None
+            if not data:
+                term = 'All'
+            else:
+                if isinstance(data, list):
+                    terms = {}
+                    for d in data:
+                        for choice in f.form.fields[field_name].choices:
+                            if choice[0] == d:
+                                terms[choice[0]] = choice[1]
+                                break
+                        # terms.append(self.terms.get(d, d))
+                    term = ', '.join([terms.get(d, self.terms.get(d, d)) for d in data])
+                else:
+                    for choice in f.form.fields[field_name].choices:
+                        if choice[0] == data:
+                            term = choice[1]
+                            break
+                    term = term or self.terms.get(data, data)
+            question_set_filter_text[field_name] = term or 'N/A'
 
         context['question_set_name'] = self.name
         context['question_set_key'] = self.key
@@ -285,8 +409,8 @@ class QuestionBankCategoryListView(QuestionSetView):
         context['question_set_filters'] = self.filters  # TODO remove
         context['question_set_terms'] = self.terms # TODO remove
         # url encode using urllib
-        context['question_set_args'] = urlencode(question_set_filter)
-        context['question_set_categories_args'] = urlencode({k: v for k, v in question_set_filter.items() if k not in ['module', 'question_set', 'primary_class', 'skill']})
+        context['question_set_args'] = urlencode_f({'question_set': question_set} | f.form.cleaned_data)
+        context['question_set_categories_args'] = urlencode_f({k: v for k, v in f.form.cleaned_data.items() if k not in ['module', 'question_set', 'primary_class', 'skill']})
         context['question_set_back'] = True
 
         # print('question_set_args', context['question_set_args'])
@@ -389,6 +513,72 @@ class QuestionBankCategoryListView(QuestionSetView):
         return question_set_filtered_queryset
 
 
+class QuestionBankFilterBase(django_filters.FilterSet):
+    module = django_filters.ChoiceFilter(choices=Module, empty_label='')
+    marked_for_review = django_filters.ChoiceFilter(choices=[('all', 'All'), ('true', 'Yes'), ('false', 'No')], method='filter_marked_for_review')
+
+    def filter_marked_for_review(self, queryset, name, value):
+        if self.request is None:
+            return queryset
+
+        value = {'true': True, 'false': False, 'all': None}.get(value)
+
+        if value is None:
+            return queryset
+
+        return queryset.annotate(
+            is_marked_for_review=Value(False) if not self.request.user.is_authenticated else Coalesce(
+                Subquery(UserQuestionStatus.objects.filter(user=self.request.user, exam=None, question_id=OuterRef('id')).values('is_marked_for_review')[:1]),
+                Value(False)
+            )
+        ).filter(is_marked_for_review=value)
+
+    def filter_primary_class(self, queryset, name, value):
+        return queryset.filter(tags__name=value)
+
+    def filter_skill(self, queryset, name, value):
+        return queryset.filter(tags__name=value)
+
+
+class CollegeBoardQuestionBankFilter(QuestionBankFilterBase):
+    active = django_filters.ChoiceFilter(choices=[('all', 'All'), ('bluebook-only', 'Bluebook Only'), ('non-bluebook', 'Exclude Bluebook')], method='filter_active', empty_label='All')
+    difficulty = django_filters.MultipleChoiceFilter(choices=Question.Difficulty, label='Difficulty', method='filter_difficulty')
+
+    primary_class = django_filters.ChoiceFilter(choices=[(category.primary_class, category.primary_class) for category in COLLEGE_BOARD_QUESTION_BANK_CATEGORIES_MAP if category.primary_class and category.skill is None], method='filter_primary_class')
+    skill = django_filters.ChoiceFilter(choices=[(category.skill, category.skill) for category in COLLEGE_BOARD_QUESTION_BANK_CATEGORIES_MAP if category.skill], method='filter_skill')
+
+    def filter_active(self, queryset, name, value):
+        if value == 'bluebook-only':
+            return queryset.filter(tags__name='Bluebook')
+        elif value == 'non-bluebook':
+            return queryset.filter(tags__name='Non Bluebook')
+        return queryset
+
+    def filter_difficulty(self, queryset, name, value):
+        # return queryset
+
+        if not value or value[0] == 'all':
+            return queryset
+
+        f = Q()
+        for v in value:
+            f |= Q(difficulty=v)
+        return queryset.filter(f)
+
+    class Meta:
+        model = Question
+        fields = ['module', 'difficulty']
+
+
+class PrincetonReviewPracticeTestsQuestionBankFilter(QuestionBankFilterBase):
+    primary_class = django_filters.ChoiceFilter(choices=[(category.primary_class, category.primary_class) for category in PRINCETON_REVIEW_PRACTICE_TESTS_QUESTION_BANK_CATEGORIES_MAP if category.primary_class and category.skill is None], method='filter_primary_class')
+    skill = django_filters.ChoiceFilter(choices=[(category.skill, category.skill) for category in PRINCETON_REVIEW_PRACTICE_TESTS_QUESTION_BANK_CATEGORIES_MAP if category.skill], method='filter_skill')
+
+    class Meta:
+        model = Question
+        fields = ['module']
+
+
 class CollegeBoardQuestionBankCategoryListView(QuestionBankCategoryListView):
     name = 'College Board Question Bank'
     key = 'college-board-question-bank'
@@ -398,57 +588,18 @@ class CollegeBoardQuestionBankCategoryListView(QuestionBankCategoryListView):
              'H': 'Algebra', 'H.C.': 'Linear equations in two variables', 'H.E.': 'Linear inequalities in one or two variables', 'H.D.': 'Systems of two linear equations in two variables', 'H.B.': 'Linear functions', 'H.A.': 'Linear equations in one variable', 'P': 'Advanced Math', 'P.C.': 'Nonlinear functions', 'P.A.': 'Equivalent expressions', 'P.B.': 'Nonlinear equations in one variable and systems of equations in two variables ', 'Q': 'Problem-Solving and Data Analysis', 'Q.F.': 'Inference from sample statistics and margin of error ', 'Q.A.': 'Ratios, rates, proportional relationships, and units', 'Q.E.': 'Probability and conditional probability', 'Q.B.': 'Percentages', 'Q.D.': 'Two-variable data: Models and scatterplots', 'Q.C.': 'One-variable data: Distributions and measures of center and spread', 'Q.G.': 'Evaluating statistical claims: Observational studies and experiments ', 'S': 'Geometry and Trigonometry', 'S.B.': 'Lines, angles, and triangles', 'S.C.': 'Right triangles and trigonometry', 'S.A.': 'Area and volume', 'S.D.': 'Circles',
              'INI': 'Information and Ideas', 'INF': 'Inferences', 'CID': 'Central Ideas and Details', 'COE': 'Command of Evidence', 'CAS': 'Craft and Structure', 'WIC': 'Words in Context', 'TSP': 'Text Structure and Purpose', 'CTC': 'Cross-Text Connections', 'EOI': 'Expression of Ideas', 'SYN': 'Rhetorical Synthesis', 'TRA': 'Transitions', 'SEC': 'Standard English Conventions', 'BOU': 'Boundaries', 'FSS': 'Form, Structure, and Sense',
              'bluebook-only': 'Bluebook Only', 'all': 'All', 'non-bluebook': 'Exclude Bluebook'}
-    category_map = [
-        QuestionBankCategoryCategoryMap(module='en', primary_class=None, skill=None),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='CAS', skill=None),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='CAS', skill='CTC'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='CAS', skill='TSP'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='CAS', skill='WIC'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='EOI', skill=None),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='EOI', skill='SYN'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='EOI', skill='TRA'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='INI', skill=None),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='INI', skill='CID'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='INI', skill='COE'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='INI', skill='INF'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='SEC', skill=None),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='SEC', skill='BOU'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='SEC', skill='FSS'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class=None, skill=None),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill=None),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill='H.A.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill='H.B.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill='H.C.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill='H.D.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='H', skill='H.E.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='P', skill=None),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='P', skill='P.A.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='P', skill='P.B.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='P', skill='P.C.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill=None),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.A.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.B.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.C.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.D.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.E.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.F.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Q', skill='Q.G.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='S', skill=None),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='S', skill='S.A.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='S', skill='S.B.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='S', skill='S.C.'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='S', skill='S.D.'),
-    ]
+    category_map = COLLEGE_BOARD_QUESTION_BANK_CATEGORIES_MAP
 
     filters = {
         'module': {
             'text': 'Module',
-            'choices': Question.Module,
+            'choices': Module,
             'orm_field': 'module',
         },
         'active': {
             'show': True,
             'text': 'Filter',
+            'ignore_values': [''],
             # 'default': 'all',
             'items': OrderedDict([
                 ('all', {'text': 'All'}),
@@ -459,13 +610,19 @@ class CollegeBoardQuestionBankCategoryListView(QuestionBankCategoryListView):
         'difficulty': {
             'show': True,
             'text': 'Difficulty',
+            'include_all': True,
+
             'items': OrderedDict([('all', 'All')] + Question.Difficulty.choices),
             'choices': Question.Difficulty,
             'orm_field': 'difficulty',
+            'multiple': True,
+            'disable_empty': True,
+            'empty_values': ['', 'all']
         },
         'marked_for_review': {
             'show': True,
             'text': 'Marked For Review',
+            'ignore_values': [''],
             'items': OrderedDict([
                 ('all', {'text': 'All'}),
                 ('true', {'text': 'Yes', 'filter': {'is_marked_for_review': True}}),
@@ -493,6 +650,7 @@ class CollegeBoardQuestionBankCategoryListView(QuestionBankCategoryListView):
             ]),
         },
     }
+    filter_class = CollegeBoardQuestionBankFilter
 
     tags_map = None
     flat_tags = None
@@ -506,58 +664,19 @@ class PrincetonReviewPracticeTestsQuestionBankCategoryListView(CollegeBoardQuest
 
     terms = {'math': 'Math', 'en': 'English', 'english': 'English'}
     QuestionBankCategoryCategoryMap = namedtuple('CategoryMap', ['module', 'primary_class', 'skill', 'primary_class_cd', 'skill_cd'], defaults=(None,) * 5)
-    category_map = [
-        QuestionBankCategoryCategoryMap(module='en', primary_class=None, skill=None),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill=None),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Vocabulary'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Purpose'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Retrieval'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Charts'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Main Ideas'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Dual Texts'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Claims'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Reading', skill='Conclusions'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill=None),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Complete Sentences'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Connecting Clauses'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Lists'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Modifiers'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='No Punctuation'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Nouns'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Pronouns'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Punctuation with Describing Phrases'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rules', skill='Verbs'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rhetoric', skill=None),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rhetoric', skill='Transitions'),
-        QuestionBankCategoryCategoryMap(module='en', primary_class='Writing Rhetoric', skill='Rhetorical Synthesis'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class=None, skill=None),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill=None),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill='Coordinate Geometry'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill='Functions'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill='Linear Solving'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill='Nonlinear Solving'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Algebra', skill='Representation and Interpretation'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Problem-Solving and Data Analysis', skill=None),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Problem-Solving and Data Analysis', skill='Proportional Relationships'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Problem-Solving and Data Analysis', skill='Working with Data'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Strategies', skill=None),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Strategies', skill='Plugging In'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Strategies', skill='Plugging In the Answers'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Geometry and Trigonometry', skill=None),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Geometry and Trigonometry', skill='Advanced Coordinate Geometry'),
-        QuestionBankCategoryCategoryMap(module='math', primary_class='Geometry and Trigonometry', skill='Geometry and Trigonometry'),
-    ]
+    category_map = PRINCETON_REVIEW_PRACTICE_TESTS_QUESTION_BANK_CATEGORIES_MAP
 
     filters = {
         'module': {
             'text': 'Module',
-            'choices': Question.Module,
+            'choices': Module,
             'orm_field': 'module',
         },
 
         'marked_for_review': {
             'show': True,
             'text': 'Marked For Review',
+            'ignore_values': [''],
             'items': OrderedDict([
                 ('all', {'text': 'All'}),
                 ('true', {'text': 'Yes', 'filter': {'is_marked_for_review': True}}),
@@ -586,6 +705,7 @@ class PrincetonReviewPracticeTestsQuestionBankCategoryListView(CollegeBoardQuest
             ]),
         },
     }
+    filter_class = PrincetonReviewPracticeTestsQuestionBankFilter
 
 
 question_sets = {
@@ -619,10 +739,11 @@ def question_set_first_question_view(request):
         return JsonResponse({'error': 'Invalid question set'}, status=400)
 
     QuestionSetView: CollegeBoardQuestionBankCategoryListView = question_sets[question_set]()
-    question_set_filter = {}
 
-    question_set_filtered_queryset = QuestionSetView.filtered_queryset().order_by('source_order')
-    question_set_filtered_queryset = QuestionSetView.get_filter_from_args(request, question_set_filter, {}, question_set_filtered_queryset)
+    question_set_filter = {}
+    question_set_filtered_queryset, f = QuestionSetView.filtered_queryset(request=request)
+    question_set_filtered_queryset = question_set_filtered_queryset.order_by('source_order')
+    # question_set_filtered_queryset = QuestionSetView.get_filter_from_args(request, question_set_filter, {}, question_set_filtered_queryset)
 
     try:
         first_question = question_set_filtered_queryset.first()
@@ -632,7 +753,7 @@ def question_set_first_question_view(request):
     # print('first_question', first_question)
 
     redirect_url = reverse('questions:detail', args=(first_question.id,))
-    parameters = urlencode({'question_set': question_set} | question_set_filter)
+    parameters = urlencode_f({'question_set': question_set} | f.form.cleaned_data)
     return redirect(f'{redirect_url}?{parameters}')
 
     # return Redirect
@@ -645,6 +766,8 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        context['HIDE_DONATION_SUCCESS_NOTICE'] = True
+
         question = Question.objects.prefetch_related("tags").only(*[
             'module', 'program', 'difficulty',
             'stimulus', 'stem', 'answer_type', 'explanation',
@@ -653,6 +776,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
         ]).get(pk=kwargs['pk'])
         context['question'] = question
         context['Question'] = Question
+        context['Module'] = Module
         context['questions_tags'] = [tag.name for tag in question.tags.all()]
         context['mathjax_inline_ds'] = not any([tag in ['College Board', 'The Princeton Review'] for tag in context['questions_tags']])
         context['answer_choices'] = list(question.answer_choice_set.only(*['id', 'text', 'letter', 'order', 'correct', 'explanation']).order_by('order').values())
@@ -718,6 +842,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
                 QuestionSetView.get_question_context_data(question, self.request, context)
             except Exception as e:
                 # print(e)
+                # raise e
                 context['is_question_set'] = False
 
             # question_set_filtered_queryset = question_set_filtered_queryset.only('id', 'source_order', 'difficulty')
@@ -732,6 +857,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
                 last_answer_correct=Subquery(UserQuestionAnswer.objects.filter(user=self.request.user, exam=None, question_id=OuterRef('id')).order_by('-answered_at').values('is_correct')[:1]),
             )
 
+            # TODO cache base then add user specific data from database
             context['question_set_questions'] = list(question_set_filtered_queryset.order_by('source_order').values('id', 'source_order', 'difficulty', 'is_marked_for_review', 'last_answer_correct'))
 
             # print('question_set_questions', context['question_set_questions'])
@@ -749,3 +875,4 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
         context['PREFETCH_QUESTION'] = settings.DOC_PREFETCH_QUESTION
 
         return context
+

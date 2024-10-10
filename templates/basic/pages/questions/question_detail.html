@@ -14,7 +14,11 @@
             {% if question_set_previous_question_id %}
             	<link rel="prefetch" href="{% url "questions:detail" question_set_previous_question_id %}?{{ question_set_args }}">
             {% endif %}
+<<<<<<< HEAD
             {% endif %}
+=======
+        {% endif %}
+>>>>>>> 14de0f236bd5ff6a5b7e5e1ef40034c85f9b0ffc
     {% endif %}
 {% endblock %}
 
@@ -43,7 +47,7 @@
         <script src="{% static 'cdn/alpine.3.x.x.min.js' %}" defer></script>
     {% endif %}
 
-    {% if question.module == Question.Module.MATH %}
+    {% if question.module == Module.MATH %}
         {% if not IS_BLACKOUT %}
             <script src="https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
         {% else %}
@@ -57,7 +61,7 @@
 {% block css %}
 	{{ block.super }}
 
-    {% if question.module == Question.Module.MATH %}
+    {% if question.module == Module.MATH %}
         <link rel="stylesheet" href="{% static 'css/math-calc.css' %}">
     {% endif %}
 
@@ -184,7 +188,7 @@
         {% endif %}
         <div id="question-meta" class="">
             <div class="">
-                {% if question.module == Question.Module.MATH %}
+                {% if question.module == Module.MATH %}
                 <div class="" x-data x-cloak>
                     <span class="btn float-right mt-1 mr-2"
                           :class="{'btn-primary': $store.calculator.show}" @click="calc_resize(); $store.calculator.show = !$store.calculator.show">
@@ -210,8 +214,8 @@
         </div>
     </div>
 
-    <div class="grid px-2 gap-4 md:gap-16 question {% if question.module == Question.Module.ENGLISH %}grid-cols-1 md:grid-cols-2{% endif %}{% if question.module == Question.Module.MATH %}grid-cols-1{% endif %}" id="question" x-data>
-        {% if question.module == Question.Module.ENGLISH %}
+    <div class="grid px-2 gap-4 md:gap-16 question {% if question.module == Module.ENGLISH %}grid-cols-1 md:grid-cols-2{% endif %}{% if question.module == Module.MATH %}grid-cols-1{% endif %}" id="question" x-data>
+        {% if question.module == Module.ENGLISH %}
             <div>
                 <div style="font-family: Roboto, sans-serif" id="question-stimulus">
                     <div class="">{{ question.stimulus | safe }}</div>
@@ -219,8 +223,8 @@
             </div>
         {% endif %}
 
-        <div class="{% if question.module == Question.Module.MATH %}w-full max-w-3xl px-0 md:px-5 justify-self-center{% endif %}"
-             {% if question.module == Question.Module.MATH %}:class="{'justify-self-end': $store.calculator.show, 'justify-self-center': !$store.calculator.show}" x-data{% endif %}>
+        <div class="{% if question.module == Module.MATH %}w-full max-w-3xl px-0 md:px-5 justify-self-center{% endif %}"
+             {% if question.module == Module.MATH %}:class="{'justify-self-end': $store.calculator.show, 'justify-self-center': !$store.calculator.show}" x-data{% endif %}>
             <div class="flex bg-base-300 py-1 px-1 items-center">
                 <span class="flex items-center question-mark-for-review"
                       x-data :class="{'question-marked': $store.data.status.is_marked_for_review}"
@@ -251,7 +255,7 @@
                 {% endif %}
             </div>
 
-            {% if question.module == Question.Module.MATH %}
+            {% if question.module == Module.MATH %}
             	<div class="my-3" style="font-family: Roboto, sans-serif" id="question-stimulus">
                     <div class="">{{ question.stimulus | safe }}</div>
                 </div>
@@ -280,7 +284,8 @@
                                                 'border-neutral': !$store.data.answer_choices_status[letter].is_submitted,
                                                 'border-primary bg-primary text-primary-content': !$store.data.answer_choices_status[letter].is_submitted && $store.data.answer_choices_status[letter].is_selected,
                                                 'border-success bg-success text-success-content': $store.data.answer_choices_status[letter].is_submitted && $store.data.answer_choices_status[letter].is_correct,
-                                                'border-error bg-error text-error-content': $store.data.answer_choices_status[letter].is_submitted && !$store.data.answer_choices_status[letter].is_correct
+                                                'border-error bg-error text-error-content': $store.data.answer_choices_status[letter].is_submitted && !$store.data.answer_choices_status[letter].is_correct,
+                                                'text-primary': !$store.data.answer_choices_status[letter].is_submitted,
                                              }">
                                             {{ answer.letter }}
                                         </div>
@@ -305,9 +310,9 @@
             {% endif %}
             {% if question.answer_type == Question.AnswerType.SPR %}
                 <div x-data="{input: ''}">
-                    <input type="text" placeholder="Answer" maxlength="6"
+                    <input type="text" placeholder="Answer" maxlength="10"
                        class="input input-bordered input-primary mt-2"
-                       x-model="input" @input="$store.data.input_user_answer(input)"/>
+                       x-model="input" @input="$store.data.input_user_answer(input)" @keyup.enter="($store.data.has_answered && !$store.data.has_answered_correct) ? $store.data.check() : ''"/>
                 </div>
             {% endif %}
 
@@ -420,7 +425,7 @@
         </div>
     </div>
 
-    {% if question.module == Question.Module.MATH %}
+    {% if question.module == Module.MATH %}
         <div style="position: fixed; overflow-x: hidden; max-width: 100%; width: 100%; z-index: 200;">
             <div class="mg mg-popup border-base-content border" id="calculator-window"
                  style="position: fixed; z-index: 200; min-width: 410px; min-height: 578px;"
@@ -780,7 +785,7 @@
         }
     </script>
 
-    {% if question.module == Question.Module.MATH %}
+    {% if question.module == Module.MATH %}
         <script>
             let elt = document.getElementById('desmos-calculator');
             let calculator = Desmos.GraphingCalculator(elt, {images: false, notes: false, folders: false});

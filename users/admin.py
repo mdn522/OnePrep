@@ -1,20 +1,22 @@
 from audioop import reverse
 from typing import List, Any, Dict
 
+import easy
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import admin as auth_admin
 from django.contrib.auth.decorators import login_required
+from django.db import models
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from djangoql.admin import DjangoQLSearchMixin
 
-from questions.models import Question, AnswerChoice
+from questions.models import Question, AnswerChoice, Module
 from users.forms import UserAdminChangeForm
 from users.forms import UserAdminCreationForm
-from users.models import User
+from users.models import User, Profile
 
 if settings.DJANGO_ADMIN_FORCE_ALLAUTH:
     # Force the `admin` sign in process to go through the `django-allauth` workflow:
@@ -61,7 +63,7 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
         "email",
         "username",
     ]
-    list_per_page = 500
+    list_per_page = 250
     list_max_show_all = 1000
     search_fields = ["name"]
     ordering = ["id"]
@@ -104,7 +106,7 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
         html += '</span>'
         return mark_safe(html)
 
-    num_user_question_answers.label = "User Question Answers"
+    num_user_question_answers.label = "Attempts"
     num_user_question_answers.admin_order_field = 'num_user_question_answers'
 
     def get_queryset(self, request):
@@ -118,14 +120,14 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
             num_user_question_answers_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__is_correct=False)),
 
             # English
-            num_user_question_answers_english=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.ENGLISH)),
-            num_user_question_answers_english_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.ENGLISH, question_answer_set__is_correct=True)),
-            num_user_question_answers_english_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.ENGLISH, question_answer_set__is_correct=False)),
+            num_user_question_answers_english=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.ENGLISH)),
+            num_user_question_answers_english_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.ENGLISH, question_answer_set__is_correct=True)),
+            num_user_question_answers_english_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.ENGLISH, question_answer_set__is_correct=False)),
 
             # Math
-            num_user_question_answers_math=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.MATH)),
-            num_user_question_answers_math_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.MATH, question_answer_set__is_correct=True)),
-            num_user_question_answers_math_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Question.Module.MATH, question_answer_set__is_correct=False)),
+            num_user_question_answers_math=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.MATH)),
+            num_user_question_answers_math_correct=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.MATH, question_answer_set__is_correct=True)),
+            num_user_question_answers_math_incorrect=Count("question_answer_set__id", distinct=True, filter=Q(question_answer_set__question__module=Module.MATH, question_answer_set__is_correct=False)),
         )
 
     actions = [
@@ -200,3 +202,26 @@ class UserAdmin(DjangoQLSearchMixin, auth_admin.UserAdmin):
         return response
 
     export_user_data.short_description = "Export Data"
+
+
+USER_FK = easy.ForeignKeyAdminField('user', display='user.username')
+
+@admin.register(Profile)
+class ProfileAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    list_display = ['id', 'user_fk', 'timezone', 'theme', 'notes', 'has_donated', 'last_donated_at', 'last_donation_amount', 'last_donation_currency', 'disable_donation_notice', 'disable_donation_notice_until']
+    list_editable = ['notes', 'has_donated', 'last_donated_at', 'last_donation_amount', 'last_donation_currency', 'disable_donation_notice', 'disable_donation_notice_until']
+    list_filter = ['has_donated', 'disable_donation_notice']
+    raw_id_fields = ['user']
+    # readonly_fields = ['user']
+    search_fields = ['user__username', 'user__email']
+    list_select_related = ['user']
+    list_per_page = 250
+    list_max_show_all = 1000
+    ordering = ['id']
+
+    user_fk = USER_FK
+
+    formfield_overrides = {
+        models.TextField: {'widget': admin.widgets.AdminTextareaWidget(attrs={'rows': 4, 'cols': 40, 'class': ''})},
+    }
+

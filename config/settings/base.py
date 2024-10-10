@@ -1,6 +1,6 @@
 # ruff: noqa: ERA001, E501
 """Base settings to build other settings files upon."""
-
+from collections import OrderedDict
 from pathlib import Path
 
 import environ
@@ -75,7 +75,7 @@ DJANGO_APPS = [
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "django.contrib.humanize", # Handy template tags
+    "django.contrib.humanize", # Handy template tags
 
     "django_admin_env_notice",
     "related_admin",
@@ -89,6 +89,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "django_extensions",
     # "silk",
+    "constance",
 
     "crispy_forms",
     "crispy_bootstrap5",
@@ -189,6 +190,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     # "silk.middleware.SilkyMiddleware"
+
+    "core.middleware.ProfileMiddleware",
 ]
 
 SESSION_ENGINE = "qsessions.backends.db"
@@ -241,8 +244,10 @@ TEMPLATES = [
                 "users.context_processors.allauth_settings",
                 "django_admin_env_notice.context_processors.from_settings",
 
+                "utils.context_processors.base_context",
                 "utils.context_processors.google_analytics_context",
                 "utils.context_processors.theme_context",
+                "utils.context_processors.ip_address_context",
 
                 "utils.context_processors.internet_blackout_context",
             ],
@@ -260,7 +265,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = env.int("DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE", defa
 # CRISPY_TEMPLATE_PACK = "bootstrap5"
 # CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "tailwind"
-CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+CRISPY_ALLOWED_TEMPLATE_PACKS = ("tailwind", "bootstrap5")
 
 DAISYUI_THEME = ALLAUTH_UI_THEME = env.str("DAISYUI_THEME", default="light")
 
@@ -404,3 +409,26 @@ SILKY_DYNAMIC_PROFILING = [
 LOGIN_HISTORY_GEOLOCATION_METHOD = env.str('LOGIN_HISTORY_GEOLOCATION_METHOD', default='')
 
 DOC_PREFETCH_QUESTION = env.bool('DOC_PREFETCH_QUESTION', default=False)
+
+
+# Constance
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+# CONSTANCE_DATABASE_CACHE_BACKEND = 'memory'
+CONSTANCE_IGNORE_ADMIN_VERSION_CHECK = True
+CONSTANCE_CONFIG = OrderedDict([
+    ('DONATION_NOTICE_ENABLED', (False, 'Enable Donation Notice', bool)),
+    ('DONATION_NOTICE_TEXT', ('', """""", str)),
+    ('DONATION_TARGET', (0, 'Donation Target', int)),
+    ('DONATION_AMOUNT', (0, 'Donation Amount', int)),
+
+])
+
+CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
+    ('Donation', {
+        'fields': [
+            'DONATION_NOTICE_ENABLED', 'DONATION_NOTICE_TEXT',
+            'DONATION_AMOUNT', 'DONATION_TARGET',
+        ],
+        'collapse': True
+    }),
+])

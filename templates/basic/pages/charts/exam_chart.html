@@ -92,9 +92,11 @@
 
                     {% with correct_times_length=question_data.correct_times|length %}
                         {% with missing=5|sub:correct_times_length %}
-                            {% for n in missing|range %}
-                                <td class=""></td>
-                            {% endfor %}
+                            {% if missing > 0 %}
+                            	{% for n in missing|range %}
+                                    <td class=""></td>
+                                {% endfor %}
+                            {% endif %}
                         {% endwith %}
                     {% endwith %}
                 {% endwith %}

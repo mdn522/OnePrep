@@ -1,0 +1,9 @@
+{% if DONATION_TARGET %}
+    <div class="flex items-center space-x-3 mt-2 px-4">
+        <span>Target:</span>
+        <span class="font-bold">{{ DONATION_AMOUNT }}$</span>
+        <progress class="progress progress-success w-full" value="{{ DONATION_AMOUNT }}"
+                  max="{{ DONATION_TARGET }}"></progress>
+        <span class="font-bold">{{ DONATION_TARGET }}$</span>
+    </div>
+{% endif %}

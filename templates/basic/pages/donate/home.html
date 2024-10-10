@@ -1,0 +1,129 @@
+{% extends 'basic/base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}Donate - {{ block.super }}{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <h1 class="text-6xl font-bold text-center mt-4 mb-4 text-success">Donate</h1>
+    <h2 class="text-2xl font-bold text-center mt-4 mb-4">Help us keep the lights on</h2>
+    <p class="max-w-3xl mx-auto px-4">
+        Our mission is to provide a free and accessible question bank to help students learn and succeed. To keep our
+        platform running smoothly and continue adding new questions, we rely on your <b class="text-primary">generous
+        support</b>. Your <b class="text-primary">donation</b> will help cover server costs, maintenance, and the cost
+        of obtaining and importing high-quality questions. Every contribution, no matter how small, makes a significant
+        difference. Thank you for helping us make education more accessible!
+    </p>
+
+    <div class="text-center px-2">
+        <div class="stats stats-shadow max-w-full overflow-x-auto">
+            {% for stats in kpi %}
+                <div class="stat">
+                    <div class="stat-title">{{ stats.title }}</div>
+                    <div class="stat-value">{{ stats.value|intcomma }}</div>
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+
+    <div class="w-full mt-4 px-2">
+        <div role="tablist" class="tabs tabs-boxed donation-tabs w-full">
+            {% if country_code == 'BD' %}
+                <a role="tab" class="tab tab-active text-nowrap">bKash & Nagad</a>
+                <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6 relative">
+                    <h3 class="text-xl font-semibold text-center mb-3">bKash &amp; Nagad for Bangladeshi donors</h3>
+                    <div class="flex flex-col flex-wrap items-center justify-center items-start space-y-4 w-full">
+                        <div class="rounded-lg w-72">
+                            <div class="p-2 rounded-lg" style="background-color: rgb(235, 28, 36); color: white;">
+                                <h4 class="text-lg font-semibold">Nagad</h4>
+                                <p>
+                                    Send money to
+                                    <b>0</b><b>1</b><b>8</b><b>7</b><b>7</b><b>3</b><b>0</b><b>7</b><b>2</b><b>4</b><b>3</b>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="rounded-lg w-72">
+                            <div class="p-2 rounded-t rounded-t-lg"
+                                 style="background-color: rgb(226, 19, 110); color: white;">
+                                <h4 class="text-lg font-semibold">bKash</h4>
+                                <p>
+                                    Send money to
+                                    <b>0</b><b>1</b><b>8</b><b>7</b><b>7</b><b>3</b><b>0</b><b>7</b><b>2</b><b>4</b><b>3</b>
+                                </p>
+                            </div>
+
+                            <img src="{% static 'images/donate/bkash_qr_cropped.jpg' %}" alt="" class="w-72">
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <a role="tab" class="tab {% if not has_country_specific %}tab-active{% endif %} text-nowrap">Ko-fi</a>
+            <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                <div class="text-center text-lg -mt-4 mb-2 font-semibold">Link to our <a
+                    href="https://ko-fi.com/abdullahmallik?utm_source=oneprep&utm_medium=donation-page" target="_blank"
+                    class="underline text-primary font-bold">Ko-fi</a> page. You can donate using PayPal and
+                    Credit/Debit
+                    card
+                </div>
+
+                <div class="text-center">
+                    <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+                    <script type='text/javascript'>kofiwidget2.init('Support Me on Ko-fi', '#6f28e0', 'U7U5LHF5');
+                    kofiwidget2.draw();</script>
+                </div>
+                
+                {#            <iframe id='kofiframe'#}
+                {#                    src='https://ko-fi.com/abdullahmallik/?hidefeed=true&widget=true&embed=true'#}
+                {#                    style='border:none;width:100%;padding:4px;background:#f9f9f9;' height='712'#}
+                {#                    title='abdullahmallik'></iframe>#}
+            </div>
+
+            <a role="tab" class="tab text-nowrap">Crypto</a>
+            <div role="tabpanel"
+                 class="tab-content bg-base-100 border-base-300 rounded-box p-6 w-full"
+                 translate="no">
+                <div class="flex flex-col items-center space-y-8 notranslate w-full">
+                    {% for crypto in crypto_list %}
+                    	<div class="border-accent border rounded-xl max-w-[400px] related select-none">
+                            <h3 class="text-xl font-bold text-center mb-1">{{ crypto.name }}</h3>
+                            <div class="flex flex-col flex-wrap justify-center items-center">
+                                {% for address in crypto.addresses %}
+                                	<div class="rounded-lg w-full">
+                                        <div class="p-2 rounded-t rounded-t-lg">
+                                            <h4 class="text-lg font-semibold"><b>{{ address.label_code }}</b> {{ address.label }}</h4>
+                                            <p class="break-all border-b border-b-neutral-content/50">
+                                                <b class="select-all">{{ address.address }}</b>
+                                            </p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block inline_javascript %}
+    {{ block.super }}
+
+    <script>
+        $('.donation-tabs .tab').on('click', function () {
+            let tab = $(this).text();
+            $('.donation-tabs .tab').removeClass('tab-active');
+            $(this).addClass('tab-active');
+        });
+
+        // cc: {{ country_code|safe }}; ip: {{ user_ip|safe }}
+    </script>
+{% endblock %}

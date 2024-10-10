@@ -7,10 +7,17 @@ from programs.models import Program
 
 from pathlib import Path
 
+from questions.models import Module
+
 
 # Abstract loader from file
 class Loader:
     program = 'sat'
+
+    module_title = {
+        Module.ENGLISH: 'English',
+        Module.MATH: 'Math',
+    }
 
     def get_program(self):
         program = Program.objects.get(name__iexact=self.program)

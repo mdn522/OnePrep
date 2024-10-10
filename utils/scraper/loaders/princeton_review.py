@@ -1,15 +1,13 @@
 import json
 import re
-from collections import defaultdict
 from datetime import timedelta
 
 from django.utils.text import slugify
 
-from questions.models import Question, AnswerChoice, Answer
+from questions.models import Question, AnswerChoice, Answer, Module
 from exams.models import Exam, ExamQuestion
 from ..loaders import Loader
 
-import more_itertools
 from rich import print
 
 
@@ -77,7 +75,7 @@ class PrincetonReviewLoader(Loader):
                             explanation=question_data['explanation'],
                             answer_type=answer_type,
 
-                            module={'english': Question.Module.ENGLISH, 'math': Question.Module.MATH}[module],
+                            module={'english': Module.ENGLISH, 'math': Module.MATH}[module],
                             program=program,
 
                             source_order=question_i + 1,
