@@ -194,7 +194,17 @@ class ExamQuestionSet(QuestionSetView):
 
 class QuestionBankCategoryListView(QuestionSetView):
     template_name = 'basic/pages/questions/set/question_bank_categories.html'  # TODO rename
-    question_content_type_id = ContentType.objects.get_for_model(Question).id
+    # question_content_type_id = ContentType.objects.get_for_model(Question).id
+
+    _question_content_type_id = None
+    @property
+    def question_content_type_id(self):
+        if self._question_content_type_id is None:
+            try:
+                self._question_content_type_id = ContentType.objects.get_for_model(Question).id
+            except Exception as e:
+                pass
+        return self._question_content_type_id
 
     category_map = []
 
