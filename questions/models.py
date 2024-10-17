@@ -128,7 +128,7 @@ class UserQuestionAnswer(models.Model):
     exam = models.ForeignKey('exams.Exam', on_delete=models.CASCADE, null=True, blank=True, related_name='user_question_answer_set')
 
     # ForeignKey AnswerChoice or Answer
-    answer = models.CharField(max_length=6, null=True, blank=True)
+    answer = models.CharField(max_length=12, null=True, blank=True)
     answer_choice = models.ForeignKey(AnswerChoice, on_delete=models.CASCADE, null=True, blank=True)
 
     answer_group_id = models.CharField(max_length=64, null=True, blank=True)

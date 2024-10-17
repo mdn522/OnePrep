@@ -50,9 +50,9 @@ swap_size_mb = 700
   min_machines_running = 1
   processes = ['app']
 
-  [http_services.concurrency]
+  [http_service.concurrency]
     type = "connections"
-    soft_limit = 200
+    soft_limit = 500
 
 [[vm]]
   size = 'shared-cpu-1x'

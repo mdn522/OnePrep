@@ -11,6 +11,8 @@ from .base import DATABASES
 from .base import INSTALLED_APPS
 from .base import env
 
+from .base import REDIS_URL
+
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
@@ -25,10 +27,11 @@ DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=60)
 
 # CACHES
 # ------------------------------------------------------------------------------
-CACHES['default'] = {
+
+CACHES.setdefault("default", {
     "BACKEND": "django.core.cache.backends.db.DatabaseCache",
     "LOCATION": "db_cache_table",
-}
+})
 # TODO cache redis or memcache
 # "default": {
 #     "BACKEND": "django_redis.cache.RedisCache",
@@ -167,6 +170,9 @@ if SENTRY_DSN:
         DjangoIntegration(),
         # RedisIntegration()  # TODO redis
     ]
+
+    if REDIS_URL:
+        integrations += [RedisIntegration]
 
     sentry_sdk.init(
         dsn=SENTRY_DSN,

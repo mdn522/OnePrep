@@ -14,11 +14,7 @@
             {% if question_set_previous_question_id %}
             	<link rel="prefetch" href="{% url "questions:detail" question_set_previous_question_id %}?{{ question_set_args }}">
             {% endif %}
-<<<<<<< HEAD
-            {% endif %}
-=======
         {% endif %}
->>>>>>> 14de0f236bd5ff6a5b7e5e1ef40034c85f9b0ffc
     {% endif %}
 {% endblock %}
 

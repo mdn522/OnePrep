@@ -16,6 +16,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.views.generic import TemplateView, ListView
+from django.core.cache import cache, caches
 
 from core.models import SubqueryCount
 from core.templatetags.core_tags import urlencode_f
@@ -109,6 +110,12 @@ PRINCETON_REVIEW_PRACTICE_TESTS_QUESTION_BANK_CATEGORIES_MAP = [
 
 # TODO remove later. temp memory cache
 memcache = defaultdict(dict)
+
+try:
+    cache_name = 'redis'
+    caches[cache_name]
+except Exception as e:
+    cache_name = 'memory'
 
 class QuestionListView(ListView):
     template_name = 'basic/pages/questions/question_list.html'
@@ -220,21 +227,38 @@ class QuestionBankCategoryListView(QuestionSetView):
 
         # flat tags from category map
 
-        if memcache[self.key].get('flat_tags') is None:
+        def get_flat_tags():
             flat_tags = set([tag for category in self.category_map for tag in [category.module, category.primary_class, category.skill] if tag])
-            flat_tags = (flat_tags - {'en', 'math'}) | {'English', 'Math'} # | {'Bluebook', 'Non Bluebook'}
-            memcache[self.key]['flat_tags'] = flat_tags
+            flat_tags = (flat_tags - {'en', 'math'}) | {'English', 'Math'}  # | {'Bluebook', 'Non Bluebook'}
+            return flat_tags
+        flat_tags = caches[cache_name].get_or_set(f'{self.key}-flat_tags', default=get_flat_tags, timeout=None)
+        # ck = f'{self.key}-flat_tags'
+        # flat_tags = caches[cache_name].get(ck)
+        # if flat_tags is None:
+        #     flat_tags = get_flat_tags()
+        #     caches[cache_name].set(ck, flat_tags, timeout=None)
 
-        flat_tags = memcache[self.key]['flat_tags']
+        # if memcache[self.key].get('flat_tags') is None:
+        #     flat_tags = set([tag for category in self.category_map for tag in [category.module, category.primary_class, category.skill] if tag])
+        #     flat_tags = (flat_tags - {'en', 'math'}) | {'English', 'Math'} # | {'Bluebook', 'Non Bluebook'}
+        #     memcache[self.key]['flat_tags'] = flat_tags
 
         # TODO Cache
-        if memcache[self.key].get('tags_map') is None:
+
+        def get_tags_map():
             tags = Question.tags.through.tag_model().objects.filter(
                 name__in=self.tag_filter + list(flat_tags)
             )
-            memcache[self.key]['tags_map'] = {tag.name: tag for tag in tags}
+            return {tag.name: tag for tag in tags}
+        tags_map = caches[cache_name].get_or_set(f'{self.key}-tags_map', default=get_tags_map, timeout=None)
 
-        tags_map = memcache[self.key]['tags_map']
+        # if memcache[self.key].get('tags_map') is None:
+        #     tags = Question.tags.through.tag_model().objects.filter(
+        #         name__in=self.tag_filter + list(flat_tags)
+        #     )
+        #     memcache[self.key]['tags_map'] = {tag.name: tag for tag in tags}
+        #
+        # tags_map = memcache[self.key]['tags_map']
 
         # print('tags_map', tags_map)
 
@@ -480,37 +504,37 @@ class QuestionBankCategoryListView(QuestionSetView):
         # print('question_set_questions', context['question_set_questions'])
         # print('question_stats', question_stats)
 
-    def get_filter_from_args(self, request, question_set_filter, question_set_filter_text, question_set_filtered_queryset=None):
-        for filter_key, filter_data in self.filters.items():
-            if 'orm_annotate' in filter_data:
-                question_set_filtered_queryset = question_set_filtered_queryset.annotate(**filter_data['orm_annotate'](request))
-
-            if 'items' in filter_data:
-                item_value: Dict[str, Any] = request.GET.get(filter_key, filter_data.get('default'))
-                if item_value is not None:
-                    if question_set_filtered_queryset is not None:
-                        if isinstance(filter_data['items'][item_value], dict):
-                            question_set_filtered_queryset = question_set_filtered_queryset.filter(**filter_data['items'][item_value].get('filter', {}))
-                    question_set_filter[filter_key] = item_value
-                    if 'term' in filter_data['items'][item_value]:
-                        question_set_filter_text[filter_key] = self.terms.get(item_value, item_value)
-                    else:
-                        if type(filter_data['items'][item_value]) == str:
-                            question_set_filter_text[filter_key] = filter_data['items'][item_value]
-                        else:
-                            question_set_filter_text[filter_key] = filter_data['items'][item_value]['text']
-
-            if 'choices' in filter_data:
-                item_value = request.GET.get(filter_key, filter_data.get('default'))
-                if item_value is not None:
-                    if item_value not in map(str, filter_data['choices'].values):
-                        continue
-                    if question_set_filtered_queryset is not None:
-                        question_set_filtered_queryset = question_set_filtered_queryset.filter(**{filter_data['orm_field']: item_value})
-                    question_set_filter[filter_key] = item_value
-                    question_set_filter_text[filter_key] = dict(filter_data['choices'].choices).get(item_value)
-
-        return question_set_filtered_queryset
+    # def get_filter_from_args(self, request, question_set_filter, question_set_filter_text, question_set_filtered_queryset=None):
+    #     for filter_key, filter_data in self.filters.items():
+    #         if 'orm_annotate' in filter_data:
+    #             question_set_filtered_queryset = question_set_filtered_queryset.annotate(**filter_data['orm_annotate'](request))
+    #
+    #         if 'items' in filter_data:
+    #             item_value: Dict[str, Any] = request.GET.get(filter_key, filter_data.get('default'))
+    #             if item_value is not None:
+    #                 if question_set_filtered_queryset is not None:
+    #                     if isinstance(filter_data['items'][item_value], dict):
+    #                         question_set_filtered_queryset = question_set_filtered_queryset.filter(**filter_data['items'][item_value].get('filter', {}))
+    #                 question_set_filter[filter_key] = item_value
+    #                 if 'term' in filter_data['items'][item_value]:
+    #                     question_set_filter_text[filter_key] = self.terms.get(item_value, item_value)
+    #                 else:
+    #                     if type(filter_data['items'][item_value]) == str:
+    #                         question_set_filter_text[filter_key] = filter_data['items'][item_value]
+    #                     else:
+    #                         question_set_filter_text[filter_key] = filter_data['items'][item_value]['text']
+    #
+    #         if 'choices' in filter_data:
+    #             item_value = request.GET.get(filter_key, filter_data.get('default'))
+    #             if item_value is not None:
+    #                 if item_value not in map(str, filter_data['choices'].values):
+    #                     continue
+    #                 if question_set_filtered_queryset is not None:
+    #                     question_set_filtered_queryset = question_set_filtered_queryset.filter(**{filter_data['orm_field']: item_value})
+    #                 question_set_filter[filter_key] = item_value
+    #                 question_set_filter_text[filter_key] = dict(filter_data['choices'].choices).get(item_value)
+    #
+    #     return question_set_filtered_queryset
 
 
 class QuestionBankFilterBase(django_filters.FilterSet):
@@ -611,7 +635,7 @@ class CollegeBoardQuestionBankCategoryListView(QuestionBankCategoryListView):
             'show': True,
             'text': 'Difficulty',
             'include_all': True,
-
+            'ignore_values': [''],
             'items': OrderedDict([('all', 'All')] + Question.Difficulty.choices),
             'choices': Question.Difficulty,
             'orm_field': 'difficulty',
@@ -728,8 +752,6 @@ for c in [CollegeBoardQuestionBankCategoryListView, PrincetonReviewPracticeTests
             c.category_map[i] = c.category_map[i]._replace(skill_cd=cd)
             if ' ' in cat.skill:
                 c.terms[cd] = cat.skill
-
-
 
 
 @login_required

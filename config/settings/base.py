@@ -57,6 +57,19 @@ CACHES = {
     }
 }
 
+REDIS_URL = env.str("REDIS_URL", default="")
+if REDIS_URL:
+    CACHES["default"] = {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # "IGNORE_EXCEPTIONS": True,
+            "PICKLE_VERSION": -1,
+        }
+    }
+    CACHES["redis"] = CACHES["default"]
+
 
 # URLS
 # ------------------------------------------------------------------------------
@@ -194,7 +207,7 @@ MIDDLEWARE = [
     "core.middleware.ProfileMiddleware",
 ]
 
-SESSION_ENGINE = "qsessions.backends.db"
+SESSION_ENGINE = "qsessions.backends.cached_db"
 
 GEOIP_PATH = env.str('GEOIP_PATH', str(BASE_DIR / "data" / "geoip"))
 

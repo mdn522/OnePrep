@@ -24,7 +24,7 @@ django-allauth==0.61.1  # https://github.com/pennersr/django-allauth
 django-crispy-forms==2.1  # https://github.com/django-crispy-forms/django-crispy-forms
 crispy-bootstrap5==2023.10  # https://github.com/django-crispy-forms/crispy-bootstrap5
 django-ninja
-# django-redis==5.4.0  # https://github.com/jazzband/django-redis
+django-redis==5.4.0  # https://github.com/jazzband/django-redis
 django-import-export  # https://github.com/django-import-export/django-import-export/
 # Django Admin
 django-admin-env-notice  # https://github.com/dizballanze/django-admin-env-notice
