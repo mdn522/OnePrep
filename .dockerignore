@@ -4,6 +4,7 @@ fly.toml
 data/sat/
 data/geoip/
 venv/
+venv-wsl/
 static/cdn/
 .env
 data.*

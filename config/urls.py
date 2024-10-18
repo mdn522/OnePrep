@@ -63,7 +63,11 @@ if settings.DEBUG:
         ),
         path("500/", default_views.server_error),
     ]
-    if "debug_toolbar" in settings.INSTALLED_APPS:
-        import debug_toolbar
 
-        urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
+if "debug_toolbar" in settings.INSTALLED_APPS and settings.DEBUG_TOOLBAR_ENABLED:
+    import debug_toolbar
+
+    urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
+
+if settings.SILK_ENABLED:
+    urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]

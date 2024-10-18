@@ -65,7 +65,6 @@ class ExamListView(ListView):
                 .order_by('source', 'source_order', 'name')
         )
 
-
         return qs
 
     def get_context_data(self, **kwargs):
@@ -73,6 +72,7 @@ class ExamListView(ListView):
         qs = self.get_queryset()
         filter = ExamFilter(self.request.GET, qs)
         ctx["filter"] = filter
+
 
         if 'sources' not in cache or (time.time() - cache['sources'][0]) > 300:
             sources = Exam.objects.filter(is_active=True).values_list('source', flat=True).order_by('source').distinct()  # TODO cache

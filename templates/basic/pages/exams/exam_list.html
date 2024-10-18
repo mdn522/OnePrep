@@ -6,7 +6,7 @@
 {% block content %}
 
     <div class="overflow-x-auto max-w-screen-xl mx-auto px-2">
-        <h1 class="text-3xl font-bold">Practice Tests ({{ filter.qs | length }})</h1>
+        <h1 class="text-3xl font-bold">Practice Tests ({{ paginator.count }})</h1>
 
         <div class="alert mx-2 md:mx-0">
             <span>
@@ -76,24 +76,24 @@ Remember: Your goal is to be fully prepared for the real exam. By practicing in 
                         <td class="text-center">
                             {% if exam.correct_count > 0 %}
                                 <span class="badge badge-success text-success-content">
-                                    {{ exam.correct_count }}
+                                    {{ exam.correct_count | safe }}
                                 </span>
                             {% endif %}
                             {% if exam.incorrect_count > 0 %}
                                 <span class="badge badge-error badge-outline text-error-content">
-                                    {{ exam.incorrect_count }}
+                                    {{ exam.incorrect_count | safe }}
                                 </span>
                             {% endif %}
                         </td>
                         <td class="text-center">
                             {% if exam.marked_for_review_count > 0 %}
                                 <span class="badge badge-warning text-warning-content">
-                                    {{ exam.marked_for_review_count }}
+                                    {{ exam.marked_for_review_count | safe }}
                                 </span>
                             {% endif %}
                         </td>
                     {% endif %}
-                    <td class="font-bold">{{ exam.question_count }}</td>
+                    <td class="font-bold">{{ exam.question_count | safe }}</td>
                     <td>
                         <a class="btn btn-secondary btn-sm mr-1"
                            href="{% url 'charts:basic_exam_time' exam_id=exam.id %}">

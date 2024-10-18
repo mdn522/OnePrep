@@ -809,6 +809,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
         context['question'] = question
         context['Question'] = Question
         context['Module'] = Module
+        # TODO cache???
         context['questions_tags'] = [tag.name for tag in question.tags.all()]
         context['mathjax_inline_ds'] = not any([tag in ['College Board', 'The Princeton Review'] for tag in context['questions_tags']])
         context['answer_choices'] = list(question.answer_choice_set.only(*['id', 'text', 'letter', 'order', 'correct', 'explanation']).order_by('order').values())
@@ -890,7 +891,10 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
             )
 
             # TODO cache base then add user specific data from database
-            context['question_set_questions'] = list(question_set_filtered_queryset.order_by('source_order').values('id', 'source_order', 'difficulty', 'is_marked_for_review', 'last_answer_correct'))
+            context['question_set_questions'] = list(question_set_filtered_queryset.order_by('source_order').values(
+                'id', 'source_order', 'difficulty',
+                'is_marked_for_review', 'last_answer_correct'
+            ))
 
             # print('question_set_questions', context['question_set_questions'])
 

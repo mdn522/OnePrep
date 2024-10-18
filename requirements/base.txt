@@ -38,10 +38,11 @@ django-mathfilters  # https://github.com/dbrgn/django-mathfilters
 # django-login-history2  # https://github.com/riquedev/django-login-history2
 git+https://github.com/mdn522/django-login-history2  # https://github.com/mdn522/django-login-history2
 django-qsessions  # https://github.com/QueraTeam/django-qsessions
-# django-silk  # https://github.com/jazzband/django-silk
+django-silk  # https://github.com/jazzband/django-silk
 django-constance  # https://github.com/jazzband/django-constance
 django-timezone-field  # https://github.com/mfogel/django-timezone-field/
-
+django-debug-toolbar==4.3.0  # https://github.com/jazzband/django-debug-toolbar
+django-debug-toolbar-template-profiler  # https://github.com/node13h/django-debug-toolbar-template-profiler
 
 django-allauth-ui
 slippers

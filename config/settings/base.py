@@ -19,6 +19,10 @@ if READ_DOT_ENV_FILE:
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = env.bool("DJANGO_DEBUG", False)
+
+DEBUG_TOOLBAR_ENABLED = env.bool("DJANGO_DEBUG_TOOLBAR_ENABLED", DEBUG)
+SILK_ENABLED = env.bool("DJANGO_SILK_ENABLED", False)
+
 # Local time zone. Choices are
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # though not all of them may be available with every OS.
@@ -47,6 +51,7 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {"default": env.db("DATABASE_URL")}
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=60)
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -103,6 +108,11 @@ THIRD_PARTY_APPS = [
     "django_extensions",
     # "silk",
     "constance",
+    *([
+          "debug_toolbar",
+          "template_profiler_panel"
+      ] if DEBUG_TOOLBAR_ENABLED else []),
+    *(["silk"] if SILK_ENABLED else []),
 
     "crispy_forms",
     "crispy_bootstrap5",
@@ -191,20 +201,26 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # "core.middleware.PA2FlyRedirectMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+
+    # "core.middleware.PA2FlyRedirectMiddleware",
+
     # "django.contrib.sessions.middleware.SessionMiddleware",
     "qsessions.middleware.SessionMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     # "silk.middleware.SilkyMiddleware"
 
     "core.middleware.ProfileMiddleware",
+
+    *(["debug_toolbar.middleware.DebugToolbarMiddleware"] if DEBUG_TOOLBAR_ENABLED else []),
+    *(["silk.middleware.SilkyMiddleware"] if SILK_ENABLED else []),
 ]
 
 SESSION_ENGINE = "qsessions.backends.cached_db"
@@ -386,6 +402,37 @@ ACCOUNT_USERNAME_BLACKLIST += ["abuse", "account", "adm", "admin", "admins", "ad
 
 ACCOUNT_USERNAME_BLACKLIST = list(set(ACCOUNT_USERNAME_BLACKLIST))
 
+# django-debug-toolbar
+# ------------------------------------------------------------------------------
+def show_toolbar(request):
+    return request.user.is_authenticated and request.user.is_superuser
+# https://django-debug-toolbar.readthedocs.io/en/latest/configuration.html#debug-toolbar-config
+DEBUG_TOOLBAR_CONFIG = {
+    "DISABLE_PANELS": [
+        # "debug_toolbar.panels.profiling.ProfilingPanel",  # additional one
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+    ],
+    "SHOW_TEMPLATE_CONTEXT": True,
+    'SHOW_TOOLBAR_CALLBACK': 'config.settings.base.show_toolbar',
+}
+
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'template_profiler_panel.panels.template.TemplateProfilerPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel',
+]
+
 # Your stuff...
 # ------------------------------------------------------------------------------
 ENVIRONMENT_NAME = env.str("ENVIRONMENT_NAME", default="development")
@@ -410,6 +457,7 @@ SILKY_PYTHON_PROFILER = env.bool('SILKY_PYTHON_PROFILER', default=True)  # True 
 
 SILKY_MAX_REQUEST_BODY_SIZE = env.int('SILKY_MAX_REQUEST_BODY_SIZE', default=-1)  # -1  # Silk takes anything <0 as no limit
 SILKY_MAX_RESPONSE_BODY_SIZE = env.int('SILKY_MAX_RESPONSE_BODY_SIZE', default=1024)  # 1024  # If response body>1024kb, ignore
+SILKY_MAX_RECORDED_REQUESTS = env.int('SILKY_MAX_RECORDED_REQUESTS', default=None)  # 1000  # Keep only the last 1000 requests
 
 SILKY_DYNAMIC_PROFILING = [
     {'module': 'questions.views', 'function': 'QuestionListView.get'},
