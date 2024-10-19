@@ -168,10 +168,10 @@ class ExamQuestionSet(QuestionSetView):
         question_set_filter['question_set'] = question_set
         question_set_filter['exam_id'] = exam.id
 
-        context['question_set_filter'] = question_set_filter
+        # context['question_set_filter'] = question_set_filter
         context['question_set_name'] = exam.name
         context['question_set_key'] = f'exam'
-        context['question_set_filter'] = {}
+        # context['question_set_filter'] = {}
         context['question_set_args'] = urlencode_f(question_set_filter)
         context['question_set_back'] = False
 
@@ -437,11 +437,12 @@ class QuestionBankCategoryListView(QuestionSetView):
 
         context['question_set_name'] = self.name
         context['question_set_key'] = self.key
-        context['question_set_filter'] = question_set_filter
+        # context['question_set_filter'] = question_set_filter
         context['question_set_filter_text'] = question_set_filter_text
         context['question_set_questions'] = question_set_filtered_queryset
-        context['question_set_filters'] = self.filters  # TODO remove
-        context['question_set_terms'] = self.terms # TODO remove
+        context['question_set_questions_filter'] = f
+        # context['question_set_filters'] = self.filters  # TODO remove
+        # context['question_set_terms'] = self.terms # TODO remove
         # url encode using urllib
         context['question_set_args'] = urlencode_f({'question_set': question_set} | f.form.cleaned_data)
         context['question_set_categories_args'] = urlencode_f({k: v for k, v in f.form.cleaned_data.items() if k not in ['module', 'question_set', 'primary_class', 'skill']})

@@ -21,14 +21,16 @@ Remember: Your goal is to be fully prepared for the real exam. By practicing in 
             </span>
         </div>
 
-        <div class=" mt-4 border border-neutral rounded px-2 py-1">
+        <div class="mt-4 border border-neutral rounded px-2 py-1">
             <form method="get" class="flex flex-wrap items-center flex-row space-x-4">
                 <div class="form-control flex flex-row space-x-2 items-center">
                     <label for="source">Source</label>
                     <select name="source" id="source" class="select select-neutral select-bordered select-sm">
-                        <option value="" {% if not filter.form.source.value %}selected{% endif %} >All Sources</option>
+                        <option value="" {% if not filterset.form.source.value %}selected{% endif %}>All Sources
+                        </option>
                         {% for source in sources %}
-                            <option value="{{ source }}" {% if filter.form.source.value == source %}selected{% endif %}>
+                            <option value="{{ source }}"
+                                    {% if filterset.form.source.value == source %}selected{% endif %}>
                                 {{ sources_friendly_names|get_item:source }}
                             </option>
                         {% endfor %}
@@ -68,9 +70,9 @@ Remember: Your goal is to be fully prepared for the real exam. By practicing in 
             </tr>
             </thead>
             <tbody>
-            {% for exam in filter.qs %}
+            {% for exam in exams %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
+                    <td>{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
                     <td><span class="text-lg font-semibold">{{ exam.name }}</span></td>
                     {% if user.is_authenticated %}
                         <td class="text-center">
@@ -99,14 +101,70 @@ Remember: Your goal is to be fully prepared for the real exam. By practicing in 
                            href="{% url 'charts:basic_exam_time' exam_id=exam.id %}">
                             Stats
                         </a>
-                        <a class="btn btn-neutral btn-sm"
-                           href="{% url 'questions:detail' exam.first_question_id %}?question_set=exam&exam_id={{ exam.id }}">
-                            View
-                        </a>
+                        {% if exam.first_question_id %}
+                            <a class="btn btn-neutral btn-sm"
+                               href="{% url 'questions:detail' exam.first_question_id %}?question_set=exam&exam_id={{ exam.id }}">
+                                View
+                            </a>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+
+        <div class="mt-6"></div>
+
+        {% if is_paginated %}
+            <div class="text-center">
+                <div class="join mx-auto">
+                    {% if page_obj.has_previous %}
+                        <a class="join-item btn" href="?{% param_replace page=1 %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                 stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
+                            </svg>
+                        </a>
+                        {% if page_obj.previous_page_number != 1 %}
+                            <a class="join-item btn" href="?{% param_replace page=page_obj.previous_page_number %}">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M15.75 19.5 8.25 12l7.5-7.5"/>
+                                </svg>
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    {% for l in page_obj.paginator.page_range %}
+                        {% if l <= page_obj.number|add:5 and l >= page_obj.number|add:-5 %}
+                            <a class="join-item btn {% if forloop.counter == page_obj.number %}btn-primary{% endif %}"
+                               href="?{% param_replace page=forloop.counter %}">{{ forloop.counter }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                        {% if page_obj.next_page_number != paginator.num_pages %}
+                            <a class="join-item btn" href="?{% param_replace page=page_obj.next_page_number %}">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                     stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+                                </svg>
+                            </a>
+                        {% endif %}
+                        <a class="join-item btn" href="?{% param_replace page=paginator.num_pages %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                 stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"/>
+                            </svg>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <p class="mt-2 font-semibold">Exams {{ page_obj.start_index }}&mdash;{{ page_obj.end_index }}
+                    of {{ page_obj.paginator.count }}</p>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
