@@ -357,7 +357,7 @@
 
                 <span class="absolute w-3 h-3 bg-warning top-0.5 left-0.5 rounded-full" x-cloak x-show="question.is_marked_for_review"></span>
                 <span class="absolute w-3 h-3 top-0.5 right-0.5 rounded-full"
-                      :class="{'bg-success': question.last_answer_correct, 'bg-error': !question.last_answer_correct}"
+                      :class="{'bg-success': question.last_answer_correct == 1, 'bg-error': question.last_answer_correct == 0}"
                       x-cloak x-show="question.last_answer_correct != null"></span>
             </a>
         </template>

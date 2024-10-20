@@ -33,13 +33,13 @@ class Question(TimeStampedModel, models.Model):
     source_order = models.PositiveIntegerField(null=True)  # TODO UniqueConstraint
     source_raw_data = models.JSONField(default=None, null=True, blank=True)
 
-    module = models.CharField(choices=Module.choices, max_length=4)
+    module = models.CharField(choices=Module.choices, max_length=4, db_index=True)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
 
     stimulus = models.TextField(default='', blank=True)
     stem = models.TextField(default='', blank=True)
-    difficulty = models.CharField(choices=Difficulty.choices, max_length=2, blank=True, default='')
-    answer_type = models.CharField(max_length=24, default='', choices=AnswerType.choices)
+    difficulty = models.CharField(choices=Difficulty.choices, max_length=2, blank=True, default='', db_index=True)
+    answer_type = models.CharField(max_length=24, default='', choices=AnswerType.choices, db_index=True)
     explanation = models.TextField(default='', blank=True)
 
     tags = TaggableManager()
@@ -151,6 +151,16 @@ class UserQuestionAnswer(models.Model):
                 condition=models.Q(exam__isnull=False)
             ),
         ]
+
+        indexes = [
+            models.Index(
+                fields=['user', 'question', 'exam'], name='idx_uqae'
+            ),
+            models.Index(
+                fields=['user', 'question', 'exam', 'is_correct'], name='idx_uqae_ic'
+            ),
+        ]
+
         verbose_name = 'User Answer'
 
 
@@ -175,6 +185,11 @@ class UserQuestionStatus(models.Model):
             # Constraints
             # A user can only have one status per question per exam
             models.UniqueConstraint(fields=['user', 'question', 'exam'], name='unique_user_question_status_exam'),
+
+        ]
+
+        indexes = [
+            models.Index(fields=['user', 'question', 'is_marked_for_review'], name='idx_uqse_mfr'),
         ]
 
         verbose_name = 'User Question Status'

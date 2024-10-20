@@ -98,36 +98,36 @@ class ExamListView(FilteredListView):
         #
         # for
 
-        question_answers = (
-            UserQuestionAnswer.objects
-            # .filter(question__exam_question_set__exam=OuterRef('pk'), user=user, exam=None, is_correct=True)
-            .annotate(parent_exam_id=OuterRef('pk'))
-            .filter(question_id__in=ExamQuestion.objects.filter(exam_id=OuterRef('parent_exam_id')).values('question_id'), user=user, exam=None)
-            .distinct('question').values('id')
-        )
-
-        # question_answer_correct = (
+        # question_answers = (
         #     UserQuestionAnswer.objects
         #     # .filter(question__exam_question_set__exam=OuterRef('pk'), user=user, exam=None, is_correct=True)
         #     .annotate(parent_exam_id=OuterRef('pk'))
         #     .filter(question_id__in=ExamQuestion.objects.filter(exam_id=OuterRef('parent_exam_id')).values('question_id'), user=user, exam=None)
         #     .distinct('question').values('id')
         # )
-        #
-        # question_answer_incorrect = (
-        #     UserQuestionAnswer.objects
-        #     # .filter(question__exam_question_set__exam=OuterRef('pk'), user=user, exam=None, is_correct=False)
-        #     .annotate(parent_exam_id=OuterRef('pk'))
-        #     .filter(question_id__in=ExamQuestion.objects.filter(exam_id=OuterRef('parent_exam_id')).values('question_id'), user=user, exam=None)
-        #     .distinct('question').values('id')
-        # )
+
+        question_answer_correct = (
+            UserQuestionAnswer.objects
+            # .filter(question__exam_question_set__exam=OuterRef('pk'), user=user, exam=None, is_correct=True)
+            .annotate(parent_exam_id=OuterRef('pk'))
+            .filter(question_id__in=ExamQuestion.objects.filter(exam_id=OuterRef('parent_exam_id')).values('question_id'), user=user, exam=None, is_correct=True)
+            .distinct('question').values('id')
+        )
+
+        question_answer_incorrect = (
+            UserQuestionAnswer.objects
+            # .filter(question__exam_question_set__exam=OuterRef('pk'), user=user, exam=None, is_correct=False)
+            .annotate(parent_exam_id=OuterRef('pk'))
+            .filter(question_id__in=ExamQuestion.objects.filter(exam_id=OuterRef('parent_exam_id')).values('question_id'), user=user, exam=None, is_correct=False)
+            .distinct('question').values('id')
+        )
 
         qs = qs.annotate(
             # TODO cache
             question_count=Count("exam_question_set"),
             marked_for_review_count=SubqueryCount(question_status),
-            correct_count=SubqueryCount(question_answers, filter=Q(is_correct=True)),
-            incorrect_count=SubqueryCount(question_answers, filter=Q(is_correct=False)),
+            correct_count=SubqueryCount(question_answer_correct),
+            incorrect_count=SubqueryCount(question_answer_incorrect),
             first_question_id=Subquery(questions[:1]),
         )
 
