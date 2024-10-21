@@ -279,7 +279,9 @@ class QuestionBankCategoryListView(QuestionSetView):
 
         # print(len(question_set_filtered_queryset))
 
-        question_ids = list(question_set_filtered_queryset.values_list('id', flat=True))
+        # question_ids = list(question_set_filtered_queryset.values_list('id', flat=True))
+        question_ids = question_set_filtered_queryset.values_list('id', flat=True)
+        # question_ids = question_set_filtered_queryset
 
         counts = (Question.tags.through.objects.filter(
             # tag__name__in=self.tag_filter,
@@ -319,8 +321,9 @@ class QuestionBankCategoryListView(QuestionSetView):
 
         counts_marked_for_review = (
             UserQuestionStatus.objects.filter(
-                user=self.request.user if self.request.user.is_authenticated else None, exam=None,
-                question_id__in=question_ids,
+                user=self.request.user if self.request.user.is_authenticated else None,
+                exam=None,
+                question_id__in=list(question_ids),
                 is_marked_for_review=True
             ).aggregate(
                 count=Count('question_id', distinct=True),
@@ -807,6 +810,7 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
             'tags', 'skill_tags',
             # 'answer_choice_set__text', 'answer_choice_set__explanation', 'answer_choice_set__correct', 'answer_choice_set__order', 'answer_choice_set__letter',
         ]).get(pk=kwargs['pk'])
+
         context['question'] = question
         context['Question'] = Question
         context['Module'] = Module
@@ -816,31 +820,36 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
         context['answer_choices'] = list(question.answer_choice_set.only(*['id', 'text', 'letter', 'order', 'correct', 'explanation']).order_by('order').values())
         context['answers'] = list(question.answer_set.only(*['id', 'value', 'order', 'explanation']).order_by('order').values())
 
+        context['question_status'] = None
         try:
-            context['question_status'] = UserQuestionStatus.objects.get(user=self.request.user, question=question, exam=None)
+            if self.request.user.is_authenticated:
+                context['question_status'] = UserQuestionStatus.objects.get(user=self.request.user, question=question, exam=None)
+            # context['question_status'] = UserQuestionStatus.objects.get(user=self.request.user, question=question, exam=None)
         except UserQuestionStatus.DoesNotExist:
-            context['question_status'] = None
+            # context['question_status'] = None
+            pass
 
         # TODO choice letter
-        context['user_answers'] = UserQuestionAnswer.objects.filter(user=self.request.user, question=question).values(
-            'answer_choice', 'answer', 'is_correct', 'answered_at', 'time_given'
-        ).order_by('answered_at')
-        # Bucket them by incorrect correct then again bucket
         f = lambda: {'items': [], 'corrected': False, 'attempts': 0}
         context['user_answers_groups']: List = [f()]
-        for user_answer in context['user_answers']:
-            if context['user_answers_groups'][-1]['corrected']:
-                # context['user_answers_groups'][-1]['items'].reverse()
-                context['user_answers_groups'].append(f())
+        if self.request.user.is_authenticated:
+            context['user_answers'] = UserQuestionAnswer.objects.filter(user=self.request.user, question=question).values(
+                'answer_choice', 'answer', 'is_correct', 'answered_at', 'time_given'
+            ).order_by('answered_at')
+            # Bucket them by incorrect correct then again bucket
+            for user_answer in context['user_answers']:
+                if context['user_answers_groups'][-1]['corrected']:
+                    # context['user_answers_groups'][-1]['items'].reverse()
+                    context['user_answers_groups'].append(f())
 
-            if user_answer['is_correct']:
-                context['user_answers_groups'][-1]['items'].append(user_answer)
-                context['user_answers_groups'][-1]['corrected'] = True
-            else:
-                context['user_answers_groups'][-1]['items'].append(user_answer)
-                context['user_answers_groups'][-1]['attempts'] += 1
+                if user_answer['is_correct']:
+                    context['user_answers_groups'][-1]['items'].append(user_answer)
+                    context['user_answers_groups'][-1]['corrected'] = True
+                else:
+                    context['user_answers_groups'][-1]['items'].append(user_answer)
+                    context['user_answers_groups'][-1]['attempts'] += 1
 
-        context['user_answers_groups'].reverse()
+            context['user_answers_groups'].reverse()
 
         # print('user_answers_groups', context['user_answers_groups'])
 
@@ -884,11 +893,11 @@ class QuestionDetailView(LoginRequiredMixin, TemplateView):
             # add is_marked_for_review if it exists otherwise set it to false by default if none is found (exam=None)
 
             question_set_filtered_queryset = question_set_filtered_queryset.annotate(
-                is_marked_for_review=Coalesce(
+                is_marked_for_review=Value(False) if not self.request.user.is_authenticated else Coalesce(
                     Subquery(UserQuestionStatus.objects.filter(user=self.request.user, exam=None, question_id=OuterRef('id')).values('is_marked_for_review')[:1]),
                     Value(False)
                 ),
-                last_answer_correct=Subquery(UserQuestionAnswer.objects.filter(user=self.request.user, exam=None, question_id=OuterRef('id')).order_by('-answered_at').values('is_correct')[:1]),
+                last_answer_correct=Value(-1) if not self.request.user.is_authenticated else Subquery(UserQuestionAnswer.objects.filter(user=self.request.user, exam=None, question_id=OuterRef('id')).order_by('-answered_at').values('is_correct')[:1]),
             )
 
             # TODO cache base then add user specific data from database

@@ -190,6 +190,7 @@ class UserQuestionStatus(models.Model):
 
         indexes = [
             models.Index(fields=['user', 'question', 'is_marked_for_review'], name='idx_uqse_mfr'),
+            models.Index(fields=['user', 'question', 'exam', 'is_marked_for_review'], name='idx_uqs_uqe_mfr'),
         ]
 
         verbose_name = 'User Question Status'

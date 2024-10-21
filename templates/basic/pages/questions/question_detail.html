@@ -192,7 +192,7 @@
                     </span>
                 {% endif %}
                 <span class="btn float-right mt-1 mr-2" title="Speeds Up Next/Previous Question Loading (Hopefully)"
-                      :class="{'btn-primary': $store.data.prefetch_question, 'btn-disabled': $store.data.is_setting_prefetch_question}" @click="$store.data.switch_prefetch_question();">
+                      :class="{'btn-warning': $store.data.prefetch_question, 'btn-disabled': $store.data.is_setting_prefetch_question}" @click="$store.data.switch_prefetch_question();">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" /></svg>
                 </span>
                 </div>
@@ -228,8 +228,12 @@
             <div class="flex bg-base-300 py-1 px-1 items-center">
                 <span class="flex items-center question-mark-for-review"
                       x-data :class="{'question-marked': $store.data.status.is_marked_for_review}"
-                      @click="$store.data.mark_for_review()" x-cloak>
-                    <span class="mr-1">
+                      @click="!$store.data.is_marking_for_review && $store.data.mark_for_review()" x-cloak>
+                    <span class="mr-1 transition-colors ease-in duration-100" 
+                          :class="">
+{#                        <svg xmlns="http://www.w3.org/2000/svg" :fill="$store.data.status.is_marked_for_review ? 'none' : ''" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">#}
+{#                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />#}
+{#                        </svg>#}
                         <span class="question-mark-for-review-icon-unmarked">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
                         </span>
@@ -654,8 +658,10 @@
                     console.error('There has been a problem with your fetch operation:', error);
                 });
             },
-
+            
+            is_marking_for_review: false,
             mark_for_review() {
+                this.is_marking_for_review = true;
                 this.status.is_marked_for_review = !this.status.is_marked_for_review;
                 let API_URL = "{% url 'api_v1:question_mark_for_review' %}";
                 let data = {
@@ -676,7 +682,9 @@
                     throw new Error('Network response was not ok.');
                 }).then(data => {
                     console.log(data);
+                    this.is_marking_for_review = false;
                 }).catch(error => {
+                    this.is_marking_for_review = false;
                     console.error('There has been a problem with your fetch operation:', error);
                 });
             },

@@ -39,7 +39,7 @@ class FilteredListView(ListView):
         return context
 
 
-cache = {}
+# cache = {}
 
 class ExamListView(FilteredListView):
     model = Exam
@@ -133,12 +133,20 @@ class ExamListView(FilteredListView):
 
         ctx[self.get_context_object_name(None)] = qs
 
-        if 'sources' not in cache or (time.time() - cache['sources'][0]) > 300:
-            sources = Exam.objects.filter(is_active=True).values_list('source', flat=True).order_by('source').distinct()  # TODO cache
-            cache['sources'] = (time.time(), sources)  # TODO Use better caching with timeout
+        from django.core.cache import caches
+
+        mem_cache = caches['memory']
+
+        # ctx['sources'] = mem_cache.get_or_set('sources', lambda: Exam.objects.filter(is_active=True).values_list('source', flat=True).order_by('source').distinct(), 300)
+        ctx['count'] = mem_cache.get_or_set('exams__count', lambda: Exam.objects.filter(is_active=True).count(), 60)
+        ctx['sources'] = mem_cache.get_or_set('exams__sources', lambda: Exam.objects.filter(is_active=True).values('source').annotate(count=Count('source')).order_by('source').values('source', 'count'), 300)
+
+        # if 'sources' not in cache or (time.time() - cache['sources'][0]) > 300:
+        #     sources = Exam.objects.filter(is_active=True).values_list('source', flat=True).order_by('source').distinct()  cache
+        #     cache['sources'] = (time.time(), sources)   Use better caching with timeout
 
         # Add count along with source
-        ctx['sources'] = cache['sources'][1]
+        # ctx['sources'] = cache['sources'][1]
         ctx['sources_friendly_names'] = {
             'collegeboard_bluebook': 'College Board Bluebook',
             'sat_panda': 'SAT Panda',

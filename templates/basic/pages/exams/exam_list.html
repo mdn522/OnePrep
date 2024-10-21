@@ -26,12 +26,11 @@ Remember: Your goal is to be fully prepared for the real exam. By practicing in 
                 <div class="form-control flex flex-row space-x-2 items-center">
                     <label for="source">Source</label>
                     <select name="source" id="source" class="select select-neutral select-bordered select-sm">
-                        <option value="" {% if not filterset.form.source.value %}selected{% endif %}>All Sources
-                        </option>
+                        <option value="" {% if not filterset.form.source.value %}selected{% endif %}>All Sources ({{ count }})</option>
                         {% for source in sources %}
-                            <option value="{{ source }}"
-                                    {% if filterset.form.source.value == source %}selected{% endif %}>
-                                {{ sources_friendly_names|get_item:source }}
+                            <option value="{{ source.source }}"
+                                    {% if filterset.form.source.value == source.source %}selected{% endif %}>
+                                {{ sources_friendly_names|get_item:source.source }} ({{ source.count }})
                             </option>
                         {% endfor %}
                     </select>
