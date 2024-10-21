@@ -3,6 +3,7 @@ from django.urls import path
 from ninja import NinjaAPI
 
 from questions.api.api_v1 import router as questions_router
+from users.api.api_v1 import router as users_router
 
 from ninja import NinjaAPI
 
@@ -22,6 +23,7 @@ api_v1 = NinjaAPI(version='1.0.0', urls_namespace='api_v1')
 
 
 api_v1.add_router("/questions/", questions_router)
+api_v1.add_router("/users/", users_router)
 # Exam
 
 urlpatterns = [

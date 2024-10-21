@@ -7,7 +7,7 @@
 	{{ block.super }}
 
     {% if is_question_set %}
-        {% if PREFETCH_QUESTION %}
+        {% if PREFETCH_QUESTION or request.user.profile.prefetch_question %}
             {% if question_set_next_question_id %}
         		<link rel="prefetch" href="{% url "questions:detail" question_set_next_question_id %}?{{ question_set_args }}">
             {% endif %}
@@ -184,14 +184,18 @@
         {% endif %}
         <div id="question-meta" class="">
             <div class="">
-                {% if question.module == Module.MATH %}
                 <div class="" x-data x-cloak>
+                {% if question.module == Module.MATH %}
                     <span class="btn float-right mt-1 mr-2"
                           :class="{'btn-primary': $store.calculator.show}" @click="calc_resize(); $store.calculator.show = !$store.calculator.show">
                         <svg class="size-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V13.5Zm0 2.25h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V18Zm2.498-6.75h.007v.008h-.007v-.008Zm0 2.25h.007v.008h-.007V13.5Zm0 2.25h.007v.008h-.007v-.008Zm0 2.25h.007v.008h-.007V18Zm2.504-6.75h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5Zm0 2.25h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V18Zm2.498-6.75h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5ZM8.25 6h7.5v2.25h-7.5V6ZM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.65 4.5 4.757V19.5a2.25 2.25 0 0 0 2.25 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25V4.757c0-1.108-.806-2.057-1.907-2.185A48.507 48.507 0 0 0 12 2.25Z" /></svg>
                     </span>
-                </div>
                 {% endif %}
+                <span class="btn float-right mt-1 mr-2" title="Speeds Up Next/Previous Question Loading (Hopefully)"
+                      :class="{'btn-primary': $store.data.prefetch_question, 'btn-disabled': $store.data.is_setting_prefetch_question}" @click="$store.data.switch_prefetch_question();">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" /></svg>
+                </span>
+                </div>
                 <div class="text-sm">Question ID</div>
                 <div class="text-2xl font-semibold flex items-center font-mono">
                     <i>#{{ question.id|stringformat:"05d" }}</i>
@@ -461,6 +465,24 @@
 
 {% block inline_javascript %}
 	{{ block.super }}
+    
+    <script>
+    window.cookieStorage = {
+        getItem(key) {
+            let cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].split("=");
+                if (key == cookie[0].trim()) {
+                    return decodeURIComponent(cookie[1]);
+                }
+            }
+            return null;
+        },
+        setItem(key, value) {
+            document.cookie = key+' = '+encodeURIComponent(value)
+        }
+    }
+</script>
 
     <script>
     function question_url(question_id) {
@@ -479,6 +501,35 @@
             delete_mode: false,
             timer: null,
             started_at: null,
+            
+            is_setting_prefetch_question: false,
+            prefetch_question: {{ request.user.profile.prefetch_question | jsonify }},
+            switch_prefetch_question() {
+                this.prefetch_question = !this.prefetch_question;
+                this.is_setting_prefetch_question = true;
+                let API_URL = "{% url 'api_v1:set_prefetch_question' %}";
+                let data = {
+                    prefetch_question: this.prefetch_question,
+                };
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify(data),
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok.');
+                }).then(data => {
+                    console.log(data);
+                    this.is_setting_prefetch_question = false;
+                }).catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                });
+            },
 
             question_id: {{ question.id }},
             answer_type: {{ question.answer_type | jsonify }},
@@ -651,7 +702,9 @@
                 {width: 410, height: 578},
                 {width: 820, height: 640},
             ]
-        })
+        });
+        
+        
     })
 
     function timer_data(start) {

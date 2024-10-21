@@ -70,3 +70,6 @@ class Profile(models.Model):
     last_donated_at = models.DateTimeField(blank=True, null=True, verbose_name="Last Donated At")
     last_donation_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, default=0, verbose_name="Last Donation Amount")
     last_donation_currency = models.CharField(max_length=3, blank=True, null=True, verbose_name="Last Donation Currency")
+
+    # Settings
+    prefetch_question = models.BooleanField(default=False, blank=True, verbose_name="Prefetch Question")
