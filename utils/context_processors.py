@@ -48,6 +48,9 @@ def base_context(request: HttpRequest):
             donation_amount = config.DONATION_AMOUNT
             mem_cache.set('DONATION_AMOUNT', donation_amount, timeout)
 
+        if donation_target and donation_amount and donation_amount >= donation_target:
+            ctx['DONATION_TARGET_REACHED'] = True
+
         ctx['DONATION_TARGET'] = donation_target
         ctx['DONATION_AMOUNT'] = donation_amount
 
